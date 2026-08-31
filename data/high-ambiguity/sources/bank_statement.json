@@ -1,0 +1,482 @@
+[
+  {
+    "txn_id": "TXN202606030000",
+    "value_date": "2026-06-03",
+    "description": "UPI/9533411833/RAZORPAY/SETTLEMENT",
+    "credit": 1031466,
+    "debit": 0,
+    "balance": 421031466
+  },
+  {
+    "txn_id": "TXN202606040001",
+    "value_date": "2026-06-04",
+    "description": "NEFT CR-RAZORPAY SOFTWARE PVT LTD-1137720538",
+    "credit": 4311419,
+    "debit": 0,
+    "balance": 425342885
+  },
+  {
+    "txn_id": "TXN202606050002",
+    "value_date": "2026-06-05",
+    "description": "UPI/973712207489/RAZORPAY/SETTLEMENT",
+    "credit": 1348649,
+    "debit": 0,
+    "balance": 426691534
+  },
+  {
+    "txn_id": "TXN202606080003",
+    "value_date": "2026-06-08",
+    "description": "RTGS CR RAZORPAYSOFTWARE 779439728412 SETTLEMENT",
+    "credit": 1688800,
+    "debit": 0,
+    "balance": 428380334
+  },
+  {
+    "txn_id": "TXN202606090004",
+    "value_date": "2026-06-09",
+    "description": "NEFT-345308529365-RAZORPAY SOFTWARE PRIVATE LIM",
+    "credit": 479867,
+    "debit": 0,
+    "balance": 428860201
+  },
+  {
+    "txn_id": "TXN202606100005",
+    "value_date": "2026-06-10",
+    "description": "RTGS CR RAZORPAYSOFTWARE 513722520483 SETTLEMENT",
+    "credit": 1464894,
+    "debit": 0,
+    "balance": 430325095
+  },
+  {
+    "txn_id": "TXN202606110006",
+    "value_date": "2026-06-11",
+    "description": "UPI/791076249058/RAZORPAY/SETTLEMENT",
+    "credit": 1847223,
+    "debit": 0,
+    "balance": 432172318
+  },
+  {
+    "txn_id": "TXN202606150007",
+    "value_date": "2026-06-15",
+    "description": "UPI/936200376270/RAZORPAY/SETTLEMENT",
+    "credit": 1113702,
+    "debit": 0,
+    "balance": 433286020
+  },
+  {
+    "txn_id": "TXN202606160008",
+    "value_date": "2026-06-16",
+    "description": "NEFT CR-RAZORPAY SOFTWARE PVT LTD-843519697562",
+    "credit": 17331158,
+    "debit": 0,
+    "balance": 450617178
+  },
+  {
+    "txn_id": "TXN202606180009",
+    "value_date": "2026-06-18",
+    "description": "RTGS CR RAZORPAYSOFTWARE 415905640495 SETTLEMENT",
+    "credit": 1305354,
+    "debit": 0,
+    "balance": 451922532
+  },
+  {
+    "txn_id": "TXN202606190010",
+    "value_date": "2026-06-19",
+    "description": "NEFT-842226476948-RAZORPAY SOFTWARE PRIVATE LIM",
+    "credit": 4054014,
+    "debit": 0,
+    "balance": 455976546
+  },
+  {
+    "txn_id": "TXN202606220011",
+    "value_date": "2026-06-22",
+    "description": "UPI/347795943362/RAZORPAY/SETTLEMENT",
+    "credit": 3018828,
+    "debit": 0,
+    "balance": 458995374
+  },
+  {
+    "txn_id": "TXN202606230012",
+    "value_date": "2026-06-23",
+    "description": "NEFT-478926648834-RAZORPAY SOFTWARE PRIVATE LIM",
+    "credit": 10275155,
+    "debit": 0,
+    "balance": 469270529
+  },
+  {
+    "txn_id": "TXN202606240013",
+    "value_date": "2026-06-24",
+    "description": "IMPS/P2A/659594779657/RAZORPAY SOF",
+    "credit": 381652,
+    "debit": 0,
+    "balance": 469652181
+  },
+  {
+    "txn_id": "TXN202606250014",
+    "value_date": "2026-06-25",
+    "description": "IMPS/P2A/700382438537/RAZORPAY SOF",
+    "credit": 1728126,
+    "debit": 0,
+    "balance": 471380307
+  },
+  {
+    "txn_id": "TXN202606260015",
+    "value_date": "2026-06-26",
+    "description": "NEFT CR-RAZORPAY SOFTWARE PVT LTD-746832968427",
+    "credit": 209700,
+    "debit": 0,
+    "balance": 471590007
+  },
+  {
+    "txn_id": "TXN202606290016",
+    "value_date": "2026-06-29",
+    "description": "RTGS CR RAZORPAYSOFTWARE 027103410042 SETTLEMENT",
+    "credit": 2044405,
+    "debit": 0,
+    "balance": 473634412
+  },
+  {
+    "txn_id": "TXN202606300017",
+    "value_date": "2026-06-30",
+    "description": "NEFT CR-RAZORPAY SOFTWARE PVT LTD-141760924907",
+    "credit": 6548729,
+    "debit": 0,
+    "balance": 480183141
+  },
+  {
+    "txn_id": "TXN202607010018",
+    "value_date": "2026-07-01",
+    "description": "RTGS CR RAZORPAYSOFTWARE 329581332903 SETTLEMENT",
+    "credit": 847927,
+    "debit": 0,
+    "balance": 481031068
+  },
+  {
+    "txn_id": "TXN202607020019",
+    "value_date": "2026-07-02",
+    "description": "VENDOR PMT ACME PACKAGING",
+    "credit": 0,
+    "debit": 4267800,
+    "balance": 476763268
+  },
+  {
+    "txn_id": "TXN202607030020",
+    "value_date": "2026-07-03",
+    "description": "NEFT-807821283764-RAZORPAY SOFTWARE PRIVATE LIM",
+    "credit": 231631,
+    "debit": 0,
+    "balance": 476994899
+  },
+  {
+    "txn_id": "TXN202607060021",
+    "value_date": "2026-07-06",
+    "description": "NEFT CR-RAZORPAY SOFTWARE PVT LTD-130792426615",
+    "credit": 710875,
+    "debit": 0,
+    "balance": 477705774
+  },
+  {
+    "txn_id": "TXN202607070022",
+    "value_date": "2026-07-07",
+    "description": "RTGS CR RAZORPAYSOFTWARE 096821888742 SETTLEMENT",
+    "credit": 7526243,
+    "debit": 0,
+    "balance": 485232017
+  },
+  {
+    "txn_id": "TXN202607080023",
+    "value_date": "2026-07-08",
+    "description": "IMPS/P2A/825624383586/RAZORPAY SOF",
+    "credit": 916855,
+    "debit": 0,
+    "balance": 486148872
+  },
+  {
+    "txn_id": "TXN202607100024",
+    "value_date": "2026-07-10",
+    "description": "NEFT CR-RAZORPAY SOFTWARE PVT LTD-348312903237",
+    "credit": 229800,
+    "debit": 0,
+    "balance": 486378672
+  },
+  {
+    "txn_id": "TXN202607130025",
+    "value_date": "2026-07-13",
+    "description": "IMPS/P2A/317216874930/RAZORPAY SOF",
+    "credit": 3151651,
+    "debit": 0,
+    "balance": 489530323
+  },
+  {
+    "txn_id": "TXN202607140026",
+    "value_date": "2026-07-14",
+    "description": "UPI/764521859538/RAZORPAY/SETTLEMENT",
+    "credit": 8466254,
+    "debit": 0,
+    "balance": 497996577
+  },
+  {
+    "txn_id": "TXN202607150027",
+    "value_date": "2026-07-15",
+    "description": "IMPS/P2A/014405097767/RAZORPAY SOF",
+    "credit": 3928228,
+    "debit": 0,
+    "balance": 501924805
+  },
+  {
+    "txn_id": "TXN202607160028",
+    "value_date": "2026-07-16",
+    "description": "IMPS/P2A/987448307494/RAZORPAY SOF",
+    "credit": 2245185,
+    "debit": 0,
+    "balance": 504169990
+  },
+  {
+    "txn_id": "TXN202607170029",
+    "value_date": "2026-07-17",
+    "description": "UPI/979251528151/RAZORPAY/SETTLEMENT",
+    "credit": 2310384,
+    "debit": 0,
+    "balance": 506480374
+  },
+  {
+    "txn_id": "TXN202607200030",
+    "value_date": "2026-07-20",
+    "description": "NEFT CR-RAZORPAY SOFTWARE PVT LTD-562935393152",
+    "credit": 610825,
+    "debit": 0,
+    "balance": 507091199
+  },
+  {
+    "txn_id": "TXN202607210031",
+    "value_date": "2026-07-21",
+    "description": "RTGS CR RAZORPAYSOFTWARE 263094686710 SETTLEMENT",
+    "credit": 12049321,
+    "debit": 0,
+    "balance": 519140520
+  },
+  {
+    "txn_id": "TXN202607220032",
+    "value_date": "2026-07-22",
+    "description": "NEFT CR-RAZORPAY SOFTWARE PVT LTD-710197327592",
+    "credit": 2106731,
+    "debit": 0,
+    "balance": 521247251
+  },
+  {
+    "txn_id": "TXN202607270033",
+    "value_date": "2026-07-27",
+    "description": "RTGS CR RAZORPAYSOFTWARE 720344129429 SETTLEMENT",
+    "credit": 3154262,
+    "debit": 0,
+    "balance": 524401513
+  },
+  {
+    "txn_id": "TXN202607270034",
+    "value_date": "2026-07-27",
+    "description": "Office rent - Aug",
+    "credit": 0,
+    "debit": 18000000,
+    "balance": 506401513
+  },
+  {
+    "txn_id": "TXN202607280035",
+    "value_date": "2026-07-28",
+    "description": "UPI/093296905545/RAZORPAY/SETTLEMENT",
+    "credit": 4765268,
+    "debit": 0,
+    "balance": 511166781
+  },
+  {
+    "txn_id": "TXN202607290036",
+    "value_date": "2026-07-29",
+    "description": "UPI/893943391516/RAZORPAY/SETTLEMENT",
+    "credit": 841846,
+    "debit": 0,
+    "balance": 512008627
+  },
+  {
+    "txn_id": "TXN202607300037",
+    "value_date": "2026-07-30",
+    "description": "NEFT CR-RAZORPAY SOFTWARE PVT LTD-095108305768",
+    "credit": 2240699,
+    "debit": 0,
+    "balance": 514249326
+  },
+  {
+    "txn_id": "TXN202607310038",
+    "value_date": "2026-07-31",
+    "description": "NEFT CR-RAZORPAY SOFTWARE PVT LTD-654086991971",
+    "credit": 346834,
+    "debit": 0,
+    "balance": 514596160
+  },
+  {
+    "txn_id": "TXN202608030039",
+    "value_date": "2026-08-03",
+    "description": "RTGS CR RAZORPAYSOFTWARE 190435562201 SETTLEMENT",
+    "credit": 1470756,
+    "debit": 0,
+    "balance": 516066916
+  },
+  {
+    "txn_id": "TXN202608030040",
+    "value_date": "2026-08-03",
+    "description": "GST CHALLAN PMT",
+    "credit": 0,
+    "debit": 8934500,
+    "balance": 507132416
+  },
+  {
+    "txn_id": "TXN202608040041",
+    "value_date": "2026-08-04",
+    "description": "UPI/323489977873/RAZORPAY/SETTLEMENT",
+    "credit": 4922896,
+    "debit": 0,
+    "balance": 512055312
+  },
+  {
+    "txn_id": "TXN202608050042",
+    "value_date": "2026-08-05",
+    "description": "NEFT CR-RAZORPAY SOFTWARE PVT LTD-081076564206",
+    "credit": 2035291,
+    "debit": 0,
+    "balance": 514090603
+  },
+  {
+    "txn_id": "TXN202608050043",
+    "value_date": "2026-08-05",
+    "description": "SALARY BATCH 08/2026",
+    "credit": 0,
+    "debit": 61500000,
+    "balance": 452590603
+  },
+  {
+    "txn_id": "TXN202608060044",
+    "value_date": "2026-08-06",
+    "description": "RTGS CR RAZORPAYSOFTWARE 626127066369 SETTLEMENT",
+    "credit": 383067,
+    "debit": 0,
+    "balance": 452973670
+  },
+  {
+    "txn_id": "TXN202608070045",
+    "value_date": "2026-08-07",
+    "description": "UPI/870563619830/RAZORPAY/SETTLEMENT",
+    "credit": 1542362,
+    "debit": 0,
+    "balance": 454516032
+  },
+  {
+    "txn_id": "TXN202608100046",
+    "value_date": "2026-08-10",
+    "description": "UPI/386159913267/RAZORPAY/SETTLEMENT",
+    "credit": 1061666,
+    "debit": 0,
+    "balance": 455577698
+  },
+  {
+    "txn_id": "TXN202608110047",
+    "value_date": "2026-08-11",
+    "description": "NEFT-719647210742-RAZORPAY SOFTWARE PRIVATE LIM",
+    "credit": 3867386,
+    "debit": 0,
+    "balance": 459445084
+  },
+  {
+    "txn_id": "TXN202608130048",
+    "value_date": "2026-08-13",
+    "description": "NEFT-054071360044-RAZORPAY SOFTWARE PRIVATE LIM",
+    "credit": 4206700,
+    "debit": 0,
+    "balance": 463651784
+  },
+  {
+    "txn_id": "TXN202608150049",
+    "value_date": "2026-08-15",
+    "description": "COURIER SETTLEMENT DELHIVERY",
+    "credit": 0,
+    "debit": 2213400,
+    "balance": 461438384
+  },
+  {
+    "txn_id": "TXN202608170050",
+    "value_date": "2026-08-17",
+    "description": "RTGS CR RAZORPAYSOFTWARE 434790267321 SETTLEMENT",
+    "credit": 1113911,
+    "debit": 0,
+    "balance": 462552295
+  },
+  {
+    "txn_id": "TXN202608180051",
+    "value_date": "2026-08-18",
+    "description": "NEFT CR-RAZORPAY SOFTWARE PVT LTD-775985535616",
+    "credit": 6358210,
+    "debit": 0,
+    "balance": 468910505
+  },
+  {
+    "txn_id": "TXN202608190052",
+    "value_date": "2026-08-19",
+    "description": "RTGS CR RAZORPAYSOFTWARE 794560308570 SETTLEMENT",
+    "credit": 1761222,
+    "debit": 0,
+    "balance": 470671727
+  },
+  {
+    "txn_id": "TXN202608200053",
+    "value_date": "2026-08-20",
+    "description": "UPI/653462076442/RAZORPAY/SETTLEMENT",
+    "credit": 1140000,
+    "debit": 0,
+    "balance": 471811727
+  },
+  {
+    "txn_id": "TXN202608210054",
+    "value_date": "2026-08-21",
+    "description": "IMPS/P2A/762553068138/RAZORPAY SOF",
+    "credit": 1186906,
+    "debit": 0,
+    "balance": 472998633
+  },
+  {
+    "txn_id": "TXN202608240055",
+    "value_date": "2026-08-24",
+    "description": "IMPS/P2A/182169778587/RAZORPAY SOF",
+    "credit": 1270366,
+    "debit": 0,
+    "balance": 474268999
+  },
+  {
+    "txn_id": "TXN202608250056",
+    "value_date": "2026-08-25",
+    "description": "IMPS/P2A/792229200526/RAZORPAY SOF",
+    "credit": 5952329,
+    "debit": 0,
+    "balance": 480221328
+  },
+  {
+    "txn_id": "TXN202608280057",
+    "value_date": "2026-08-28",
+    "description": "NEFT-422745782249-RAZORPAY SOFTWARE PRIVATE LIM",
+    "credit": 3000016,
+    "debit": 0,
+    "balance": 483221344
+  },
+  {
+    "txn_id": "TXN202608310058",
+    "value_date": "2026-08-31",
+    "description": "NEFT-957528578190-RAZORPAY SOFTWARE PRIVATE LIM",
+    "credit": 2564330,
+    "debit": 0,
+    "balance": 485785674
+  },
+  {
+    "txn_id": "TXN202609010059",
+    "value_date": "2026-09-01",
+    "description": "UPI/474142406066/RAZORPAY/SETTLEMENT",
+    "credit": 4425861,
+    "debit": 0,
+    "balance": 490211535
+  }
+]

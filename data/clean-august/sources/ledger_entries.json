@@ -1,0 +1,5096 @@
+[
+  {
+    "entry_id": "JE-2026-00003",
+    "entry_date": "2026-06-01",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1179700,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01074"
+  },
+  {
+    "entry_id": "JE-2026-00001",
+    "entry_date": "2026-06-01",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 499900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01129"
+  },
+  {
+    "entry_id": "JE-2026-00002",
+    "entry_date": "2026-06-01",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 314800,
+    "narration": "REV/RCPT-2026-01149",
+    "source_ref": "RCPT-2026-01149"
+  },
+  {
+    "entry_id": "JE-2026-00006",
+    "entry_date": "2026-06-02",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 709800,
+    "narration": "Online sale - RCPT-2026-01003",
+    "source_ref": "RCPT-2026-01003"
+  },
+  {
+    "entry_id": "JE-2026-00005",
+    "entry_date": "2026-06-02",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 139900,
+    "narration": "Sale RCPT-2026-01216",
+    "source_ref": "RCPT-2026-01216"
+  },
+  {
+    "entry_id": "JE-2026-00007",
+    "entry_date": "2026-06-02",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 599900,
+    "narration": "Web order revenue",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00004",
+    "entry_date": "2026-06-02",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1309700,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01181"
+  },
+  {
+    "entry_id": "JE-2026-00361",
+    "entry_date": "2026-06-03",
+    "account": "payment_gateway_fees",
+    "debit": 9998,
+    "credit": 0,
+    "narration": "PG fees settlement 985172444723",
+    "source_ref": "985172444723"
+  },
+  {
+    "entry_id": "JE-2026-00505",
+    "entry_date": "2026-06-03",
+    "account": "bank",
+    "debit": 1982602,
+    "credit": 0,
+    "narration": "Settlement received TXN202606030000",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00009",
+    "entry_date": "2026-06-03",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 139900,
+    "narration": "Online sale - RCPT-2026-01082",
+    "source_ref": "RCPT-2026-01082"
+  },
+  {
+    "entry_id": "JE-2026-00008",
+    "entry_date": "2026-06-03",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 109800,
+    "narration": "Sales invoice RCPT-2026-01130",
+    "source_ref": "RCPT-2026-01130"
+  },
+  {
+    "entry_id": "JE-2026-00362",
+    "entry_date": "2026-06-03",
+    "account": "gst_input",
+    "debit": 1800,
+    "credit": 0,
+    "narration": "GST on PG fees 985172444723",
+    "source_ref": "985172444723"
+  },
+  {
+    "entry_id": "JE-2026-00010",
+    "entry_date": "2026-06-03",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 399900,
+    "narration": "Sales invoice RCPT-2026-01244",
+    "source_ref": "RCPT-2026-01244"
+  },
+  {
+    "entry_id": "JE-2026-00506",
+    "entry_date": "2026-06-04",
+    "account": "bank",
+    "debit": 2759300,
+    "credit": 0,
+    "narration": "Settlement received TXN202606040001",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00507",
+    "entry_date": "2026-06-05",
+    "account": "bank",
+    "debit": 245985,
+    "credit": 0,
+    "narration": "Settlement received TXN202606050002",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00364",
+    "entry_date": "2026-06-05",
+    "account": "gst_input",
+    "debit": 567,
+    "credit": 0,
+    "narration": "GST on PG fees 595616420595",
+    "source_ref": "595616420595"
+  },
+  {
+    "entry_id": "JE-2026-00015",
+    "entry_date": "2026-06-05",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1289700,
+    "narration": "REV/RCPT-2026-01301",
+    "source_ref": "RCPT-2026-01301"
+  },
+  {
+    "entry_id": "JE-2026-00011",
+    "entry_date": "2026-06-05",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 869800,
+    "narration": "Online sale - order_OYXTtJ",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00012",
+    "entry_date": "2026-06-05",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 999900,
+    "narration": "REV/RCPT-2026-01055",
+    "source_ref": "RCPT-2026-01055"
+  },
+  {
+    "entry_id": "JE-2026-00013",
+    "entry_date": "2026-06-05",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 139900,
+    "narration": "Sale RCPT-2026-01196",
+    "source_ref": "RCPT-2026-01196"
+  },
+  {
+    "entry_id": "JE-2026-00363",
+    "entry_date": "2026-06-05",
+    "account": "payment_gateway_fees",
+    "debit": 3148,
+    "credit": 0,
+    "narration": "PG fees settlement 595616420595",
+    "source_ref": "595616420595"
+  },
+  {
+    "entry_id": "JE-2026-00014",
+    "entry_date": "2026-06-05",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 849800,
+    "narration": "Sale RCPT-2026-01117",
+    "source_ref": "RCPT-2026-01117"
+  },
+  {
+    "entry_id": "JE-2026-00019",
+    "entry_date": "2026-06-06",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 199800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01090"
+  },
+  {
+    "entry_id": "JE-2026-00018",
+    "entry_date": "2026-06-06",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1459800,
+    "narration": "Sales invoice RCPT-2026-01232",
+    "source_ref": "RCPT-2026-01232"
+  },
+  {
+    "entry_id": "JE-2026-00017",
+    "entry_date": "2026-06-06",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 129900,
+    "narration": "REV/RCPT-2026-01287",
+    "source_ref": "RCPT-2026-01287"
+  },
+  {
+    "entry_id": "JE-2026-00021",
+    "entry_date": "2026-06-06",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 49900,
+    "narration": "Sale RCPT-2026-01246",
+    "source_ref": "RCPT-2026-01246"
+  },
+  {
+    "entry_id": "JE-2026-00016",
+    "entry_date": "2026-06-06",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 359800,
+    "narration": "Online sale - RCPT-2026-01175",
+    "source_ref": "RCPT-2026-01175"
+  },
+  {
+    "entry_id": "JE-2026-00022",
+    "entry_date": "2026-06-06",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 79900,
+    "narration": "Sale order_jQjCIsyNKCmnR4",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00023",
+    "entry_date": "2026-06-07",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 384700,
+    "narration": "REV/RCPT-2026-01168",
+    "source_ref": "RCPT-2026-01168"
+  },
+  {
+    "entry_id": "JE-2026-00025",
+    "entry_date": "2026-06-07",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 179900,
+    "narration": "Sale RCPT-2026-01026",
+    "source_ref": "RCPT-2026-01026"
+  },
+  {
+    "entry_id": "JE-2026-00024",
+    "entry_date": "2026-06-07",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 284800,
+    "narration": "Sale RCPT-2026-01285",
+    "source_ref": "RCPT-2026-01285"
+  },
+  {
+    "entry_id": "JE-2026-00020",
+    "entry_date": "2026-06-07",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 299800,
+    "narration": "Online sale - RCPT-2026-01047",
+    "source_ref": "RCPT-2026-01047"
+  },
+  {
+    "entry_id": "JE-2026-00508",
+    "entry_date": "2026-06-08",
+    "account": "bank",
+    "debit": 390462,
+    "credit": 0,
+    "narration": "Settlement received TXN202606080003",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00365",
+    "entry_date": "2026-06-08",
+    "account": "payment_gateway_fees",
+    "debit": 7998,
+    "credit": 0,
+    "narration": "PG fees settlement 290193588953",
+    "source_ref": "290193588953"
+  },
+  {
+    "entry_id": "JE-2026-00027",
+    "entry_date": "2026-06-08",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1399800,
+    "narration": "REV/RCPT-2026-01214",
+    "source_ref": "RCPT-2026-01214"
+  },
+  {
+    "entry_id": "JE-2026-00366",
+    "entry_date": "2026-06-08",
+    "account": "gst_input",
+    "debit": 1440,
+    "credit": 0,
+    "narration": "GST on PG fees 290193588953",
+    "source_ref": "290193588953"
+  },
+  {
+    "entry_id": "JE-2026-00028",
+    "entry_date": "2026-06-08",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 449800,
+    "narration": "Sales invoice NA",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00026",
+    "entry_date": "2026-06-08",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1359800,
+    "narration": "REV/RCPT-2026-01068",
+    "source_ref": "RCPT-2026-01068"
+  },
+  {
+    "entry_id": "JE-2026-00029",
+    "entry_date": "2026-06-09",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1049800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01006"
+  },
+  {
+    "entry_id": "JE-2026-00030",
+    "entry_date": "2026-06-09",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 359800,
+    "narration": "Online sale - RCPT-2026-01242",
+    "source_ref": "RCPT-2026-01242"
+  },
+  {
+    "entry_id": "JE-2026-00509",
+    "entry_date": "2026-06-09",
+    "account": "bank",
+    "debit": 6685007,
+    "credit": 0,
+    "narration": "Settlement received TXN202606090004",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00367",
+    "entry_date": "2026-06-09",
+    "account": "payment_gateway_fees",
+    "debit": 36435,
+    "credit": 0,
+    "narration": "PG fees settlement 398986818097",
+    "source_ref": "398986818097"
+  },
+  {
+    "entry_id": "JE-2026-00368",
+    "entry_date": "2026-06-09",
+    "account": "gst_input",
+    "debit": 6558,
+    "credit": 0,
+    "narration": "GST on PG fees 398986818097",
+    "source_ref": "398986818097"
+  },
+  {
+    "entry_id": "JE-2026-00369",
+    "entry_date": "2026-06-10",
+    "account": "payment_gateway_fees",
+    "debit": 42788,
+    "credit": 0,
+    "narration": "PG fees settlement 537513765158",
+    "source_ref": "537513765158"
+  },
+  {
+    "entry_id": "JE-2026-00370",
+    "entry_date": "2026-06-10",
+    "account": "gst_input",
+    "debit": 7702,
+    "credit": 0,
+    "narration": "GST on PG fees 537513765158",
+    "source_ref": "537513765158"
+  },
+  {
+    "entry_id": "JE-2026-00031",
+    "entry_date": "2026-06-10",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 129900,
+    "narration": "Sale RCPT-2026-01247",
+    "source_ref": "RCPT-2026-01247"
+  },
+  {
+    "entry_id": "JE-2026-00033",
+    "entry_date": "2026-06-10",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 399800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01135"
+  },
+  {
+    "entry_id": "JE-2026-00034",
+    "entry_date": "2026-06-10",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1629700,
+    "narration": "Sale RCPT-2026-01116",
+    "source_ref": "RCPT-2026-01116"
+  },
+  {
+    "entry_id": "JE-2026-00032",
+    "entry_date": "2026-06-10",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 259800,
+    "narration": "Sales invoice RCPT-2026-01341",
+    "source_ref": "RCPT-2026-01341"
+  },
+  {
+    "entry_id": "JE-2026-00510",
+    "entry_date": "2026-06-10",
+    "account": "bank",
+    "debit": 3558510,
+    "credit": 0,
+    "narration": "Settlement received TXN202606100005",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00371",
+    "entry_date": "2026-06-11",
+    "account": "payment_gateway_fees",
+    "debit": 7872,
+    "credit": 0,
+    "narration": "PG fees settlement 283692944551",
+    "source_ref": "283692944551"
+  },
+  {
+    "entry_id": "JE-2026-00036",
+    "entry_date": "2026-06-11",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 729700,
+    "narration": "Online sale - RCPT-2026-01212",
+    "source_ref": "RCPT-2026-01212"
+  },
+  {
+    "entry_id": "JE-2026-00503",
+    "entry_date": "2026-06-11",
+    "account": "refunds",
+    "debit": 449800,
+    "credit": 0,
+    "narration": "Refund order_SNLHYAhAjjKLLW",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00035",
+    "entry_date": "2026-06-11",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 49900,
+    "narration": "Sales invoice RCPT-2026-01275",
+    "source_ref": "RCPT-2026-01275"
+  },
+  {
+    "entry_id": "JE-2026-00372",
+    "entry_date": "2026-06-11",
+    "account": "gst_input",
+    "debit": 1417,
+    "credit": 0,
+    "narration": "GST on PG fees 283692944551",
+    "source_ref": "283692944551"
+  },
+  {
+    "entry_id": "JE-2026-00511",
+    "entry_date": "2026-06-11",
+    "account": "bank",
+    "debit": 440511,
+    "credit": 0,
+    "narration": "Settlement received TXN202606110006",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00037",
+    "entry_date": "2026-06-11",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 379700,
+    "narration": "Sale RCPT-2026-01035",
+    "source_ref": "RCPT-2026-01035"
+  },
+  {
+    "entry_id": "JE-2026-00040",
+    "entry_date": "2026-06-12",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 309800,
+    "narration": "Sales invoice RCPT-2026-01249",
+    "source_ref": "RCPT-2026-01249"
+  },
+  {
+    "entry_id": "JE-2026-00512",
+    "entry_date": "2026-06-12",
+    "account": "bank",
+    "debit": 1790809,
+    "credit": 0,
+    "narration": "Settlement received TXN202606120007",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00374",
+    "entry_date": "2026-06-12",
+    "account": "gst_input",
+    "debit": 1295,
+    "credit": 0,
+    "narration": "GST on PG fees 702164871206",
+    "source_ref": "702164871206"
+  },
+  {
+    "entry_id": "JE-2026-00038",
+    "entry_date": "2026-06-12",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 499900,
+    "narration": "REV/RCPT-2026-01159",
+    "source_ref": "RCPT-2026-01159"
+  },
+  {
+    "entry_id": "JE-2026-00373",
+    "entry_date": "2026-06-12",
+    "account": "payment_gateway_fees",
+    "debit": 7196,
+    "credit": 0,
+    "narration": "PG fees settlement 702164871206",
+    "source_ref": "702164871206"
+  },
+  {
+    "entry_id": "JE-2026-00039",
+    "entry_date": "2026-06-12",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 34900,
+    "narration": "Sale RCPT-2026-01174",
+    "source_ref": "RCPT-2026-01174"
+  },
+  {
+    "entry_id": "JE-2026-00041",
+    "entry_date": "2026-06-12",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 179800,
+    "narration": "Online sale - RCPT-2026-01085",
+    "source_ref": "RCPT-2026-01085"
+  },
+  {
+    "entry_id": "JE-2026-00043",
+    "entry_date": "2026-06-13",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 429800,
+    "narration": "Sales invoice RCPT-2026-01144",
+    "source_ref": "RCPT-2026-01144"
+  },
+  {
+    "entry_id": "JE-2026-00044",
+    "entry_date": "2026-06-13",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 279900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01320"
+  },
+  {
+    "entry_id": "JE-2026-00045",
+    "entry_date": "2026-06-13",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 139900,
+    "narration": "Online sale - RCPT-2026-01039",
+    "source_ref": "RCPT-2026-01039"
+  },
+  {
+    "entry_id": "JE-2026-00042",
+    "entry_date": "2026-06-13",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 659800,
+    "narration": "REV/RCPT-2026-01019",
+    "source_ref": "RCPT-2026-01019"
+  },
+  {
+    "entry_id": "JE-2026-00046",
+    "entry_date": "2026-06-13",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 299900,
+    "narration": "REV/RCPT-2026-01171",
+    "source_ref": "RCPT-2026-01171"
+  },
+  {
+    "entry_id": "JE-2026-00488",
+    "entry_date": "2026-06-13",
+    "account": "refunds",
+    "debit": 1289700,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01301",
+    "source_ref": "RCPT-2026-01301"
+  },
+  {
+    "entry_id": "JE-2026-00048",
+    "entry_date": "2026-06-14",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 589700,
+    "narration": "REV/RCPT-2026-01258",
+    "source_ref": "RCPT-2026-01258"
+  },
+  {
+    "entry_id": "JE-2026-00050",
+    "entry_date": "2026-06-14",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 289800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01163"
+  },
+  {
+    "entry_id": "JE-2026-00049",
+    "entry_date": "2026-06-14",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 79900,
+    "narration": "Sales invoice RCPT-2026-01286",
+    "source_ref": "RCPT-2026-01286"
+  },
+  {
+    "entry_id": "JE-2026-00565",
+    "entry_date": "2026-06-14",
+    "account": "suspense",
+    "debit": 0,
+    "credit": 671956,
+    "narration": "Unidentified credit - to be classified",
+    "source_ref": "RCPT-2026-70514"
+  },
+  {
+    "entry_id": "JE-2026-00047",
+    "entry_date": "2026-06-14",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 349900,
+    "narration": "Sales invoice RCPT-2026-01292",
+    "source_ref": "RCPT-2026-01292"
+  },
+  {
+    "entry_id": "JE-2026-00054",
+    "entry_date": "2026-06-15",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 849800,
+    "narration": "Sales invoice RCPT-2026-01059",
+    "source_ref": "RCPT-2026-01059"
+  },
+  {
+    "entry_id": "JE-2026-00051",
+    "entry_date": "2026-06-15",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 399900,
+    "narration": "Sales invoice RCPT-2026-01223",
+    "source_ref": "RCPT-2026-01223"
+  },
+  {
+    "entry_id": "JE-2026-00053",
+    "entry_date": "2026-06-15",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 299900,
+    "narration": "Online sale - RCPT-2026-01201",
+    "source_ref": "RCPT-2026-01201"
+  },
+  {
+    "entry_id": "JE-2026-00052",
+    "entry_date": "2026-06-15",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 404700,
+    "narration": "REV/RCPT-2026-01125",
+    "source_ref": "RCPT-2026-01125"
+  },
+  {
+    "entry_id": "JE-2026-00055",
+    "entry_date": "2026-06-15",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 59900,
+    "narration": "Online sale - RCPT-2026-01228",
+    "source_ref": "RCPT-2026-01228"
+  },
+  {
+    "entry_id": "JE-2026-00513",
+    "entry_date": "2026-06-15",
+    "account": "bank",
+    "debit": 1541239,
+    "credit": 0,
+    "narration": "Settlement received TXN202606150008",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00375",
+    "entry_date": "2026-06-15",
+    "account": "payment_gateway_fees",
+    "debit": 32594,
+    "credit": 0,
+    "narration": "PG fees settlement 683415599910",
+    "source_ref": "683415599910"
+  },
+  {
+    "entry_id": "JE-2026-00376",
+    "entry_date": "2026-06-15",
+    "account": "gst_input",
+    "debit": 5867,
+    "credit": 0,
+    "narration": "GST on PG fees 683415599910",
+    "source_ref": "683415599910"
+  },
+  {
+    "entry_id": "JE-2026-00056",
+    "entry_date": "2026-06-16",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 499900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01209"
+  },
+  {
+    "entry_id": "JE-2026-00060",
+    "entry_date": "2026-06-16",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 579800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01239"
+  },
+  {
+    "entry_id": "JE-2026-00490",
+    "entry_date": "2026-06-16",
+    "account": "refunds",
+    "debit": 849800,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01117",
+    "source_ref": "RCPT-2026-01117"
+  },
+  {
+    "entry_id": "JE-2026-00378",
+    "entry_date": "2026-06-16",
+    "account": "gst_input",
+    "debit": 4470,
+    "credit": 0,
+    "narration": "GST on PG fees 722981209957",
+    "source_ref": "722981209957"
+  },
+  {
+    "entry_id": "JE-2026-00514",
+    "entry_date": "2026-06-16",
+    "account": "bank",
+    "debit": 2604094,
+    "credit": 0,
+    "narration": "Settlement received TXN202606160009",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00377",
+    "entry_date": "2026-06-16",
+    "account": "payment_gateway_fees",
+    "debit": 24836,
+    "credit": 0,
+    "narration": "PG fees settlement 722981209957",
+    "source_ref": "722981209957"
+  },
+  {
+    "entry_id": "JE-2026-00491",
+    "entry_date": "2026-06-16",
+    "account": "refunds",
+    "debit": 149950,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01171",
+    "source_ref": "RCPT-2026-01171"
+  },
+  {
+    "entry_id": "JE-2026-00058",
+    "entry_date": "2026-06-16",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 89900,
+    "narration": "Online sale - RCPT-2026-01040",
+    "source_ref": "RCPT-2026-01040"
+  },
+  {
+    "entry_id": "JE-2026-00057",
+    "entry_date": "2026-06-17",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 79900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01028"
+  },
+  {
+    "entry_id": "JE-2026-00059",
+    "entry_date": "2026-06-17",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1329700,
+    "narration": "Online sale - RCPT-2026-01339",
+    "source_ref": "RCPT-2026-01339"
+  },
+  {
+    "entry_id": "JE-2026-00062",
+    "entry_date": "2026-06-17",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 529800,
+    "narration": "Sale RCPT-2026-01259",
+    "source_ref": "RCPT-2026-01259"
+  },
+  {
+    "entry_id": "JE-2026-00061",
+    "entry_date": "2026-06-17",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 739800,
+    "narration": "Sales invoice RCPT-2026-01215",
+    "source_ref": "RCPT-2026-01215"
+  },
+  {
+    "entry_id": "JE-2026-00380",
+    "entry_date": "2026-06-18",
+    "account": "gst_input",
+    "debit": 7148,
+    "credit": 0,
+    "narration": "GST on PG fees 509889864565",
+    "source_ref": "509889864565"
+  },
+  {
+    "entry_id": "JE-2026-00065",
+    "entry_date": "2026-06-18",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 159900,
+    "narration": "Online sale - RCPT-2026-01233",
+    "source_ref": "RCPT-2026-01233"
+  },
+  {
+    "entry_id": "JE-2026-00379",
+    "entry_date": "2026-06-18",
+    "account": "payment_gateway_fees",
+    "debit": 39711,
+    "credit": 0,
+    "narration": "PG fees settlement 509889864565",
+    "source_ref": "509889864565"
+  },
+  {
+    "entry_id": "JE-2026-00066",
+    "entry_date": "2026-06-18",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 599900,
+    "narration": "Sale order_eaAgHgRCwoUsqm",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00063",
+    "entry_date": "2026-06-18",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 499900,
+    "narration": "REV/RCPT-2026-01014",
+    "source_ref": "RCPT-2026-01014"
+  },
+  {
+    "entry_id": "JE-2026-00515",
+    "entry_date": "2026-06-18",
+    "account": "bank",
+    "debit": 3216741,
+    "credit": 0,
+    "narration": "Settlement received TXN202606180010",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00064",
+    "entry_date": "2026-06-18",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 499900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-9053"
+  },
+  {
+    "entry_id": "JE-2026-00067",
+    "entry_date": "2026-06-18",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 139900,
+    "narration": "Online sale - RCPT-2026-01029",
+    "source_ref": "RCPT-2026-01029"
+  },
+  {
+    "entry_id": "JE-2026-00069",
+    "entry_date": "2026-06-19",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 449800,
+    "narration": "Sales invoice RCPT-2026-01056",
+    "source_ref": "RCPT-2026-01056"
+  },
+  {
+    "entry_id": "JE-2026-00068",
+    "entry_date": "2026-06-19",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1459800,
+    "narration": "Online sale - RCPT-2026-01122",
+    "source_ref": "RCPT-2026-01122"
+  },
+  {
+    "entry_id": "JE-2026-00071",
+    "entry_date": "2026-06-19",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1389700,
+    "narration": "Online sale - RCPT-2026-01031",
+    "source_ref": "RCPT-2026-01031"
+  },
+  {
+    "entry_id": "JE-2026-00070",
+    "entry_date": "2026-06-19",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 164800,
+    "narration": "Web order revenue",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00516",
+    "entry_date": "2026-06-19",
+    "account": "bank",
+    "debit": 2349185,
+    "credit": 0,
+    "narration": "Settlement received TXN202606190011",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00381",
+    "entry_date": "2026-06-19",
+    "account": "payment_gateway_fees",
+    "debit": 25394,
+    "credit": 0,
+    "narration": "PG fees settlement 995154214477",
+    "source_ref": "995154214477"
+  },
+  {
+    "entry_id": "JE-2026-00382",
+    "entry_date": "2026-06-19",
+    "account": "gst_input",
+    "debit": 4571,
+    "credit": 0,
+    "narration": "GST on PG fees 995154214477",
+    "source_ref": "995154214477"
+  },
+  {
+    "entry_id": "JE-2026-00072",
+    "entry_date": "2026-06-20",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 279900,
+    "narration": "Sales invoice RCPT-2026-01094",
+    "source_ref": "RCPT-2026-01094"
+  },
+  {
+    "entry_id": "JE-2026-00474",
+    "entry_date": "2026-06-20",
+    "account": "refunds",
+    "debit": 289800,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01163",
+    "source_ref": "RCPT-2026-01163"
+  },
+  {
+    "entry_id": "JE-2026-00074",
+    "entry_date": "2026-06-20",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1299900,
+    "narration": "Sales invoice RCPT-2026-01164",
+    "source_ref": "RCPT-2026-01164"
+  },
+  {
+    "entry_id": "JE-2026-00499",
+    "entry_date": "2026-06-20",
+    "account": "refunds",
+    "debit": 599900,
+    "credit": 0,
+    "narration": "Refund order_eaAgHgRCwoUsqm",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00073",
+    "entry_date": "2026-06-20",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 949700,
+    "narration": "Online sale - RCPT-2026-01052",
+    "source_ref": "RCPT-2026-01052"
+  },
+  {
+    "entry_id": "JE-2026-00075",
+    "entry_date": "2026-06-21",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1149800,
+    "narration": "Online sale - RCPT-2026-01157",
+    "source_ref": "RCPT-2026-01157"
+  },
+  {
+    "entry_id": "JE-2026-00076",
+    "entry_date": "2026-06-21",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 549700,
+    "narration": "REV/RCPT-2026-01004",
+    "source_ref": "RCPT-2026-01004"
+  },
+  {
+    "entry_id": "JE-2026-00517",
+    "entry_date": "2026-06-22",
+    "account": "bank",
+    "debit": 2386474,
+    "credit": 0,
+    "narration": "Settlement received TXN202606220012",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00384",
+    "entry_date": "2026-06-22",
+    "account": "gst_input",
+    "debit": 6534,
+    "credit": 0,
+    "narration": "GST on PG fees 213882090883",
+    "source_ref": "213882090883"
+  },
+  {
+    "entry_id": "JE-2026-00079",
+    "entry_date": "2026-06-22",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 79900,
+    "narration": "Online sale - RCPT-2026-01308",
+    "source_ref": "RCPT-2026-01308"
+  },
+  {
+    "entry_id": "JE-2026-00078",
+    "entry_date": "2026-06-22",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 799800,
+    "narration": "Sale RCPT-2026-01032",
+    "source_ref": "RCPT-2026-01032"
+  },
+  {
+    "entry_id": "JE-2026-00383",
+    "entry_date": "2026-06-22",
+    "account": "payment_gateway_fees",
+    "debit": 36292,
+    "credit": 0,
+    "narration": "PG fees settlement 213882090883",
+    "source_ref": "213882090883"
+  },
+  {
+    "entry_id": "JE-2026-00077",
+    "entry_date": "2026-06-22",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 499800,
+    "narration": "Sale RCPT-2026-01235",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00080",
+    "entry_date": "2026-06-23",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 399900,
+    "narration": "REV/RCPT-2026-01010",
+    "source_ref": "RCPT-2026-01010"
+  },
+  {
+    "entry_id": "JE-2026-00386",
+    "entry_date": "2026-06-23",
+    "account": "gst_input",
+    "debit": 8981,
+    "credit": 0,
+    "narration": "GST on PG fees 827411767412",
+    "source_ref": "827411767412"
+  },
+  {
+    "entry_id": "JE-2026-00518",
+    "entry_date": "2026-06-23",
+    "account": "bank",
+    "debit": 6194829,
+    "credit": 0,
+    "narration": "Settlement received TXN202606230013",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00081",
+    "entry_date": "2026-06-23",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 179900,
+    "narration": "Online sale - RCPT-2026-01156",
+    "source_ref": "RCPT-2026-01156"
+  },
+  {
+    "entry_id": "JE-2026-00385",
+    "entry_date": "2026-06-23",
+    "account": "payment_gateway_fees",
+    "debit": 49890,
+    "credit": 0,
+    "narration": "PG fees settlement 827411767412",
+    "source_ref": "827411767412"
+  },
+  {
+    "entry_id": "JE-2026-00085",
+    "entry_date": "2026-06-24",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 279900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01330"
+  },
+  {
+    "entry_id": "JE-2026-00082",
+    "entry_date": "2026-06-24",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 349700,
+    "narration": "REV/RCPT-2026-01043",
+    "source_ref": "RCPT-2026-01043"
+  },
+  {
+    "entry_id": "JE-2026-00519",
+    "entry_date": "2026-06-24",
+    "account": "bank",
+    "debit": 1897352,
+    "credit": 0,
+    "narration": "Settlement received TXN202606240014",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00083",
+    "entry_date": "2026-06-24",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 314800,
+    "narration": "Sales invoice RCPT-2026-01128",
+    "source_ref": "RCPT-2026-01128"
+  },
+  {
+    "entry_id": "JE-2026-00387",
+    "entry_date": "2026-06-24",
+    "account": "payment_gateway_fees",
+    "debit": 26990,
+    "credit": 0,
+    "narration": "PG fees settlement 285478150618",
+    "source_ref": "285478150618"
+  },
+  {
+    "entry_id": "JE-2026-00388",
+    "entry_date": "2026-06-24",
+    "account": "gst_input",
+    "debit": 4858,
+    "credit": 0,
+    "narration": "GST on PG fees 285478150618",
+    "source_ref": "285478150618"
+  },
+  {
+    "entry_id": "JE-2026-00084",
+    "entry_date": "2026-06-24",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 579800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01034"
+  },
+  {
+    "entry_id": "JE-2026-00520",
+    "entry_date": "2026-06-25",
+    "account": "bank",
+    "debit": 399900,
+    "credit": 0,
+    "narration": "Settlement received TXN202606250015",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00088",
+    "entry_date": "2026-06-25",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 699800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01072"
+  },
+  {
+    "entry_id": "JE-2026-00087",
+    "entry_date": "2026-06-25",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 179800,
+    "narration": "Online sale - RCPT-2026-01268",
+    "source_ref": "RCPT-2026-01268"
+  },
+  {
+    "entry_id": "JE-2026-00086",
+    "entry_date": "2026-06-25",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 59900,
+    "narration": "Sales invoice RCPT-2026-01184",
+    "source_ref": "RCPT-2026-01184"
+  },
+  {
+    "entry_id": "JE-2026-00389",
+    "entry_date": "2026-06-26",
+    "account": "payment_gateway_fees",
+    "debit": 12503,
+    "credit": 0,
+    "narration": "PG fees settlement 789320649693",
+    "source_ref": "789320649693"
+  },
+  {
+    "entry_id": "JE-2026-00521",
+    "entry_date": "2026-06-26",
+    "account": "bank",
+    "debit": 829646,
+    "credit": 0,
+    "narration": "Settlement received TXN202606260016",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00089",
+    "entry_date": "2026-06-26",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 349900,
+    "narration": "REV/RCPT-2026-01227",
+    "source_ref": "RCPT-2026-01227"
+  },
+  {
+    "entry_id": "JE-2026-00091",
+    "entry_date": "2026-06-26",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 679800,
+    "narration": "REV/RCPT-2026-01045",
+    "source_ref": "RCPT-2026-01045"
+  },
+  {
+    "entry_id": "JE-2026-00090",
+    "entry_date": "2026-06-26",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 749800,
+    "narration": "Sales invoice RCPT-2026-01338",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00390",
+    "entry_date": "2026-06-26",
+    "account": "gst_input",
+    "debit": 2251,
+    "credit": 0,
+    "narration": "GST on PG fees 789320649693",
+    "source_ref": "789320649693"
+  },
+  {
+    "entry_id": "JE-2026-00093",
+    "entry_date": "2026-06-27",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 759700,
+    "narration": "REV/RCPT-2026-01311",
+    "source_ref": "RCPT-2026-01311"
+  },
+  {
+    "entry_id": "JE-2026-00092",
+    "entry_date": "2026-06-27",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 629700,
+    "narration": "Sales invoice RCPT-2026-01270",
+    "source_ref": "RCPT-2026-01270"
+  },
+  {
+    "entry_id": "JE-2026-00101",
+    "entry_date": "2026-06-28",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 539800,
+    "narration": "Sales invoice RCPT-2026-01137",
+    "source_ref": "RCPT-2026-01137"
+  },
+  {
+    "entry_id": "JE-2026-00094",
+    "entry_date": "2026-06-28",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 299900,
+    "narration": "Sales invoice RCPT-2026-01257",
+    "source_ref": "RCPT-2026-01257"
+  },
+  {
+    "entry_id": "JE-2026-00100",
+    "entry_date": "2026-06-28",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 619800,
+    "narration": "Sales invoice RCPT-2026-01253",
+    "source_ref": "RCPT-2026-01253"
+  },
+  {
+    "entry_id": "JE-2026-00492",
+    "entry_date": "2026-06-28",
+    "account": "refunds",
+    "debit": 279900,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01094",
+    "source_ref": "RCPT-2026-01094"
+  },
+  {
+    "entry_id": "JE-2026-00098",
+    "entry_date": "2026-06-28",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 149900,
+    "narration": "Sales invoice RCPT-2026-01195",
+    "source_ref": "RCPT-2026-01195"
+  },
+  {
+    "entry_id": "JE-2026-00097",
+    "entry_date": "2026-06-28",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1939700,
+    "narration": "Sales invoice RCPT-2026-01329",
+    "source_ref": "RCPT-2026-01329"
+  },
+  {
+    "entry_id": "JE-2026-00095",
+    "entry_date": "2026-06-28",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 699800,
+    "narration": "Sale RCPT-2026-01302",
+    "source_ref": "RCPT-2026-01302"
+  },
+  {
+    "entry_id": "JE-2026-00096",
+    "entry_date": "2026-06-28",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 89900,
+    "narration": "Online sale - RCPT-2026-01353",
+    "source_ref": "RCPT-2026-01353"
+  },
+  {
+    "entry_id": "JE-2026-00102",
+    "entry_date": "2026-06-28",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 639800,
+    "narration": "Sales invoice RCPT-2026-01231",
+    "source_ref": "RCPT-2026-01231"
+  },
+  {
+    "entry_id": "JE-2026-00099",
+    "entry_date": "2026-06-28",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1219800,
+    "narration": "Web order revenue",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00104",
+    "entry_date": "2026-06-29",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 779800,
+    "narration": "REV/RCPT-2026-01111",
+    "source_ref": "RCPT-2026-01111"
+  },
+  {
+    "entry_id": "JE-2026-00105",
+    "entry_date": "2026-06-29",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 279900,
+    "narration": "Sales invoice RCPT-2026-01290",
+    "source_ref": "RCPT-2026-01290"
+  },
+  {
+    "entry_id": "JE-2026-00103",
+    "entry_date": "2026-06-29",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 499900,
+    "narration": "Sales invoice RCPT-2026-01161",
+    "source_ref": "RCPT-2026-01161"
+  },
+  {
+    "entry_id": "JE-2026-00391",
+    "entry_date": "2026-06-29",
+    "account": "payment_gateway_fees",
+    "debit": 12644,
+    "credit": 0,
+    "narration": "PG fees settlement 776958741314",
+    "source_ref": "776958741314"
+  },
+  {
+    "entry_id": "JE-2026-00392",
+    "entry_date": "2026-06-29",
+    "account": "gst_input",
+    "debit": 2276,
+    "credit": 0,
+    "narration": "GST on PG fees 776958741314",
+    "source_ref": "776958741314"
+  },
+  {
+    "entry_id": "JE-2026-00522",
+    "entry_date": "2026-06-29",
+    "account": "bank",
+    "debit": 1084480,
+    "credit": 0,
+    "narration": "Settlement received TXN202606290018",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00107",
+    "entry_date": "2026-06-30",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1369800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01335"
+  },
+  {
+    "entry_id": "JE-2026-00393",
+    "entry_date": "2026-06-30",
+    "account": "payment_gateway_fees",
+    "debit": 15569,
+    "credit": 0,
+    "narration": "PG fees settlement 627796304483",
+    "source_ref": "627796304483"
+  },
+  {
+    "entry_id": "JE-2026-00106",
+    "entry_date": "2026-06-30",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 499900,
+    "narration": "Online sale - RCPT-2026-01217",
+    "source_ref": "RCPT-2026-01217"
+  },
+  {
+    "entry_id": "JE-2026-00394",
+    "entry_date": "2026-06-30",
+    "account": "gst_input",
+    "debit": 2802,
+    "credit": 0,
+    "narration": "GST on PG fees 627796304483",
+    "source_ref": "627796304483"
+  },
+  {
+    "entry_id": "JE-2026-00111",
+    "entry_date": "2026-06-30",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 34900,
+    "narration": "Online sale - RCPT-2026-01248",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00523",
+    "entry_date": "2026-06-30",
+    "account": "bank",
+    "debit": 6099829,
+    "credit": 0,
+    "narration": "Settlement received TXN202606300019",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00112",
+    "entry_date": "2026-06-30",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 729700,
+    "narration": "Sales invoice RCPT-2026-01254",
+    "source_ref": "RCPT-2026-01254"
+  },
+  {
+    "entry_id": "JE-2026-00108",
+    "entry_date": "2026-06-30",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 549800,
+    "narration": "Online sale - RCPT-2026-01200",
+    "source_ref": "RCPT-2026-01200"
+  },
+  {
+    "entry_id": "JE-2026-00109",
+    "entry_date": "2026-06-30",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 599800,
+    "narration": "Online sale - RCPT-2026-01318",
+    "source_ref": "RCPT-2026-01318"
+  },
+  {
+    "entry_id": "JE-2026-00110",
+    "entry_date": "2026-06-30",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1299900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01180"
+  },
+  {
+    "entry_id": "JE-2026-00396",
+    "entry_date": "2026-07-01",
+    "account": "gst_input",
+    "debit": 9474,
+    "credit": 0,
+    "narration": "GST on PG fees 766404735047",
+    "source_ref": "766404735047"
+  },
+  {
+    "entry_id": "JE-2026-00116",
+    "entry_date": "2026-07-01",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1149700,
+    "narration": "Sales invoice RCPT-2026-01222",
+    "source_ref": "RCPT-2026-01222"
+  },
+  {
+    "entry_id": "JE-2026-00113",
+    "entry_date": "2026-07-01",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1899800,
+    "narration": "REV/RCPT-2026-01337",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00524",
+    "entry_date": "2026-07-01",
+    "account": "bank",
+    "debit": 3106988,
+    "credit": 0,
+    "narration": "Settlement received TXN202607010020",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00114",
+    "entry_date": "2026-07-01",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 349900,
+    "narration": "Sale RCPT-2026-01261",
+    "source_ref": "RCPT-2026-01261"
+  },
+  {
+    "entry_id": "JE-2026-00115",
+    "entry_date": "2026-07-01",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 149900,
+    "narration": "Online sale - RCPT-2026-01095",
+    "source_ref": "RCPT-2026-01095"
+  },
+  {
+    "entry_id": "JE-2026-00118",
+    "entry_date": "2026-07-01",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 249700,
+    "narration": "Sale RCPT-2026-01284",
+    "source_ref": "RCPT-2026-01284"
+  },
+  {
+    "entry_id": "JE-2026-00395",
+    "entry_date": "2026-07-01",
+    "account": "payment_gateway_fees",
+    "debit": 52638,
+    "credit": 0,
+    "narration": "PG fees settlement 766404735047",
+    "source_ref": "766404735047"
+  },
+  {
+    "entry_id": "JE-2026-00117",
+    "entry_date": "2026-07-01",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 149900,
+    "narration": "Sales invoice RCPT-2026-01299",
+    "source_ref": "RCPT-2026-01299"
+  },
+  {
+    "entry_id": "JE-2026-00397",
+    "entry_date": "2026-07-02",
+    "account": "payment_gateway_fees",
+    "debit": 15596,
+    "credit": 0,
+    "narration": "PG fees settlement 529800615581",
+    "source_ref": "529800615581"
+  },
+  {
+    "entry_id": "JE-2026-00119",
+    "entry_date": "2026-07-02",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 2099800,
+    "narration": "Online sale - RCPT-2026-01148",
+    "source_ref": "RCPT-2026-01148"
+  },
+  {
+    "entry_id": "JE-2026-00475",
+    "entry_date": "2026-07-02",
+    "account": "refunds",
+    "debit": 694850,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01031",
+    "source_ref": "RCPT-2026-01031"
+  },
+  {
+    "entry_id": "JE-2026-00120",
+    "entry_date": "2026-07-02",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 999900,
+    "narration": "Sale RCPT-2026-01119",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00525",
+    "entry_date": "2026-07-02",
+    "account": "bank",
+    "debit": 2041097,
+    "credit": 0,
+    "narration": "Settlement received TXN202607020021",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00398",
+    "entry_date": "2026-07-02",
+    "account": "gst_input",
+    "debit": 2807,
+    "credit": 0,
+    "narration": "GST on PG fees 529800615581",
+    "source_ref": "529800615581"
+  },
+  {
+    "entry_id": "JE-2026-00399",
+    "entry_date": "2026-07-03",
+    "account": "payment_gateway_fees",
+    "debit": 132428,
+    "credit": 0,
+    "narration": "PG fees settlement 425563830008",
+    "source_ref": "425563830008"
+  },
+  {
+    "entry_id": "JE-2026-00400",
+    "entry_date": "2026-07-03",
+    "account": "gst_input",
+    "debit": 23837,
+    "credit": 0,
+    "narration": "GST on PG fees 425563830008",
+    "source_ref": "425563830008"
+  },
+  {
+    "entry_id": "JE-2026-00123",
+    "entry_date": "2026-07-03",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1389800,
+    "narration": "Sale RCPT-2026-01076",
+    "source_ref": "RCPT-2026-01076"
+  },
+  {
+    "entry_id": "JE-2026-00122",
+    "entry_date": "2026-07-03",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 499900,
+    "narration": "Web order revenue",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00121",
+    "entry_date": "2026-07-03",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 89900,
+    "narration": "Sales invoice RCPT-2026-01272",
+    "source_ref": "RCPT-2026-01272"
+  },
+  {
+    "entry_id": "JE-2026-00526",
+    "entry_date": "2026-07-03",
+    "account": "bank",
+    "debit": 7797035,
+    "credit": 0,
+    "narration": "Settlement received TXN202607030022",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00126",
+    "entry_date": "2026-07-04",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 199900,
+    "narration": "Sale RCPT-2026-01136",
+    "source_ref": "RCPT-2026-01136"
+  },
+  {
+    "entry_id": "JE-2026-00128",
+    "entry_date": "2026-07-04",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 569800,
+    "narration": "Sale RCPT-2026-01143",
+    "source_ref": "RCPT-2026-01143"
+  },
+  {
+    "entry_id": "JE-2026-00127",
+    "entry_date": "2026-07-04",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1049800,
+    "narration": "Sales invoice RCPT-2026-01124",
+    "source_ref": "RCPT-2026-01124"
+  },
+  {
+    "entry_id": "JE-2026-00124",
+    "entry_date": "2026-07-04",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 869700,
+    "narration": "Sale RCPT-2026-01158",
+    "source_ref": "RCPT-2026-01158"
+  },
+  {
+    "entry_id": "JE-2026-00125",
+    "entry_date": "2026-07-04",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 599700,
+    "narration": "REV/RCPT-2026-01075",
+    "source_ref": "RCPT-2026-01075"
+  },
+  {
+    "entry_id": "JE-2026-00133",
+    "entry_date": "2026-07-05",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 49900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-9985"
+  },
+  {
+    "entry_id": "JE-2026-00134",
+    "entry_date": "2026-07-05",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 99900,
+    "narration": "Online sale - RCPT-2026-01146",
+    "source_ref": "RCPT-2026-01146"
+  },
+  {
+    "entry_id": "JE-2026-00131",
+    "entry_date": "2026-07-05",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 759800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01310"
+  },
+  {
+    "entry_id": "JE-2026-00130",
+    "entry_date": "2026-07-05",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 799800,
+    "narration": "Sales invoice RCPT-2026-01084",
+    "source_ref": "RCPT-2026-01084"
+  },
+  {
+    "entry_id": "JE-2026-00129",
+    "entry_date": "2026-07-05",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 619700,
+    "narration": "Sales invoice RCPT-2026-01142",
+    "source_ref": "RCPT-2026-01142"
+  },
+  {
+    "entry_id": "JE-2026-00132",
+    "entry_date": "2026-07-05",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 49900,
+    "narration": "Online sale - RCPT-2026-01296",
+    "source_ref": "RCPT-2026-01296"
+  },
+  {
+    "entry_id": "JE-2026-00527",
+    "entry_date": "2026-07-06",
+    "account": "bank",
+    "debit": 2754895,
+    "credit": 0,
+    "narration": "Settlement received TXN202607060023",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00401",
+    "entry_date": "2026-07-06",
+    "account": "payment_gateway_fees",
+    "debit": 41996,
+    "credit": 0,
+    "narration": "PG fees settlement 304166241118",
+    "source_ref": "304166241118"
+  },
+  {
+    "entry_id": "JE-2026-00138",
+    "entry_date": "2026-07-06",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1049700,
+    "narration": "Sales invoice RCPT-2026-01205",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00137",
+    "entry_date": "2026-07-06",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 649900,
+    "narration": "Sale RCPT-2026-01172",
+    "source_ref": "RCPT-2026-01172"
+  },
+  {
+    "entry_id": "JE-2026-00402",
+    "entry_date": "2026-07-06",
+    "account": "gst_input",
+    "debit": 7559,
+    "credit": 0,
+    "narration": "GST on PG fees 304166241118",
+    "source_ref": "304166241118"
+  },
+  {
+    "entry_id": "JE-2026-00139",
+    "entry_date": "2026-07-06",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 484800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01025"
+  },
+  {
+    "entry_id": "JE-2026-00135",
+    "entry_date": "2026-07-06",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 799900,
+    "narration": "Sales invoice RCPT-2026-01326",
+    "source_ref": "RCPT-2026-01326"
+  },
+  {
+    "entry_id": "JE-2026-00136",
+    "entry_date": "2026-07-06",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 539800,
+    "narration": "Web order revenue",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00140",
+    "entry_date": "2026-07-07",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 649900,
+    "narration": "REV/RCPT-2026-01067",
+    "source_ref": "RCPT-2026-01067"
+  },
+  {
+    "entry_id": "JE-2026-00141",
+    "entry_date": "2026-07-07",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 299900,
+    "narration": "Online sale - RCPT-2026-01114",
+    "source_ref": "RCPT-2026-01114"
+  },
+  {
+    "entry_id": "JE-2026-00404",
+    "entry_date": "2026-07-07",
+    "account": "gst_input",
+    "debit": 9501,
+    "credit": 0,
+    "narration": "GST on PG fees 963945680447",
+    "source_ref": "963945680447"
+  },
+  {
+    "entry_id": "JE-2026-00142",
+    "entry_date": "2026-07-07",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1609700,
+    "narration": "REV/RCPT-2026-01109",
+    "source_ref": "RCPT-2026-01109"
+  },
+  {
+    "entry_id": "JE-2026-00403",
+    "entry_date": "2026-07-07",
+    "account": "payment_gateway_fees",
+    "debit": 52782,
+    "credit": 0,
+    "narration": "PG fees settlement 963945680447",
+    "source_ref": "963945680447"
+  },
+  {
+    "entry_id": "JE-2026-00528",
+    "entry_date": "2026-07-07",
+    "account": "bank",
+    "debit": 6625717,
+    "credit": 0,
+    "narration": "Settlement received TXN202607070024",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00143",
+    "entry_date": "2026-07-07",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1079700,
+    "narration": "Online sale - RCPT-2026-01061",
+    "source_ref": "RCPT-2026-01061"
+  },
+  {
+    "entry_id": "JE-2026-00146",
+    "entry_date": "2026-07-08",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 109900,
+    "narration": "Sale RCPT-2026-01260",
+    "source_ref": "RCPT-2026-01260"
+  },
+  {
+    "entry_id": "JE-2026-00405",
+    "entry_date": "2026-07-08",
+    "account": "payment_gateway_fees",
+    "debit": 27295,
+    "credit": 0,
+    "narration": "PG fees settlement 474883607658",
+    "source_ref": "474883607658"
+  },
+  {
+    "entry_id": "JE-2026-00144",
+    "entry_date": "2026-07-08",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 949800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01279"
+  },
+  {
+    "entry_id": "JE-2026-00529",
+    "entry_date": "2026-07-08",
+    "account": "bank",
+    "debit": 2266992,
+    "credit": 0,
+    "narration": "Settlement received TXN202607080025",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00145",
+    "entry_date": "2026-07-08",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 339800,
+    "narration": "REV/RCPT-2026-01162",
+    "source_ref": "RCPT-2026-01162"
+  },
+  {
+    "entry_id": "JE-2026-00147",
+    "entry_date": "2026-07-08",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 999900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01234"
+  },
+  {
+    "entry_id": "JE-2026-00406",
+    "entry_date": "2026-07-08",
+    "account": "gst_input",
+    "debit": 4913,
+    "credit": 0,
+    "narration": "GST on PG fees 474883607658",
+    "source_ref": "474883607658"
+  },
+  {
+    "entry_id": "JE-2026-00407",
+    "entry_date": "2026-07-09",
+    "account": "payment_gateway_fees",
+    "debit": 45192,
+    "credit": 0,
+    "narration": "PG fees settlement 452118237931",
+    "source_ref": "452118237931"
+  },
+  {
+    "entry_id": "JE-2026-00150",
+    "entry_date": "2026-07-09",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 99900,
+    "narration": "REV/RCPT-2026-01350",
+    "source_ref": "RCPT-2026-01350"
+  },
+  {
+    "entry_id": "JE-2026-00151",
+    "entry_date": "2026-07-09",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 279900,
+    "narration": "Sale RCPT-2026-01105",
+    "source_ref": "RCPT-2026-01105"
+  },
+  {
+    "entry_id": "JE-2026-00530",
+    "entry_date": "2026-07-09",
+    "account": "bank",
+    "debit": 4690573,
+    "credit": 0,
+    "narration": "Settlement received TXN202607090026",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00149",
+    "entry_date": "2026-07-09",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 349800,
+    "narration": "Sale RCPT-2026-01007",
+    "source_ref": "RCPT-2026-01007"
+  },
+  {
+    "entry_id": "JE-2026-00408",
+    "entry_date": "2026-07-09",
+    "account": "gst_input",
+    "debit": 8135,
+    "credit": 0,
+    "narration": "GST on PG fees 452118237931",
+    "source_ref": "452118237931"
+  },
+  {
+    "entry_id": "JE-2026-00148",
+    "entry_date": "2026-07-09",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 799900,
+    "narration": "Sales invoice RCPT-2026-01108",
+    "source_ref": "RCPT-2026-01108"
+  },
+  {
+    "entry_id": "JE-2026-00410",
+    "entry_date": "2026-07-10",
+    "account": "gst_input",
+    "debit": 3419,
+    "credit": 0,
+    "narration": "GST on PG fees 464520599604",
+    "source_ref": "464520599604"
+  },
+  {
+    "entry_id": "JE-2026-00409",
+    "entry_date": "2026-07-10",
+    "account": "payment_gateway_fees",
+    "debit": 18996,
+    "credit": 0,
+    "narration": "PG fees settlement 464520599604",
+    "source_ref": "464520599604"
+  },
+  {
+    "entry_id": "JE-2026-00153",
+    "entry_date": "2026-07-10",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 499900,
+    "narration": "REV/RCPT-2026-01153",
+    "source_ref": "RCPT-2026-01153"
+  },
+  {
+    "entry_id": "JE-2026-00531",
+    "entry_date": "2026-07-10",
+    "account": "bank",
+    "debit": 2346885,
+    "credit": 0,
+    "narration": "Settlement received TXN202607100027",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00152",
+    "entry_date": "2026-07-10",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 284800,
+    "narration": "Sales invoice RCPT-2026-01069",
+    "source_ref": "RCPT-2026-01069"
+  },
+  {
+    "entry_id": "JE-2026-00157",
+    "entry_date": "2026-07-11",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 709700,
+    "narration": "Online sale - RCPT-2026-01194",
+    "source_ref": "RCPT-2026-01194"
+  },
+  {
+    "entry_id": "JE-2026-00155",
+    "entry_date": "2026-07-11",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 249900,
+    "narration": "REV/RCPT-2026-01224",
+    "source_ref": "RCPT-2026-01224"
+  },
+  {
+    "entry_id": "JE-2026-00156",
+    "entry_date": "2026-07-11",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 159800,
+    "narration": "REV/RCPT-2026-01151",
+    "source_ref": "RCPT-2026-01151"
+  },
+  {
+    "entry_id": "JE-2026-00154",
+    "entry_date": "2026-07-11",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 99900,
+    "narration": "REV/RCPT-2026-01273",
+    "source_ref": "RCPT-2026-01273"
+  },
+  {
+    "entry_id": "JE-2026-00162",
+    "entry_date": "2026-07-12",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 339800,
+    "narration": "Sales invoice RCPT-2026-01139",
+    "source_ref": "RCPT-2026-01139"
+  },
+  {
+    "entry_id": "JE-2026-00159",
+    "entry_date": "2026-07-12",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 249800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01282"
+  },
+  {
+    "entry_id": "JE-2026-00163",
+    "entry_date": "2026-07-12",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1149700,
+    "narration": "Sales invoice RCPT-2026-01237",
+    "source_ref": "RCPT-2026-01237"
+  },
+  {
+    "entry_id": "JE-2026-00161",
+    "entry_date": "2026-07-12",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 799800,
+    "narration": "REV/RCPT-2026-01115",
+    "source_ref": "RCPT-2026-01115"
+  },
+  {
+    "entry_id": "JE-2026-00160",
+    "entry_date": "2026-07-12",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 399900,
+    "narration": "Sale RCPT-2026-01236",
+    "source_ref": "RCPT-2026-01236"
+  },
+  {
+    "entry_id": "JE-2026-00158",
+    "entry_date": "2026-07-12",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 219900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01083"
+  },
+  {
+    "entry_id": "JE-2026-00532",
+    "entry_date": "2026-07-13",
+    "account": "bank",
+    "debit": 2309996,
+    "credit": 0,
+    "narration": "Settlement received TXN202607130028",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00412",
+    "entry_date": "2026-07-13",
+    "account": "gst_input",
+    "debit": 7537,
+    "credit": 0,
+    "narration": "GST on PG fees 788116162028",
+    "source_ref": "788116162028"
+  },
+  {
+    "entry_id": "JE-2026-00166",
+    "entry_date": "2026-07-13",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 649800,
+    "narration": "REV/RCPT-2026-01203",
+    "source_ref": "RCPT-2026-01203"
+  },
+  {
+    "entry_id": "JE-2026-00167",
+    "entry_date": "2026-07-13",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1249800,
+    "narration": "Online sale - RCPT-2026-01127",
+    "source_ref": "RCPT-2026-01127"
+  },
+  {
+    "entry_id": "JE-2026-00411",
+    "entry_date": "2026-07-13",
+    "account": "payment_gateway_fees",
+    "debit": 41867,
+    "credit": 0,
+    "narration": "PG fees settlement 788116162028",
+    "source_ref": "788116162028"
+  },
+  {
+    "entry_id": "JE-2026-00164",
+    "entry_date": "2026-07-13",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 69900,
+    "narration": "REV/RCPT-2026-01099",
+    "source_ref": "RCPT-2026-01099"
+  },
+  {
+    "entry_id": "JE-2026-00165",
+    "entry_date": "2026-07-13",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 609700,
+    "narration": "Online sale - RCPT-2026-01226",
+    "source_ref": "RCPT-2026-01226"
+  },
+  {
+    "entry_id": "JE-2026-00169",
+    "entry_date": "2026-07-14",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 59900,
+    "narration": "REV/RCPT-2026-01306",
+    "source_ref": "RCPT-2026-01306"
+  },
+  {
+    "entry_id": "JE-2026-00171",
+    "entry_date": "2026-07-14",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 219800,
+    "narration": "Online sale - RCPT-2026-01314",
+    "source_ref": "RCPT-2026-01314"
+  },
+  {
+    "entry_id": "JE-2026-00414",
+    "entry_date": "2026-07-14",
+    "account": "gst_input",
+    "debit": 2812,
+    "credit": 0,
+    "narration": "GST on PG fees 872866041644",
+    "source_ref": "872866041644"
+  },
+  {
+    "entry_id": "JE-2026-00170",
+    "entry_date": "2026-07-14",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1749700,
+    "narration": "Sale RCPT-2026-01079",
+    "source_ref": "RCPT-2026-01079"
+  },
+  {
+    "entry_id": "JE-2026-00168",
+    "entry_date": "2026-07-14",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 399900,
+    "narration": "Sale RCPT-2026-01147",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00502",
+    "entry_date": "2026-07-14",
+    "account": "refunds",
+    "debit": 279900,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01105",
+    "source_ref": "RCPT-2026-01105"
+  },
+  {
+    "entry_id": "JE-2026-00413",
+    "entry_date": "2026-07-14",
+    "account": "payment_gateway_fees",
+    "debit": 15621,
+    "credit": 0,
+    "narration": "PG fees settlement 872866041644",
+    "source_ref": "872866041644"
+  },
+  {
+    "entry_id": "JE-2026-00533",
+    "entry_date": "2026-07-14",
+    "account": "bank",
+    "debit": 3135067,
+    "credit": 0,
+    "narration": "Settlement received TXN202607140029",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00172",
+    "entry_date": "2026-07-15",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1089800,
+    "narration": "Online sale - RCPT-2026-01103",
+    "source_ref": "RCPT-2026-01103"
+  },
+  {
+    "entry_id": "JE-2026-00534",
+    "entry_date": "2026-07-15",
+    "account": "bank",
+    "debit": 3585735,
+    "credit": 0,
+    "narration": "Settlement received TXN202607150030",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00415",
+    "entry_date": "2026-07-15",
+    "account": "payment_gateway_fees",
+    "debit": 27937,
+    "credit": 0,
+    "narration": "PG fees settlement 958947735228",
+    "source_ref": "958947735228"
+  },
+  {
+    "entry_id": "JE-2026-00175",
+    "entry_date": "2026-07-15",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 249800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01300"
+  },
+  {
+    "entry_id": "JE-2026-00174",
+    "entry_date": "2026-07-15",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1089700,
+    "narration": "REV/RCPT-2026-01240",
+    "source_ref": "RCPT-2026-01240"
+  },
+  {
+    "entry_id": "JE-2026-00173",
+    "entry_date": "2026-07-15",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 139900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01295"
+  },
+  {
+    "entry_id": "JE-2026-00416",
+    "entry_date": "2026-07-15",
+    "account": "gst_input",
+    "debit": 5028,
+    "credit": 0,
+    "narration": "GST on PG fees 958947735228",
+    "source_ref": "958947735228"
+  },
+  {
+    "entry_id": "JE-2026-00478",
+    "entry_date": "2026-07-15",
+    "account": "refunds",
+    "debit": 799800,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01115",
+    "source_ref": "RCPT-2026-01115"
+  },
+  {
+    "entry_id": "JE-2026-00495",
+    "entry_date": "2026-07-15",
+    "account": "refunds",
+    "debit": 599700,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01075",
+    "source_ref": "RCPT-2026-01075"
+  },
+  {
+    "entry_id": "JE-2026-00176",
+    "entry_date": "2026-07-16",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 239800,
+    "narration": "Sale RCPT-2026-01064",
+    "source_ref": "RCPT-2026-01064"
+  },
+  {
+    "entry_id": "JE-2026-00535",
+    "entry_date": "2026-07-16",
+    "account": "bank",
+    "debit": 3179400,
+    "credit": 0,
+    "narration": "Settlement received TXN202607160031",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00177",
+    "entry_date": "2026-07-16",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 349900,
+    "narration": "Online sale - RCPT-2026-01207",
+    "source_ref": "RCPT-2026-01207"
+  },
+  {
+    "entry_id": "JE-2026-00418",
+    "entry_date": "2026-07-17",
+    "account": "gst_input",
+    "debit": 1295,
+    "credit": 0,
+    "narration": "GST on PG fees 694596488319",
+    "source_ref": "694596488319"
+  },
+  {
+    "entry_id": "JE-2026-00179",
+    "entry_date": "2026-07-17",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1039700,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01118"
+  },
+  {
+    "entry_id": "JE-2026-00178",
+    "entry_date": "2026-07-17",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 109900,
+    "narration": "Online sale - RCPT-2026-01134",
+    "source_ref": "RCPT-2026-01134"
+  },
+  {
+    "entry_id": "JE-2026-00417",
+    "entry_date": "2026-07-17",
+    "account": "payment_gateway_fees",
+    "debit": 7194,
+    "credit": 0,
+    "narration": "PG fees settlement 694596488319",
+    "source_ref": "694596488319"
+  },
+  {
+    "entry_id": "JE-2026-00185",
+    "entry_date": "2026-07-18",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 159900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01220"
+  },
+  {
+    "entry_id": "JE-2026-00187",
+    "entry_date": "2026-07-18",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 249900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01063"
+  },
+  {
+    "entry_id": "JE-2026-00180",
+    "entry_date": "2026-07-18",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 179900,
+    "narration": "Online sale - RCPT-2026-01198",
+    "source_ref": "RCPT-2026-01198"
+  },
+  {
+    "entry_id": "JE-2026-00181",
+    "entry_date": "2026-07-18",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1519800,
+    "narration": "REV/RCPT-2026-01316",
+    "source_ref": "RCPT-2026-01316"
+  },
+  {
+    "entry_id": "JE-2026-00184",
+    "entry_date": "2026-07-18",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 34900,
+    "narration": "Online sale - RCPT-2026-01050",
+    "source_ref": "RCPT-2026-01050"
+  },
+  {
+    "entry_id": "JE-2026-00186",
+    "entry_date": "2026-07-18",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 49900,
+    "narration": "Web order revenue",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00182",
+    "entry_date": "2026-07-18",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 219800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01005"
+  },
+  {
+    "entry_id": "JE-2026-00566",
+    "entry_date": "2026-07-19",
+    "account": "suspense",
+    "debit": 0,
+    "credit": 156924,
+    "narration": "Unidentified credit - to be classified",
+    "source_ref": "RCPT-2026-70174"
+  },
+  {
+    "entry_id": "JE-2026-00183",
+    "entry_date": "2026-07-19",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 139900,
+    "narration": "Sale RCPT-2026-01020",
+    "source_ref": "RCPT-2026-01020"
+  },
+  {
+    "entry_id": "JE-2026-00189",
+    "entry_date": "2026-07-19",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 459800,
+    "narration": "Online sale - RCPT-2026-01131",
+    "source_ref": "RCPT-2026-01131"
+  },
+  {
+    "entry_id": "JE-2026-00188",
+    "entry_date": "2026-07-19",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 449700,
+    "narration": "Sale RCPT-2026-01289",
+    "source_ref": "RCPT-2026-01289"
+  },
+  {
+    "entry_id": "JE-2026-00190",
+    "entry_date": "2026-07-19",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 49900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01104"
+  },
+  {
+    "entry_id": "JE-2026-00191",
+    "entry_date": "2026-07-19",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 129800,
+    "narration": "Online sale - RCPT-2026-01033",
+    "source_ref": "RCPT-2026-01033"
+  },
+  {
+    "entry_id": "JE-2026-00195",
+    "entry_date": "2026-07-20",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 249900,
+    "narration": "Sales invoice RCPT-2026-01335",
+    "source_ref": "RCPT-2026-01335"
+  },
+  {
+    "entry_id": "JE-2026-00194",
+    "entry_date": "2026-07-20",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 129900,
+    "narration": "Online sale - RCPT-2026-01070",
+    "source_ref": "RCPT-2026-01070"
+  },
+  {
+    "entry_id": "JE-2026-00193",
+    "entry_date": "2026-07-20",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 199900,
+    "narration": "Sales invoice RCPT-2026-01291",
+    "source_ref": "RCPT-2026-01291"
+  },
+  {
+    "entry_id": "JE-2026-00420",
+    "entry_date": "2026-07-20",
+    "account": "gst_input",
+    "debit": 4786,
+    "credit": 0,
+    "narration": "GST on PG fees 659994973203",
+    "source_ref": "659994973203"
+  },
+  {
+    "entry_id": "JE-2026-00536",
+    "entry_date": "2026-07-20",
+    "account": "bank",
+    "debit": 1547924,
+    "credit": 0,
+    "narration": "Settlement received TXN202607200033",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00192",
+    "entry_date": "2026-07-20",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 114800,
+    "narration": "Sale RCPT-2026-01062",
+    "source_ref": "RCPT-2026-01062"
+  },
+  {
+    "entry_id": "JE-2026-00196",
+    "entry_date": "2026-07-20",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 179900,
+    "narration": "REV/RCPT-2026-01192",
+    "source_ref": "RCPT-2026-01192"
+  },
+  {
+    "entry_id": "JE-2026-00419",
+    "entry_date": "2026-07-20",
+    "account": "payment_gateway_fees",
+    "debit": 26590,
+    "credit": 0,
+    "narration": "PG fees settlement 659994973203",
+    "source_ref": "659994973203"
+  },
+  {
+    "entry_id": "JE-2026-00422",
+    "entry_date": "2026-07-21",
+    "account": "gst_input",
+    "debit": 11762,
+    "credit": 0,
+    "narration": "GST on PG fees 028767548138",
+    "source_ref": "028767548138"
+  },
+  {
+    "entry_id": "JE-2026-00537",
+    "entry_date": "2026-07-21",
+    "account": "bank",
+    "debit": 4426095,
+    "credit": 0,
+    "narration": "Settlement received TXN202607210034",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00197",
+    "entry_date": "2026-07-21",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 169800,
+    "narration": "Online sale - RCPT-2026-01315",
+    "source_ref": "RCPT-2026-01315"
+  },
+  {
+    "entry_id": "JE-2026-00421",
+    "entry_date": "2026-07-21",
+    "account": "payment_gateway_fees",
+    "debit": 65343,
+    "credit": 0,
+    "narration": "PG fees settlement 028767548138",
+    "source_ref": "028767548138"
+  },
+  {
+    "entry_id": "JE-2026-00199",
+    "entry_date": "2026-07-21",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1249800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01185"
+  },
+  {
+    "entry_id": "JE-2026-00198",
+    "entry_date": "2026-07-21",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 104800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01027"
+  },
+  {
+    "entry_id": "JE-2026-00204",
+    "entry_date": "2026-07-22",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 949700,
+    "narration": "Sale RCPT-2026-01024",
+    "source_ref": "RCPT-2026-01024"
+  },
+  {
+    "entry_id": "JE-2026-00424",
+    "entry_date": "2026-07-22",
+    "account": "gst_input",
+    "debit": 2652,
+    "credit": 0,
+    "narration": "GST on PG fees 932426877418",
+    "source_ref": "932426877418"
+  },
+  {
+    "entry_id": "JE-2026-00480",
+    "entry_date": "2026-07-22",
+    "account": "refunds",
+    "debit": 34900,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01050",
+    "source_ref": "RCPT-2026-01050"
+  },
+  {
+    "entry_id": "JE-2026-00202",
+    "entry_date": "2026-07-22",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 399900,
+    "narration": "REV/RCPT-2026-01110",
+    "source_ref": "RCPT-2026-01110"
+  },
+  {
+    "entry_id": "JE-2026-00200",
+    "entry_date": "2026-07-22",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1139800,
+    "narration": "Online sale - RCPT-2026-01238",
+    "source_ref": "RCPT-2026-01238"
+  },
+  {
+    "entry_id": "JE-2026-00201",
+    "entry_date": "2026-07-22",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 119800,
+    "narration": "Sales invoice RCPT-2026-01188",
+    "source_ref": "RCPT-2026-01188"
+  },
+  {
+    "entry_id": "JE-2026-00423",
+    "entry_date": "2026-07-22",
+    "account": "payment_gateway_fees",
+    "debit": 14733,
+    "credit": 0,
+    "narration": "PG fees settlement 932426877418",
+    "source_ref": "932426877418"
+  },
+  {
+    "entry_id": "JE-2026-00203",
+    "entry_date": "2026-07-22",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 299900,
+    "narration": "REV/RCPT-2026-01042",
+    "source_ref": "RCPT-2026-01042"
+  },
+  {
+    "entry_id": "JE-2026-00538",
+    "entry_date": "2026-07-22",
+    "account": "bank",
+    "debit": 1066715,
+    "credit": 0,
+    "narration": "Settlement received TXN202607220035",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00205",
+    "entry_date": "2026-07-22",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 699800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01044"
+  },
+  {
+    "entry_id": "JE-2026-00206",
+    "entry_date": "2026-07-23",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 389800,
+    "narration": "Online sale - RCPT-2026-01165",
+    "source_ref": "RCPT-2026-01165"
+  },
+  {
+    "entry_id": "JE-2026-00207",
+    "entry_date": "2026-07-23",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 169800,
+    "narration": "Online sale - RCPT-2026-01262",
+    "source_ref": "RCPT-2026-01262"
+  },
+  {
+    "entry_id": "JE-2026-00426",
+    "entry_date": "2026-07-24",
+    "account": "gst_input",
+    "debit": 688,
+    "credit": 0,
+    "narration": "GST on PG fees 639836520375",
+    "source_ref": "639836520375"
+  },
+  {
+    "entry_id": "JE-2026-00208",
+    "entry_date": "2026-07-24",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 509800,
+    "narration": "Sales invoice RCPT-2026-01073",
+    "source_ref": "RCPT-2026-01073"
+  },
+  {
+    "entry_id": "JE-2026-00425",
+    "entry_date": "2026-07-24",
+    "account": "payment_gateway_fees",
+    "debit": 3821,
+    "credit": 0,
+    "narration": "PG fees settlement 639836520375",
+    "source_ref": "639836520375"
+  },
+  {
+    "entry_id": "JE-2026-00539",
+    "entry_date": "2026-07-24",
+    "account": "bank",
+    "debit": 595091,
+    "credit": 0,
+    "narration": "Settlement received TXN202607240036",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00209",
+    "entry_date": "2026-07-25",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 129900,
+    "narration": "REV/RCPT-2026-01152",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00213",
+    "entry_date": "2026-07-25",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 99900,
+    "narration": "REV/RCPT-2026-01183",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00211",
+    "entry_date": "2026-07-25",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 69900,
+    "narration": "Sales invoice RCPT-2026-01352",
+    "source_ref": "RCPT-2026-01352"
+  },
+  {
+    "entry_id": "JE-2026-00494",
+    "entry_date": "2026-07-25",
+    "account": "refunds",
+    "debit": 124950,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01224",
+    "source_ref": "RCPT-2026-01224"
+  },
+  {
+    "entry_id": "JE-2026-00210",
+    "entry_date": "2026-07-25",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 179900,
+    "narration": "Sales invoice RCPT-2026-01155",
+    "source_ref": "RCPT-2026-01155"
+  },
+  {
+    "entry_id": "JE-2026-00212",
+    "entry_date": "2026-07-25",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 84800,
+    "narration": "Online sale - RCPT-2026-01319",
+    "source_ref": "RCPT-2026-01319"
+  },
+  {
+    "entry_id": "JE-2026-00216",
+    "entry_date": "2026-07-26",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 649900,
+    "narration": "Online sale - RCPT-2026-01325",
+    "source_ref": "RCPT-2026-01325"
+  },
+  {
+    "entry_id": "JE-2026-00214",
+    "entry_date": "2026-07-26",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 999900,
+    "narration": "REV/RCPT-2026-01331",
+    "source_ref": "RCPT-2026-01331"
+  },
+  {
+    "entry_id": "JE-2026-00215",
+    "entry_date": "2026-07-26",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 499900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01057"
+  },
+  {
+    "entry_id": "JE-2026-00217",
+    "entry_date": "2026-07-27",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 249900,
+    "narration": "Online sale - RCPT-2026-01101",
+    "source_ref": "RCPT-2026-01101"
+  },
+  {
+    "entry_id": "JE-2026-00428",
+    "entry_date": "2026-07-27",
+    "account": "gst_input",
+    "debit": 6422,
+    "credit": 0,
+    "narration": "GST on PG fees 940476044090",
+    "source_ref": "940476044090"
+  },
+  {
+    "entry_id": "JE-2026-00218",
+    "entry_date": "2026-07-27",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 249900,
+    "narration": "Sales invoice RCPT-2026-01012",
+    "source_ref": "RCPT-2026-01012"
+  },
+  {
+    "entry_id": "JE-2026-00540",
+    "entry_date": "2026-07-27",
+    "account": "bank",
+    "debit": 5276303,
+    "credit": 0,
+    "narration": "Settlement received TXN202607270037",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00427",
+    "entry_date": "2026-07-27",
+    "account": "payment_gateway_fees",
+    "debit": 35675,
+    "credit": 0,
+    "narration": "PG fees settlement 940476044090",
+    "source_ref": "940476044090"
+  },
+  {
+    "entry_id": "JE-2026-00219",
+    "entry_date": "2026-07-27",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 279900,
+    "narration": "Sales invoice RCPT-2026-01328",
+    "source_ref": "RCPT-2026-01328"
+  },
+  {
+    "entry_id": "JE-2026-00541",
+    "entry_date": "2026-07-28",
+    "account": "bank",
+    "debit": 2116710,
+    "credit": 0,
+    "narration": "Settlement received TXN202607280038",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00430",
+    "entry_date": "2026-07-28",
+    "account": "gst_input",
+    "debit": 342,
+    "credit": 0,
+    "narration": "GST on PG fees 810509222161",
+    "source_ref": "810509222161"
+  },
+  {
+    "entry_id": "JE-2026-00220",
+    "entry_date": "2026-07-28",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 999900,
+    "narration": "REV/RCPT-2026-01347",
+    "source_ref": "RCPT-2026-01347"
+  },
+  {
+    "entry_id": "JE-2026-00221",
+    "entry_date": "2026-07-28",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 99900,
+    "narration": "REV/RCPT-2026-01313",
+    "source_ref": "RCPT-2026-01313"
+  },
+  {
+    "entry_id": "JE-2026-00429",
+    "entry_date": "2026-07-28",
+    "account": "payment_gateway_fees",
+    "debit": 1898,
+    "credit": 0,
+    "narration": "PG fees settlement 810509222161",
+    "source_ref": "810509222161"
+  },
+  {
+    "entry_id": "JE-2026-00222",
+    "entry_date": "2026-07-28",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 309800,
+    "narration": "REV/RCPT-2026-01022",
+    "source_ref": "RCPT-2026-01022"
+  },
+  {
+    "entry_id": "JE-2026-00482",
+    "entry_date": "2026-07-28",
+    "account": "refunds",
+    "debit": 219800,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01005",
+    "source_ref": "RCPT-2026-01005"
+  },
+  {
+    "entry_id": "JE-2026-00431",
+    "entry_date": "2026-07-29",
+    "account": "payment_gateway_fees",
+    "debit": 24121,
+    "credit": 0,
+    "narration": "PG fees settlement 055295806601",
+    "source_ref": "055295806601"
+  },
+  {
+    "entry_id": "JE-2026-00224",
+    "entry_date": "2026-07-29",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 739800,
+    "narration": "Sale RCPT-2026-01036",
+    "source_ref": "RCPT-2026-01036"
+  },
+  {
+    "entry_id": "JE-2026-00432",
+    "entry_date": "2026-07-29",
+    "account": "gst_input",
+    "debit": 4342,
+    "credit": 0,
+    "narration": "GST on PG fees 055295806601",
+    "source_ref": "055295806601"
+  },
+  {
+    "entry_id": "JE-2026-00485",
+    "entry_date": "2026-07-29",
+    "account": "refunds",
+    "debit": 324950,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01325",
+    "source_ref": "RCPT-2026-01325"
+  },
+  {
+    "entry_id": "JE-2026-00542",
+    "entry_date": "2026-07-29",
+    "account": "bank",
+    "debit": 1901037,
+    "credit": 0,
+    "narration": "Settlement received TXN202607290039",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00223",
+    "entry_date": "2026-07-29",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 689800,
+    "narration": "REV/RCPT-2026-01208",
+    "source_ref": "RCPT-2026-01208"
+  },
+  {
+    "entry_id": "JE-2026-00543",
+    "entry_date": "2026-07-30",
+    "account": "bank",
+    "debit": 877760,
+    "credit": 0,
+    "narration": "Settlement received TXN202607300040",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00433",
+    "entry_date": "2026-07-30",
+    "account": "payment_gateway_fees",
+    "debit": 1898,
+    "credit": 0,
+    "narration": "PG fees settlement 862044851579",
+    "source_ref": "862044851579"
+  },
+  {
+    "entry_id": "JE-2026-00225",
+    "entry_date": "2026-07-30",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 79900,
+    "narration": "Sale RCPT-2026-01182",
+    "source_ref": "RCPT-2026-01182"
+  },
+  {
+    "entry_id": "JE-2026-00434",
+    "entry_date": "2026-07-30",
+    "account": "gst_input",
+    "debit": 342,
+    "credit": 0,
+    "narration": "GST on PG fees 862044851579",
+    "source_ref": "862044851579"
+  },
+  {
+    "entry_id": "JE-2026-00226",
+    "entry_date": "2026-07-30",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 109900,
+    "narration": "REV/RCPT-2026-01098",
+    "source_ref": "RCPT-2026-01098"
+  },
+  {
+    "entry_id": "JE-2026-00227",
+    "entry_date": "2026-07-30",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 349800,
+    "narration": "Sales invoice RCPT-2026-01303",
+    "source_ref": "RCPT-2026-01303"
+  },
+  {
+    "entry_id": "JE-2026-00230",
+    "entry_date": "2026-07-31",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 449900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01038"
+  },
+  {
+    "entry_id": "JE-2026-00228",
+    "entry_date": "2026-07-31",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1379800,
+    "narration": "Online sale - order_7kG2E2",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00544",
+    "entry_date": "2026-07-31",
+    "account": "bank",
+    "debit": 1392587,
+    "credit": 0,
+    "narration": "Settlement received TXN202607310041",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00436",
+    "entry_date": "2026-07-31",
+    "account": "gst_input",
+    "debit": 3335,
+    "credit": 0,
+    "narration": "GST on PG fees 590203571343",
+    "source_ref": "590203571343"
+  },
+  {
+    "entry_id": "JE-2026-00229",
+    "entry_date": "2026-07-31",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 479800,
+    "narration": "REV/RCPT-2026-01009",
+    "source_ref": "RCPT-2026-01009"
+  },
+  {
+    "entry_id": "JE-2026-00435",
+    "entry_date": "2026-07-31",
+    "account": "payment_gateway_fees",
+    "debit": 18528,
+    "credit": 0,
+    "narration": "PG fees settlement 590203571343",
+    "source_ref": "590203571343"
+  },
+  {
+    "entry_id": "JE-2026-00233",
+    "entry_date": "2026-08-01",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 499800,
+    "narration": "Online sale - RCPT-2026-01150",
+    "source_ref": "RCPT-2026-01150"
+  },
+  {
+    "entry_id": "JE-2026-00504",
+    "entry_date": "2026-08-01",
+    "account": "refunds",
+    "debit": 199950,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01110",
+    "source_ref": "RCPT-2026-01110"
+  },
+  {
+    "entry_id": "JE-2026-00234",
+    "entry_date": "2026-08-01",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 549800,
+    "narration": "Online sale - RCPT-2026-01297",
+    "source_ref": "RCPT-2026-01297"
+  },
+  {
+    "entry_id": "JE-2026-00232",
+    "entry_date": "2026-08-01",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 699800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01096"
+  },
+  {
+    "entry_id": "JE-2026-00231",
+    "entry_date": "2026-08-01",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 349900,
+    "narration": "Online sale - order_D1TQED",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00236",
+    "entry_date": "2026-08-02",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 379700,
+    "narration": "Sales invoice RCPT-2026-01269",
+    "source_ref": "RCPT-2026-01269"
+  },
+  {
+    "entry_id": "JE-2026-00498",
+    "entry_date": "2026-08-02",
+    "account": "refunds",
+    "debit": 114800,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01062",
+    "source_ref": "RCPT-2026-01062"
+  },
+  {
+    "entry_id": "JE-2026-00235",
+    "entry_date": "2026-08-02",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 149900,
+    "narration": "Sale RCPT-2026-01088",
+    "source_ref": "RCPT-2026-01088"
+  },
+  {
+    "entry_id": "JE-2026-00237",
+    "entry_date": "2026-08-02",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 499900,
+    "narration": "Sales invoice RCPT-2026-01191",
+    "source_ref": "RCPT-2026-01191"
+  },
+  {
+    "entry_id": "JE-2026-00239",
+    "entry_date": "2026-08-02",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 89900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01030"
+  },
+  {
+    "entry_id": "JE-2026-00437",
+    "entry_date": "2026-08-03",
+    "account": "payment_gateway_fees",
+    "debit": 2088,
+    "credit": 0,
+    "narration": "PG fees settlement 633432447417",
+    "source_ref": "633432447417"
+  },
+  {
+    "entry_id": "JE-2026-00545",
+    "entry_date": "2026-08-03",
+    "account": "bank",
+    "debit": 187336,
+    "credit": 0,
+    "narration": "Settlement received TXN202608030042",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00240",
+    "entry_date": "2026-08-03",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 89900,
+    "narration": "Online sale - RCPT-2026-01041",
+    "source_ref": "RCPT-2026-01041"
+  },
+  {
+    "entry_id": "JE-2026-00245",
+    "entry_date": "2026-08-03",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 369800,
+    "narration": "Online sale - RCPT-2026-01126",
+    "source_ref": "RCPT-2026-01126"
+  },
+  {
+    "entry_id": "JE-2026-00242",
+    "entry_date": "2026-08-03",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 899800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01267"
+  },
+  {
+    "entry_id": "JE-2026-00238",
+    "entry_date": "2026-08-03",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 569800,
+    "narration": "Online sale - RCPT-2026-01340",
+    "source_ref": "RCPT-2026-01340"
+  },
+  {
+    "entry_id": "JE-2026-00246",
+    "entry_date": "2026-08-03",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 159900,
+    "narration": "REV/RCPT-2026-01265",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00438",
+    "entry_date": "2026-08-03",
+    "account": "gst_input",
+    "debit": 376,
+    "credit": 0,
+    "narration": "GST on PG fees 633432447417",
+    "source_ref": "633432447417"
+  },
+  {
+    "entry_id": "JE-2026-00241",
+    "entry_date": "2026-08-03",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 504700,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01334"
+  },
+  {
+    "entry_id": "JE-2026-00244",
+    "entry_date": "2026-08-03",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1299900,
+    "narration": "Sale RCPT-2026-01091",
+    "source_ref": "RCPT-2026-01091"
+  },
+  {
+    "entry_id": "JE-2026-00243",
+    "entry_date": "2026-08-03",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 249900,
+    "narration": "Sale RCPT-2026-01322",
+    "source_ref": "RCPT-2026-01322"
+  },
+  {
+    "entry_id": "JE-2026-00546",
+    "entry_date": "2026-08-04",
+    "account": "bank",
+    "debit": 5360663,
+    "credit": 0,
+    "narration": "Settlement received TXN202608040043",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00248",
+    "entry_date": "2026-08-04",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 579800,
+    "narration": "Sales invoice RCPT-2026-01120",
+    "source_ref": "RCPT-2026-01120"
+  },
+  {
+    "entry_id": "JE-2026-00439",
+    "entry_date": "2026-08-04",
+    "account": "payment_gateway_fees",
+    "debit": 95498,
+    "credit": 0,
+    "narration": "PG fees settlement 962893654358",
+    "source_ref": "962893654358"
+  },
+  {
+    "entry_id": "JE-2026-00440",
+    "entry_date": "2026-08-04",
+    "account": "gst_input",
+    "debit": 17189,
+    "credit": 0,
+    "narration": "GST on PG fees 962893654358",
+    "source_ref": "962893654358"
+  },
+  {
+    "entry_id": "JE-2026-00247",
+    "entry_date": "2026-08-05",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 99900,
+    "narration": "REV/RCPT-2026-01017",
+    "source_ref": "RCPT-2026-01017"
+  },
+  {
+    "entry_id": "JE-2026-00487",
+    "entry_date": "2026-08-05",
+    "account": "refunds",
+    "debit": 249950,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01191",
+    "source_ref": "RCPT-2026-01191"
+  },
+  {
+    "entry_id": "JE-2026-00250",
+    "entry_date": "2026-08-05",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1299900,
+    "narration": "Online sale - RCPT-2026-9333",
+    "source_ref": "RCPT-2026-9333"
+  },
+  {
+    "entry_id": "JE-2026-00442",
+    "entry_date": "2026-08-05",
+    "account": "gst_input",
+    "debit": 4039,
+    "credit": 0,
+    "narration": "GST on PG fees 182727955969",
+    "source_ref": "182727955969"
+  },
+  {
+    "entry_id": "JE-2026-00547",
+    "entry_date": "2026-08-05",
+    "account": "bank",
+    "debit": 3677423,
+    "credit": 0,
+    "narration": "Settlement received TXN202608050045",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00441",
+    "entry_date": "2026-08-05",
+    "account": "payment_gateway_fees",
+    "debit": 22438,
+    "credit": 0,
+    "narration": "PG fees settlement 182727955969",
+    "source_ref": "182727955969"
+  },
+  {
+    "entry_id": "JE-2026-00249",
+    "entry_date": "2026-08-05",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1299900,
+    "narration": "Online sale - RCPT-2026-01278",
+    "source_ref": "RCPT-2026-01278"
+  },
+  {
+    "entry_id": "JE-2026-00548",
+    "entry_date": "2026-08-06",
+    "account": "bank",
+    "debit": 626015,
+    "credit": 0,
+    "narration": "Settlement received TXN202608060046",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00444",
+    "entry_date": "2026-08-06",
+    "account": "gst_input",
+    "debit": 547,
+    "credit": 0,
+    "narration": "GST on PG fees 512542782079",
+    "source_ref": "512542782079"
+  },
+  {
+    "entry_id": "JE-2026-00252",
+    "entry_date": "2026-08-06",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 159900,
+    "narration": "REV/RCPT-2026-01140",
+    "source_ref": "RCPT-2026-01140"
+  },
+  {
+    "entry_id": "JE-2026-00251",
+    "entry_date": "2026-08-06",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 79900,
+    "narration": "Sales invoice RCPT-2026-01018",
+    "source_ref": "RCPT-2026-01018"
+  },
+  {
+    "entry_id": "JE-2026-00443",
+    "entry_date": "2026-08-06",
+    "account": "payment_gateway_fees",
+    "debit": 3038,
+    "credit": 0,
+    "narration": "PG fees settlement 512542782079",
+    "source_ref": "512542782079"
+  },
+  {
+    "entry_id": "JE-2026-00445",
+    "entry_date": "2026-08-07",
+    "account": "payment_gateway_fees",
+    "debit": 62442,
+    "credit": 0,
+    "narration": "PG fees settlement 576403816649",
+    "source_ref": "576403816649"
+  },
+  {
+    "entry_id": "JE-2026-00258",
+    "entry_date": "2026-08-07",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 409800,
+    "narration": "Sale RCPT-2026-01241",
+    "source_ref": "RCPT-2026-01241"
+  },
+  {
+    "entry_id": "JE-2026-00257",
+    "entry_date": "2026-08-07",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 849800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01323"
+  },
+  {
+    "entry_id": "JE-2026-00477",
+    "entry_date": "2026-08-07",
+    "account": "refunds",
+    "debit": 349800,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01303",
+    "source_ref": "RCPT-2026-01303"
+  },
+  {
+    "entry_id": "JE-2026-00549",
+    "entry_date": "2026-08-07",
+    "account": "bank",
+    "debit": 2855968,
+    "credit": 0,
+    "narration": "Settlement received TXN202608070047",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00446",
+    "entry_date": "2026-08-07",
+    "account": "gst_input",
+    "debit": 11240,
+    "credit": 0,
+    "narration": "GST on PG fees 576403816649",
+    "source_ref": "576403816649"
+  },
+  {
+    "entry_id": "JE-2026-00255",
+    "entry_date": "2026-08-07",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 929700,
+    "narration": "Sale RCPT-2026-01170",
+    "source_ref": "RCPT-2026-01170"
+  },
+  {
+    "entry_id": "JE-2026-00256",
+    "entry_date": "2026-08-07",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1519700,
+    "narration": "Online sale - RCPT-2026-01058",
+    "source_ref": "RCPT-2026-01058"
+  },
+  {
+    "entry_id": "JE-2026-00253",
+    "entry_date": "2026-08-07",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 2079700,
+    "narration": "Sale RCPT-2026-01307",
+    "source_ref": "RCPT-2026-01307"
+  },
+  {
+    "entry_id": "JE-2026-00254",
+    "entry_date": "2026-08-07",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1339700,
+    "narration": "Online sale - RCPT-2026-01121",
+    "source_ref": "RCPT-2026-01121"
+  },
+  {
+    "entry_id": "JE-2026-00261",
+    "entry_date": "2026-08-08",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 459700,
+    "narration": "REV/RCPT-2026-01206",
+    "source_ref": "RCPT-2026-01206"
+  },
+  {
+    "entry_id": "JE-2026-00263",
+    "entry_date": "2026-08-08",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1649700,
+    "narration": "REV/RCPT-2026-01304",
+    "source_ref": "RCPT-2026-01304"
+  },
+  {
+    "entry_id": "JE-2026-00484",
+    "entry_date": "2026-08-08",
+    "account": "refunds",
+    "debit": 89900,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01030",
+    "source_ref": "RCPT-2026-01030"
+  },
+  {
+    "entry_id": "JE-2026-00264",
+    "entry_date": "2026-08-08",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1449800,
+    "narration": "Online sale - RCPT-2026-01283",
+    "source_ref": "RCPT-2026-01283"
+  },
+  {
+    "entry_id": "JE-2026-00259",
+    "entry_date": "2026-08-08",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 289800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01160"
+  },
+  {
+    "entry_id": "JE-2026-00483",
+    "entry_date": "2026-08-08",
+    "account": "refunds",
+    "debit": 279900,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01328",
+    "source_ref": "RCPT-2026-01328"
+  },
+  {
+    "entry_id": "JE-2026-00262",
+    "entry_date": "2026-08-08",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 869800,
+    "narration": "Online sale - RCPT-2026-01179",
+    "source_ref": "RCPT-2026-01179"
+  },
+  {
+    "entry_id": "JE-2026-00486",
+    "entry_date": "2026-08-08",
+    "account": "refunds",
+    "debit": 69900,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01352",
+    "source_ref": "RCPT-2026-01352"
+  },
+  {
+    "entry_id": "JE-2026-00260",
+    "entry_date": "2026-08-08",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 299800,
+    "narration": "Web order revenue",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00270",
+    "entry_date": "2026-08-09",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 349900,
+    "narration": "REV/RCPT-2026-01193",
+    "source_ref": "RCPT-2026-01193"
+  },
+  {
+    "entry_id": "JE-2026-00265",
+    "entry_date": "2026-08-09",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 529800,
+    "narration": "Web order revenue",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00271",
+    "entry_date": "2026-08-09",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 249900,
+    "narration": "Sale RCPT-2026-01178",
+    "source_ref": "RCPT-2026-01178"
+  },
+  {
+    "entry_id": "JE-2026-00267",
+    "entry_date": "2026-08-09",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 999900,
+    "narration": "Online sale - RCPT-2026-01342",
+    "source_ref": "RCPT-2026-01342"
+  },
+  {
+    "entry_id": "JE-2026-00269",
+    "entry_date": "2026-08-09",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 59900,
+    "narration": "Sale RCPT-2026-01276",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00266",
+    "entry_date": "2026-08-09",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 179900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01154"
+  },
+  {
+    "entry_id": "JE-2026-00274",
+    "entry_date": "2026-08-09",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 349800,
+    "narration": "Sale RCPT-2026-01176",
+    "source_ref": "RCPT-2026-01176"
+  },
+  {
+    "entry_id": "JE-2026-00268",
+    "entry_date": "2026-08-09",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 449900,
+    "narration": "Sale RCPT-2026-01100",
+    "source_ref": "RCPT-2026-01100"
+  },
+  {
+    "entry_id": "JE-2026-00448",
+    "entry_date": "2026-08-10",
+    "account": "gst_input",
+    "debit": 273,
+    "credit": 0,
+    "narration": "GST on PG fees 392250142576",
+    "source_ref": "392250142576"
+  },
+  {
+    "entry_id": "JE-2026-00550",
+    "entry_date": "2026-08-10",
+    "account": "bank",
+    "debit": 78109,
+    "credit": 0,
+    "narration": "Settlement received TXN202608100048",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00273",
+    "entry_date": "2026-08-10",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 649900,
+    "narration": "REV/RCPT-2026-01046",
+    "source_ref": "RCPT-2026-01046"
+  },
+  {
+    "entry_id": "JE-2026-00275",
+    "entry_date": "2026-08-10",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 69900,
+    "narration": "Sales invoice RCPT-2026-01048",
+    "source_ref": "RCPT-2026-01048"
+  },
+  {
+    "entry_id": "JE-2026-00447",
+    "entry_date": "2026-08-10",
+    "account": "payment_gateway_fees",
+    "debit": 1518,
+    "credit": 0,
+    "narration": "PG fees settlement 392250142576",
+    "source_ref": "392250142576"
+  },
+  {
+    "entry_id": "JE-2026-00276",
+    "entry_date": "2026-08-10",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 579800,
+    "narration": "Sales invoice RCPT-2026-01349",
+    "source_ref": "RCPT-2026-01349"
+  },
+  {
+    "entry_id": "JE-2026-00473",
+    "entry_date": "2026-08-10",
+    "account": "refunds",
+    "debit": 369900,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01036",
+    "source_ref": "RCPT-2026-01036"
+  },
+  {
+    "entry_id": "JE-2026-00481",
+    "entry_date": "2026-08-10",
+    "account": "refunds",
+    "debit": 89900,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01041",
+    "source_ref": "RCPT-2026-01041"
+  },
+  {
+    "entry_id": "JE-2026-00497",
+    "entry_date": "2026-08-10",
+    "account": "refunds",
+    "debit": 1649700,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01304",
+    "source_ref": "RCPT-2026-01304"
+  },
+  {
+    "entry_id": "JE-2026-00272",
+    "entry_date": "2026-08-10",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1799800,
+    "narration": "REV/RCPT-2026-01293",
+    "source_ref": "RCPT-2026-01293"
+  },
+  {
+    "entry_id": "JE-2026-00277",
+    "entry_date": "2026-08-10",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 499900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01271"
+  },
+  {
+    "entry_id": "JE-2026-00279",
+    "entry_date": "2026-08-11",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1299900,
+    "narration": "Online sale - RCPT-2026-01189",
+    "source_ref": "RCPT-2026-01189"
+  },
+  {
+    "entry_id": "JE-2026-00281",
+    "entry_date": "2026-08-11",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 459800,
+    "narration": "REV/RCPT-2026-01266",
+    "source_ref": "RCPT-2026-01266"
+  },
+  {
+    "entry_id": "JE-2026-00551",
+    "entry_date": "2026-08-11",
+    "account": "bank",
+    "debit": 12212748,
+    "credit": 0,
+    "narration": "Settlement received TXN202608110049",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00282",
+    "entry_date": "2026-08-11",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 139900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01280"
+  },
+  {
+    "entry_id": "JE-2026-00449",
+    "entry_date": "2026-08-11",
+    "account": "payment_gateway_fees",
+    "debit": 189959,
+    "credit": 0,
+    "narration": "PG fees settlement 361328507251",
+    "source_ref": "361328507251"
+  },
+  {
+    "entry_id": "JE-2026-00280",
+    "entry_date": "2026-08-11",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 549800,
+    "narration": "Online sale - RCPT-2026-01251",
+    "source_ref": "RCPT-2026-01251"
+  },
+  {
+    "entry_id": "JE-2026-00278",
+    "entry_date": "2026-08-11",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 179900,
+    "narration": "Sale RCPT-2026-01021",
+    "source_ref": "RCPT-2026-01021"
+  },
+  {
+    "entry_id": "JE-2026-00450",
+    "entry_date": "2026-08-11",
+    "account": "gst_input",
+    "debit": 34193,
+    "credit": 0,
+    "narration": "GST on PG fees 361328507251",
+    "source_ref": "361328507251"
+  },
+  {
+    "entry_id": "JE-2026-00287",
+    "entry_date": "2026-08-12",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 449900,
+    "narration": "Web order revenue",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00284",
+    "entry_date": "2026-08-12",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1249800,
+    "narration": "Online sale - RCPT-2026-01298",
+    "source_ref": "RCPT-2026-01298"
+  },
+  {
+    "entry_id": "JE-2026-00552",
+    "entry_date": "2026-08-12",
+    "account": "bank",
+    "debit": 1320678,
+    "credit": 0,
+    "narration": "Settlement received TXN202608120050",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00286",
+    "entry_date": "2026-08-12",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 649800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01060"
+  },
+  {
+    "entry_id": "JE-2026-00452",
+    "entry_date": "2026-08-12",
+    "account": "gst_input",
+    "debit": 5952,
+    "credit": 0,
+    "narration": "GST on PG fees 162526546968",
+    "source_ref": "162526546968"
+  },
+  {
+    "entry_id": "JE-2026-00451",
+    "entry_date": "2026-08-12",
+    "account": "payment_gateway_fees",
+    "debit": 33070,
+    "credit": 0,
+    "narration": "PG fees settlement 162526546968",
+    "source_ref": "162526546968"
+  },
+  {
+    "entry_id": "JE-2026-00283",
+    "entry_date": "2026-08-12",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 599900,
+    "narration": "Online sale - RCPT-2026-01066",
+    "source_ref": "RCPT-2026-01066"
+  },
+  {
+    "entry_id": "JE-2026-00285",
+    "entry_date": "2026-08-12",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 59900,
+    "narration": "Web order revenue",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00291",
+    "entry_date": "2026-08-13",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1149800,
+    "narration": "Online sale - RCPT-2026-01138",
+    "source_ref": "RCPT-2026-01138"
+  },
+  {
+    "entry_id": "JE-2026-00479",
+    "entry_date": "2026-08-13",
+    "account": "refunds",
+    "debit": 409800,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01241",
+    "source_ref": "RCPT-2026-01241"
+  },
+  {
+    "entry_id": "JE-2026-00294",
+    "entry_date": "2026-08-13",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 499800,
+    "narration": "Sales invoice RCPT-2026-01011",
+    "source_ref": "RCPT-2026-01011"
+  },
+  {
+    "entry_id": "JE-2026-00288",
+    "entry_date": "2026-08-13",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 799800,
+    "narration": "Sales invoice RCPT-2026-01077",
+    "source_ref": "RCPT-2026-01077"
+  },
+  {
+    "entry_id": "JE-2026-00453",
+    "entry_date": "2026-08-13",
+    "account": "payment_gateway_fees",
+    "debit": 20514,
+    "credit": 0,
+    "narration": "PG fees settlement 558099613273",
+    "source_ref": "558099613273"
+  },
+  {
+    "entry_id": "JE-2026-00293",
+    "entry_date": "2026-08-13",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 69900,
+    "narration": "Sales invoice RCPT-2026-01190",
+    "source_ref": "RCPT-2026-01190"
+  },
+  {
+    "entry_id": "JE-2026-00290",
+    "entry_date": "2026-08-13",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 199900,
+    "narration": "Online sale - RCPT-2026-01343",
+    "source_ref": "RCPT-2026-01343"
+  },
+  {
+    "entry_id": "JE-2026-00454",
+    "entry_date": "2026-08-13",
+    "account": "gst_input",
+    "debit": 3693,
+    "credit": 0,
+    "narration": "GST on PG fees 558099613273",
+    "source_ref": "558099613273"
+  },
+  {
+    "entry_id": "JE-2026-00292",
+    "entry_date": "2026-08-13",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 899800,
+    "narration": "Sale RCPT-2026-01346",
+    "source_ref": "RCPT-2026-01346"
+  },
+  {
+    "entry_id": "JE-2026-00553",
+    "entry_date": "2026-08-13",
+    "account": "bank",
+    "debit": 1235393,
+    "credit": 0,
+    "narration": "Settlement received TXN202608130051",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00295",
+    "entry_date": "2026-08-13",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1499800,
+    "narration": "Web order revenue",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00289",
+    "entry_date": "2026-08-13",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 679800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01256"
+  },
+  {
+    "entry_id": "JE-2026-00296",
+    "entry_date": "2026-08-14",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 89900,
+    "narration": "Sales invoice RCPT-2026-01132",
+    "source_ref": "RCPT-2026-01132"
+  },
+  {
+    "entry_id": "JE-2026-00299",
+    "entry_date": "2026-08-14",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 299800,
+    "narration": "Sales invoice RCPT-2026-01317",
+    "source_ref": "RCPT-2026-01317"
+  },
+  {
+    "entry_id": "JE-2026-00298",
+    "entry_date": "2026-08-14",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 299900,
+    "narration": "REV/RCPT-2026-01305",
+    "source_ref": "RCPT-2026-01305"
+  },
+  {
+    "entry_id": "JE-2026-00297",
+    "entry_date": "2026-08-14",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1599800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01213"
+  },
+  {
+    "entry_id": "JE-2026-00303",
+    "entry_date": "2026-08-15",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 399900,
+    "narration": "Sales invoice RCPT-2026-01229",
+    "source_ref": "RCPT-2026-01229"
+  },
+  {
+    "entry_id": "JE-2026-00300",
+    "entry_date": "2026-08-15",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 959700,
+    "narration": "Sale RCPT-2026-01106",
+    "source_ref": "RCPT-2026-01106"
+  },
+  {
+    "entry_id": "JE-2026-00301",
+    "entry_date": "2026-08-15",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 79900,
+    "narration": "Sales invoice RCPT-2026-01354",
+    "source_ref": "RCPT-2026-01354"
+  },
+  {
+    "entry_id": "JE-2026-00302",
+    "entry_date": "2026-08-15",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 649900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01218"
+  },
+  {
+    "entry_id": "JE-2026-00304",
+    "entry_date": "2026-08-15",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 269800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01219"
+  },
+  {
+    "entry_id": "JE-2026-00306",
+    "entry_date": "2026-08-16",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 239800,
+    "narration": "Online sale - RCPT-2026-01053",
+    "source_ref": "RCPT-2026-01053"
+  },
+  {
+    "entry_id": "JE-2026-00305",
+    "entry_date": "2026-08-17",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 159900,
+    "narration": "REV/RCPT-2026-01277",
+    "source_ref": "RCPT-2026-01277"
+  },
+  {
+    "entry_id": "JE-2026-00309",
+    "entry_date": "2026-08-17",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 289800,
+    "narration": "Sales invoice RCPT-2026-01197",
+    "source_ref": "RCPT-2026-01197"
+  },
+  {
+    "entry_id": "JE-2026-00455",
+    "entry_date": "2026-08-17",
+    "account": "payment_gateway_fees",
+    "debit": 66260,
+    "credit": 0,
+    "narration": "PG fees settlement 704622681715",
+    "source_ref": "704622681715"
+  },
+  {
+    "entry_id": "JE-2026-00456",
+    "entry_date": "2026-08-17",
+    "account": "gst_input",
+    "debit": 11928,
+    "credit": 0,
+    "narration": "GST on PG fees 704622681715",
+    "source_ref": "704622681715"
+  },
+  {
+    "entry_id": "JE-2026-00554",
+    "entry_date": "2026-08-17",
+    "account": "bank",
+    "debit": 5380512,
+    "credit": 0,
+    "narration": "Settlement received TXN202608170053",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00314",
+    "entry_date": "2026-08-18",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1389800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01312"
+  },
+  {
+    "entry_id": "JE-2026-00316",
+    "entry_date": "2026-08-18",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 649900,
+    "narration": "Sales invoice RCPT-2026-01089",
+    "source_ref": "RCPT-2026-01089"
+  },
+  {
+    "entry_id": "JE-2026-00458",
+    "entry_date": "2026-08-18",
+    "account": "gst_input",
+    "debit": 9754,
+    "credit": 0,
+    "narration": "GST on PG fees 670766046419",
+    "source_ref": "670766046419"
+  },
+  {
+    "entry_id": "JE-2026-00307",
+    "entry_date": "2026-08-18",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 69900,
+    "narration": "REV/RCPT-2026-01177",
+    "source_ref": "RCPT-2026-01177"
+  },
+  {
+    "entry_id": "JE-2026-00315",
+    "entry_date": "2026-08-18",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1299700,
+    "narration": "Online sale - RCPT-2026-01332",
+    "source_ref": "RCPT-2026-01332"
+  },
+  {
+    "entry_id": "JE-2026-00496",
+    "entry_date": "2026-08-18",
+    "account": "refunds",
+    "debit": 299900,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01305",
+    "source_ref": "RCPT-2026-01305"
+  },
+  {
+    "entry_id": "JE-2026-00457",
+    "entry_date": "2026-08-18",
+    "account": "payment_gateway_fees",
+    "debit": 54186,
+    "credit": 0,
+    "narration": "PG fees settlement 670766046419",
+    "source_ref": "670766046419"
+  },
+  {
+    "entry_id": "JE-2026-00312",
+    "entry_date": "2026-08-18",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 309800,
+    "narration": "REV/RCPT-2026-01345",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00311",
+    "entry_date": "2026-08-18",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 349900,
+    "narration": "Sales invoice NA",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00555",
+    "entry_date": "2026-08-18",
+    "account": "bank",
+    "debit": 10133360,
+    "credit": 0,
+    "narration": "Settlement received TXN202608180054",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00308",
+    "entry_date": "2026-08-18",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 349900,
+    "narration": "Online sale - RCPT-2026-01167",
+    "source_ref": "RCPT-2026-01167"
+  },
+  {
+    "entry_id": "JE-2026-00313",
+    "entry_date": "2026-08-19",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 69900,
+    "narration": "REV/RCPT-2026-01102",
+    "source_ref": "RCPT-2026-01102"
+  },
+  {
+    "entry_id": "JE-2026-00556",
+    "entry_date": "2026-08-19",
+    "account": "bank",
+    "debit": 659600,
+    "credit": 0,
+    "narration": "Settlement received TXN202608190055",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00317",
+    "entry_date": "2026-08-19",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 999900,
+    "narration": "Online sale - RCPT-2026-01016",
+    "source_ref": "RCPT-2026-01016"
+  },
+  {
+    "entry_id": "JE-2026-00319",
+    "entry_date": "2026-08-19",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 449900,
+    "narration": "Online sale - RCPT-2026-01211",
+    "source_ref": "RCPT-2026-01211"
+  },
+  {
+    "entry_id": "JE-2026-00318",
+    "entry_date": "2026-08-19",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 199900,
+    "narration": "Online sale - RCPT-2026-01037",
+    "source_ref": "RCPT-2026-01037"
+  },
+  {
+    "entry_id": "JE-2026-00310",
+    "entry_date": "2026-08-19",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 349900,
+    "narration": "Sale RCPT-2026-01252",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00323",
+    "entry_date": "2026-08-20",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 249900,
+    "narration": "Online sale - RCPT-2026-01336",
+    "source_ref": "RCPT-2026-01336"
+  },
+  {
+    "entry_id": "JE-2026-00320",
+    "entry_date": "2026-08-20",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 159900,
+    "narration": "REV/RCPT-2026-01054",
+    "source_ref": "RCPT-2026-01054"
+  },
+  {
+    "entry_id": "JE-2026-00557",
+    "entry_date": "2026-08-20",
+    "account": "bank",
+    "debit": 999500,
+    "credit": 0,
+    "narration": "Settlement received TXN202608200056",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00322",
+    "entry_date": "2026-08-20",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 429800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01002"
+  },
+  {
+    "entry_id": "JE-2026-00493",
+    "entry_date": "2026-08-20",
+    "account": "refunds",
+    "debit": 1299700,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01332",
+    "source_ref": "RCPT-2026-01332"
+  },
+  {
+    "entry_id": "JE-2026-00324",
+    "entry_date": "2026-08-20",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 269800,
+    "narration": "REV/RCPT-2026-01245",
+    "source_ref": "RCPT-2026-01245"
+  },
+  {
+    "entry_id": "JE-2026-00321",
+    "entry_date": "2026-08-20",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 659800,
+    "narration": "Online sale - RCPT-2026-01092",
+    "source_ref": "RCPT-2026-01092"
+  },
+  {
+    "entry_id": "JE-2026-00501",
+    "entry_date": "2026-08-20",
+    "account": "refunds",
+    "debit": 99950,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01343",
+    "source_ref": "RCPT-2026-01343"
+  },
+  {
+    "entry_id": "JE-2026-00558",
+    "entry_date": "2026-08-21",
+    "account": "bank",
+    "debit": 4211593,
+    "credit": 0,
+    "narration": "Settlement received TXN202608210057",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00460",
+    "entry_date": "2026-08-21",
+    "account": "gst_input",
+    "debit": 8803,
+    "credit": 0,
+    "narration": "GST on PG fees 863218122764",
+    "source_ref": "863218122764"
+  },
+  {
+    "entry_id": "JE-2026-00459",
+    "entry_date": "2026-08-21",
+    "account": "payment_gateway_fees",
+    "debit": 48904,
+    "credit": 0,
+    "narration": "PG fees settlement 863218122764",
+    "source_ref": "863218122764"
+  },
+  {
+    "entry_id": "JE-2026-00325",
+    "entry_date": "2026-08-21",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 309800,
+    "narration": "Sales invoice RCPT-2026-01186",
+    "source_ref": "RCPT-2026-01186"
+  },
+  {
+    "entry_id": "JE-2026-00326",
+    "entry_date": "2026-08-21",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 399900,
+    "narration": "Online sale - RCPT-2026-01080",
+    "source_ref": "RCPT-2026-01080"
+  },
+  {
+    "entry_id": "JE-2026-00327",
+    "entry_date": "2026-08-21",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 419800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01097"
+  },
+  {
+    "entry_id": "JE-2026-00330",
+    "entry_date": "2026-08-22",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 639700,
+    "narration": "Sales invoice RCPT-2026-01327",
+    "source_ref": "RCPT-2026-01327"
+  },
+  {
+    "entry_id": "JE-2026-00329",
+    "entry_date": "2026-08-22",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 59900,
+    "narration": "REV/RCPT-2026-01008",
+    "source_ref": "RCPT-2026-01008"
+  },
+  {
+    "entry_id": "JE-2026-00476",
+    "entry_date": "2026-08-22",
+    "account": "refunds",
+    "debit": 349900,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01193",
+    "source_ref": "RCPT-2026-01193"
+  },
+  {
+    "entry_id": "JE-2026-00328",
+    "entry_date": "2026-08-22",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 309800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01071"
+  },
+  {
+    "entry_id": "JE-2026-00337",
+    "entry_date": "2026-08-23",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 69900,
+    "narration": "Sale RCPT-2026-01255",
+    "source_ref": "RCPT-2026-01255"
+  },
+  {
+    "entry_id": "JE-2026-00334",
+    "entry_date": "2026-08-23",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 799900,
+    "narration": "Sales invoice RCPT-2026-01202",
+    "source_ref": "RCPT-2026-01202"
+  },
+  {
+    "entry_id": "JE-2026-00335",
+    "entry_date": "2026-08-23",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 999900,
+    "narration": "Sales invoice NA",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00333",
+    "entry_date": "2026-08-23",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 639800,
+    "narration": "Sales invoice RCPT-2026-01081",
+    "source_ref": "RCPT-2026-01081"
+  },
+  {
+    "entry_id": "JE-2026-00331",
+    "entry_date": "2026-08-23",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 584700,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01263"
+  },
+  {
+    "entry_id": "JE-2026-00338",
+    "entry_date": "2026-08-23",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 289800,
+    "narration": "Online sale - RCPT-2026-01321",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00336",
+    "entry_date": "2026-08-23",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 649900,
+    "narration": "REV/RCPT-2026-01274",
+    "source_ref": "RCPT-2026-01274"
+  },
+  {
+    "entry_id": "JE-2026-00340",
+    "entry_date": "2026-08-24",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 799900,
+    "narration": "Sale RCPT-2026-01065",
+    "source_ref": "RCPT-2026-01065"
+  },
+  {
+    "entry_id": "JE-2026-00343",
+    "entry_date": "2026-08-24",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 349900,
+    "narration": "Sales invoice RCPT-2026-01348",
+    "source_ref": "RCPT-2026-01348"
+  },
+  {
+    "entry_id": "JE-2026-00341",
+    "entry_date": "2026-08-24",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1519700,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01015"
+  },
+  {
+    "entry_id": "JE-2026-00342",
+    "entry_date": "2026-08-24",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 449700,
+    "narration": "Sale RCPT-2026-01001",
+    "source_ref": "RCPT-2026-01001"
+  },
+  {
+    "entry_id": "JE-2026-00559",
+    "entry_date": "2026-08-24",
+    "account": "bank",
+    "debit": 65604,
+    "credit": 0,
+    "narration": "Settlement received TXN202608240058",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00345",
+    "entry_date": "2026-08-24",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1219700,
+    "narration": "Online sale - RCPT-2026-01087",
+    "source_ref": "RCPT-2026-01087"
+  },
+  {
+    "entry_id": "JE-2026-00500",
+    "entry_date": "2026-08-24",
+    "account": "refunds",
+    "debit": 649950,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01189",
+    "source_ref": "RCPT-2026-01189"
+  },
+  {
+    "entry_id": "JE-2026-00332",
+    "entry_date": "2026-08-24",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 429800,
+    "narration": "Sales invoice RCPT-2026-01023",
+    "source_ref": "RCPT-2026-01023"
+  },
+  {
+    "entry_id": "JE-2026-00462",
+    "entry_date": "2026-08-24",
+    "account": "gst_input",
+    "debit": 648,
+    "credit": 0,
+    "narration": "GST on PG fees 701550291681",
+    "source_ref": "701550291681"
+  },
+  {
+    "entry_id": "JE-2026-00339",
+    "entry_date": "2026-08-24",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 649900,
+    "narration": "Sales invoice RCPT-2026-01294",
+    "source_ref": "RCPT-2026-01294"
+  },
+  {
+    "entry_id": "JE-2026-00461",
+    "entry_date": "2026-08-24",
+    "account": "payment_gateway_fees",
+    "debit": 3598,
+    "credit": 0,
+    "narration": "PG fees settlement 701550291681",
+    "source_ref": "701550291681"
+  },
+  {
+    "entry_id": "JE-2026-00344",
+    "entry_date": "2026-08-24",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 409700,
+    "narration": "Sales invoice RCPT-2026-01288",
+    "source_ref": "RCPT-2026-01288"
+  },
+  {
+    "entry_id": "JE-2026-00464",
+    "entry_date": "2026-08-25",
+    "account": "gst_input",
+    "debit": 11753,
+    "credit": 0,
+    "narration": "GST on PG fees 161394498830",
+    "source_ref": "161394498830"
+  },
+  {
+    "entry_id": "JE-2026-00560",
+    "entry_date": "2026-08-25",
+    "account": "bank",
+    "debit": 6115556,
+    "credit": 0,
+    "narration": "Settlement received TXN202608250059",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00463",
+    "entry_date": "2026-08-25",
+    "account": "payment_gateway_fees",
+    "debit": 65291,
+    "credit": 0,
+    "narration": "PG fees settlement 161394498830",
+    "source_ref": "161394498830"
+  },
+  {
+    "entry_id": "JE-2026-00346",
+    "entry_date": "2026-08-25",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 149900,
+    "narration": "Sales invoice RCPT-2026-01199",
+    "source_ref": "RCPT-2026-01199"
+  },
+  {
+    "entry_id": "JE-2026-00347",
+    "entry_date": "2026-08-25",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 709800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01107"
+  },
+  {
+    "entry_id": "JE-2026-00489",
+    "entry_date": "2026-08-26",
+    "account": "refunds",
+    "debit": 224950,
+    "credit": 0,
+    "narration": "Refund RCPT-2026-01166",
+    "source_ref": "RCPT-2026-01166"
+  },
+  {
+    "entry_id": "JE-2026-00348",
+    "entry_date": "2026-08-26",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 299900,
+    "narration": "REV/RCPT-2026-01133",
+    "source_ref": "RCPT-2026-01133"
+  },
+  {
+    "entry_id": "JE-2026-00349",
+    "entry_date": "2026-08-26",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 489700,
+    "narration": "REV/RCPT-2026-01309",
+    "source_ref": "RCPT-2026-01309"
+  },
+  {
+    "entry_id": "JE-2026-00353",
+    "entry_date": "2026-08-27",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 509800,
+    "narration": "Sales invoice RCPT-2026-01281",
+    "source_ref": "RCPT-2026-01281"
+  },
+  {
+    "entry_id": "JE-2026-00466",
+    "entry_date": "2026-08-27",
+    "account": "gst_input",
+    "debit": 5589,
+    "credit": 0,
+    "narration": "GST on PG fees 096244063062",
+    "source_ref": "096244063062"
+  },
+  {
+    "entry_id": "JE-2026-00354",
+    "entry_date": "2026-08-27",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 329800,
+    "narration": "Sale RCPT-2026-01093",
+    "source_ref": "RCPT-2026-01093"
+  },
+  {
+    "entry_id": "JE-2026-00465",
+    "entry_date": "2026-08-27",
+    "account": "payment_gateway_fees",
+    "debit": 31044,
+    "credit": 0,
+    "narration": "PG fees settlement 096244063062",
+    "source_ref": "096244063062"
+  },
+  {
+    "entry_id": "JE-2026-00561",
+    "entry_date": "2026-08-27",
+    "account": "bank",
+    "debit": 4092117,
+    "credit": 0,
+    "narration": "Settlement received TXN202608270060",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00350",
+    "entry_date": "2026-08-27",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 739800,
+    "narration": "REV/RCPT-2026-01250",
+    "source_ref": "RCPT-2026-01140"
+  },
+  {
+    "entry_id": "JE-2026-00355",
+    "entry_date": "2026-08-27",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 359800,
+    "narration": "REV/RCPT-2026-01351",
+    "source_ref": "RCPT-2026-01351"
+  },
+  {
+    "entry_id": "JE-2026-00351",
+    "entry_date": "2026-08-27",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 799700,
+    "narration": "Online sale - RCPT-2026-01333",
+    "source_ref": "RCPT-2026-01333"
+  },
+  {
+    "entry_id": "JE-2026-00357",
+    "entry_date": "2026-08-28",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 599900,
+    "narration": "Sale RCPT-2026-01141",
+    "source_ref": "RCPT-2026-01141"
+  },
+  {
+    "entry_id": "JE-2026-00467",
+    "entry_date": "2026-08-28",
+    "account": "payment_gateway_fees",
+    "debit": 46453,
+    "credit": 0,
+    "narration": "PG fees settlement 194979695867",
+    "source_ref": "194979695867"
+  },
+  {
+    "entry_id": "JE-2026-00356",
+    "entry_date": "2026-08-28",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 49900,
+    "narration": "Online sale - RCPT-2026-01344",
+    "source_ref": "RCPT-2026-01344"
+  },
+  {
+    "entry_id": "JE-2026-00562",
+    "entry_date": "2026-08-28",
+    "account": "bank",
+    "debit": 2509236,
+    "credit": 0,
+    "narration": "Settlement received TXN202608280061",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00358",
+    "entry_date": "2026-08-28",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 599900,
+    "narration": "Sales invoice NA",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00468",
+    "entry_date": "2026-08-28",
+    "account": "gst_input",
+    "debit": 8361,
+    "credit": 0,
+    "narration": "GST on PG fees 194979695867",
+    "source_ref": "194979695867"
+  },
+  {
+    "entry_id": "JE-2026-00352",
+    "entry_date": "2026-08-28",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 109900,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01113"
+  },
+  {
+    "entry_id": "JE-2026-00359",
+    "entry_date": "2026-08-29",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 1499700,
+    "narration": "Online sale - RCPT-2026-01145",
+    "source_ref": "RCPT-2026-01145"
+  },
+  {
+    "entry_id": "JE-2026-00360",
+    "entry_date": "2026-08-30",
+    "account": "revenue",
+    "debit": 0,
+    "credit": 149800,
+    "narration": "Web order revenue",
+    "source_ref": "RCPT-2026-01204"
+  },
+  {
+    "entry_id": "JE-2026-00469",
+    "entry_date": "2026-08-31",
+    "account": "payment_gateway_fees",
+    "debit": 9304,
+    "credit": 0,
+    "narration": "PG fees settlement 382646091785",
+    "source_ref": "382646091785"
+  },
+  {
+    "entry_id": "JE-2026-00470",
+    "entry_date": "2026-08-31",
+    "account": "gst_input",
+    "debit": 1675,
+    "credit": 0,
+    "narration": "GST on PG fees 382646091785",
+    "source_ref": "382646091785"
+  },
+  {
+    "entry_id": "JE-2026-00563",
+    "entry_date": "2026-08-31",
+    "account": "bank",
+    "debit": 2637921,
+    "credit": 0,
+    "narration": "Settlement received TXN202608310063",
+    "source_ref": null
+  },
+  {
+    "entry_id": "JE-2026-00471",
+    "entry_date": "2026-09-01",
+    "account": "payment_gateway_fees",
+    "debit": 36633,
+    "credit": 0,
+    "narration": "PG fees settlement 992959660487",
+    "source_ref": "992959660487"
+  },
+  {
+    "entry_id": "JE-2026-00472",
+    "entry_date": "2026-09-01",
+    "account": "gst_input",
+    "debit": 6595,
+    "credit": 0,
+    "narration": "GST on PG fees 992959660487",
+    "source_ref": "992959660487"
+  },
+  {
+    "entry_id": "JE-2026-00564",
+    "entry_date": "2026-09-01",
+    "account": "bank",
+    "debit": 2595772,
+    "credit": 0,
+    "narration": "Settlement received TXN202609010064",
+    "source_ref": null
+  }
+]
