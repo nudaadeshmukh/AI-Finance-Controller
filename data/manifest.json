@@ -1,0 +1,86 @@
+[
+  {
+    "run_id": "clean-august",
+    "label": "Clean month",
+    "seed": 42,
+    "orders": 360,
+    "recon_lines": 400,
+    "bank_txns": 65,
+    "ledger_entries": 566,
+    "class_counts": {
+      "exact": 138,
+      "fee_derived": 41,
+      "timing_skew": 53,
+      "many_to_one": 138,
+      "ambiguous": 11,
+      "tolerance": 19
+    },
+    "injected_order_id": "order_qmN3X33C1o6OTT",
+    "n_settlements": 61,
+    "suppressed": 0,
+    "truncated_utr": 2
+  },
+  {
+    "run_id": "heavy-refunds",
+    "label": "Heavy refund cycle",
+    "seed": 1337,
+    "orders": 296,
+    "recon_lines": 400,
+    "bank_txns": 51,
+    "ledger_entries": 536,
+    "class_counts": {
+      "exact": 36,
+      "timing_skew": 47,
+      "many_to_one": 260,
+      "fee_derived": 39,
+      "ambiguous": 11,
+      "tolerance": 7
+    },
+    "injected_order_id": "order_1oiiC4IqfUq4RS",
+    "n_settlements": 60,
+    "suppressed": 1,
+    "truncated_utr": 2
+  },
+  {
+    "run_id": "holiday-skew",
+    "label": "Holiday-affected settlements",
+    "seed": 9001,
+    "orders": 360,
+    "recon_lines": 400,
+    "bank_txns": 59,
+    "ledger_entries": 538,
+    "class_counts": {
+      "exact": 111,
+      "fee_derived": 40,
+      "timing_skew": 71,
+      "many_to_one": 147,
+      "tolerance": 20,
+      "ambiguous": 11
+    },
+    "injected_order_id": "order_rQUK1NguAVM07X",
+    "n_settlements": 57,
+    "suppressed": 0,
+    "truncated_utr": 2
+  },
+  {
+    "run_id": "high-ambiguity",
+    "label": "High-ambiguity batch",
+    "seed": 2718,
+    "orders": 350,
+    "recon_lines": 400,
+    "bank_txns": 60,
+    "ledger_entries": 553,
+    "class_counts": {
+      "tolerance": 7,
+      "fee_derived": 38,
+      "exact": 76,
+      "many_to_one": 197,
+      "timing_skew": 50,
+      "ambiguous": 32
+    },
+    "injected_order_id": "order_usksPw2ocWLjYj",
+    "n_settlements": 60,
+    "suppressed": 1,
+    "truncated_utr": 2
+  }
+]
