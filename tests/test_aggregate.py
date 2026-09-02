@@ -148,6 +148,13 @@ def test_ambiguous_adjustment_is_never_matched_c005_regression(db: sqlite3.Conne
     """C-005: two orders share customer_id + amount + date; the adjustment
     that nets against one of them (no one knows which) must stay unmatched,
     not be folded into a settlement group the arithmetic happens to close.
+
+    Post-§14.1/C-008: the two payments themselves DO now match (via
+    `arithmetic_scope`) - only the ambiguous adjustment line stays unmatched.
+    C-005's original finding (an ambiguous adjustment must never become a
+    matched member) still holds; this test's assertions were narrowed from
+    "match_groups == 0" to "the adjustment specifically is never a member"
+    to reflect that.
     """
     same_customer = "cust_agg000000002"
     order_a = _order("order_agg0000000002", 159900, same_customer, created_at=1_780_500_000)
@@ -168,13 +175,18 @@ def test_ambiguous_adjustment_is_never_matched_c005_regression(db: sqlite3.Conne
 
     run_cascade(db, "test")
 
-    assert db.execute("SELECT COUNT(*) AS n FROM match_groups").fetchone()["n"] == 0
     matched_keys = {
         row["record_key"] for row in db.execute("SELECT record_key FROM group_members")
     }
-    assert "recon:rfnd_agg0000000002" not in matched_keys
-    assert "recon:pay_agg00000002" not in matched_keys
-    assert "recon:pay_agg00000003" not in matched_keys
+    assert "recon:rfnd_agg0000000002" not in matched_keys, "the ambiguous line must never match"
+    assert "recon:pay_agg00000002" in matched_keys, "no longer collateral damage (C-008 resolved)"
+    assert "recon:pay_agg00000003" in matched_keys, "no longer collateral damage (C-008 resolved)"
+
+    exc = db.execute(
+        "SELECT * FROM exceptions WHERE record_key = ?", ("recon:rfnd_agg0000000002",)
+    ).fetchone()
+    assert exc is not None
+    assert exc["reason_code"] == "AMBIGUOUS_DUPLICATE"
 
 
 def test_refund_pointing_at_an_order_from_a_different_settlement_c007_regression(

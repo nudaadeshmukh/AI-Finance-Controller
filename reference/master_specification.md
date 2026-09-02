@@ -636,12 +636,34 @@ sources, including bank closure.
 | `fee_derived` | 41 | 39 | 40 | 38 |
 | `tolerance` | 19 | 7 | 20 | 7 |
 | **`ambiguous`** | **11** | **11** | **11** | **32** |
-| **Resolvable ceiling** | **389 (97.2%)** | **389 (97.2%)** | **389 (97.2%)** | **368 (92.0%)** |
+| **Resolvable ceiling** | **389-391 (97.25-97.75%)** | **389-391 (97.25-97.75%)** | **389-391 (97.25-97.75%)** | **368-374 (92.0-93.5%)** |
+
+The ceiling is a range, not a flat number, for a reason already implicit in §13.8's accepted
+math rather than something new: 2 of each run's `ambiguous` records (6 in `high-ambiguity`)
+are `CONTRADICTORY_LEDGER` — an order, stated fee, settlement and bank transaction that
+**close correctly**, since the closing equation never reads ledger data. §13.8 already
+states these will be matched and counted as false matches; the ceiling table originally
+implied 0 of the 11/32 `ambiguous` records could ever match, which understates the honestly
+achievable range by exactly how many `CONTRADICTORY_LEDGER` records happen to close in a
+given run — 0 to 2 (0 to 6 in `high-ambiguity`). Verified per-dataset, from source data only
+(never the sealed key): each run's `ledger_entries` table has exactly 2 `account='suspense'`
+rows (6 in `high-ambiguity`) with a `source_ref` that resolves to no real order receipt —
+the §6.4/§9.4 `CONTRADICTORY_LEDGER` signature — matching the designed count exactly in all
+four runs, confirming the range applies uniformly rather than being specific to one dataset's
+observed outcome. A run scoring above the base ceiling (389 or 368) is therefore not
+automatically a bug — it needs the same trace this session gave clean-august's 390/400
+(`docs/challenges-log.md` C-008), not an assumption either way.
 
 ### 8.3 Baseline headroom
 
 Naive matcher = exact `order_id` join **and** stated fee **and** exact UTR **and**
 settlement net closes with no derivation.
+
+Headroom below is measured against the **base** ceiling (389 / 368 — genuine,
+non-`CONTRADICTORY_LEDGER` resolvability), not the §8.2 range's upper bound. Headroom is a
+statement about matching capability; the extra 0-2 (0-6) `CONTRADICTORY_LEDGER` matches an
+honest matcher may pick up are a documented false-match artifact (§13.8), not a capability
+this metric should credit.
 
 | Run | Naive baseline | Ceiling | Headroom |
 |---|---|---|---|
@@ -1029,6 +1051,13 @@ def classify_residual(db: Connection, state: CascadeState) -> list[Exception_]
 
 `CONTRADICTORY_LEDGER` is **not** detected here — see §13.8.
 
+Note the distinction: §14.1's `arithmetic_scope` mechanism (C-008) recovers records that
+were only *collaterally* deferred by an unrelated ambiguous neighbour in the same
+settlement — the ambiguity itself still surfaces honestly as `AMBIGUOUS_DUPLICATE`. §13.8's
+`CONTRADICTORY_LEDGER` records are a different, unfixed case: they close correctly and
+*will* be matched, which is a known answer-key limitation, not something this mechanism (or
+any other) should paper over.
+
 ### 13.8 Known answer-key limitation — report, do not fix
 
 The answer key marks 2 recon payments per run (6 in `high-ambiguity`) as
@@ -1078,10 +1107,81 @@ class ArithmeticProof(BaseModel):
     delta: int                     # expected − observed; must be 0
     closes: bool
     tolerance_applied: int = 0     # nonzero is SURFACED in the UI
+    scope_only_keys: list[RecordKey] = []   # see §14.1 — always [] unless
+                                              # proposal.arithmetic_scope was set
 ```
 
 Splitting `verify()` from `commit()` is what makes "the verifier is the sole writer" a
 testable assertion rather than a promise.
+
+### 14.1 `arithmetic_scope` — resolution to C-008
+
+**`MatchProposal` gains one field: `arithmetic_scope: list[RecordKey] | None = None`.**
+`verify()`'s signature is unchanged — `def verify(proposal, db, facts) -> ArithmeticProof`
+still takes exactly the same three arguments. The new field lives on the proposal, not the
+function.
+
+**Old behaviour:** `verify()` re-read and summed exactly `proposal.member_keys` — the set
+of records the equation was computed over and the set `commit()` would write to
+`group_members` were always identical.
+
+**New behaviour:** when `arithmetic_scope` is `None` (true of every cascade pass except the
+one below, and of every proposal built before this amendment), behaviour is unchanged —
+`verify()` sums `member_keys` exactly as before. When `arithmetic_scope` is set, it **must
+be a superset of `member_keys`**; `verify()` re-reads and sums over `arithmetic_scope` to
+compute the closing equation, but `commit()` still writes `group_members` from
+`member_keys` only. The keys present in `arithmetic_scope` but absent from `member_keys` —
+the *scope-only keys* — are counted toward the proof but never marked matched.
+
+**Reason:** §13.7's `AMBIGUOUS_DUPLICATE` guard (`has_ambiguous_adjustment`, added in
+Phase 3 for C-005) defers an entire settlement — sometimes 20+ records — whenever it
+contains one adjustment line with no order attribution matching ≥2 duplicate orders. The
+settlement's closing equation balances regardless of which candidate order the adjustment
+"really" belongs to (the equation needs the adjustment's debit value, not its attribution),
+so every *other* record in that settlement has a legitimate, closing proof and was only
+being held back by one ambiguous neighbour. `arithmetic_scope` lets the proposer include
+the ambiguous line in the sum (so the equation still closes) while excluding it from
+`member_keys` (so it is never marked matched) — it falls through to `classify_residual` and
+is correctly named `AMBIGUOUS_DUPLICATE`, with both candidates listed, instead of silently
+blocking every other record in the settlement. This is the resolution to
+`docs/challenges-log.md` C-008.
+
+**The audit-transparency requirement.** A proof computed from a wider scope than its
+committed membership must never be reconstructable by guesswork only. Three things make it
+reconstructable purely from committed data:
+
+1. **`ArithmeticProof` gains one field: `scope_only_keys: list[RecordKey] = []`** — the
+   scope-only keys for this proof, always `[]` when `arithmetic_scope` was `None`. Because
+   `commit()` already persists `proof.model_dump()` verbatim into `match_groups.proof_json`,
+   this field requires no schema change to `match_groups` — it is simply present in the
+   JSON blob already stored there. Anyone reading a group's `proof_json` sees exactly which
+   keys its arithmetic counted that its membership doesn't.
+2. **`commit()` records one additional `audit_log` entry per scope-only key**, action
+   `"counted_not_committed"`, detail `{group_id, proof}` — in addition to (never instead
+   of) the normal per-member `"matched"` entries for `member_keys`. `audit.trail(key)` on a
+   scope-only key therefore shows, in its own history, that it was counted toward group X's
+   closing proof without becoming a member of it.
+3. **Invariant, enforced at runtime, not just by tests:** every key appearing in any
+   `match_groups.proof_json.scope_only_keys` must, by the end of the run, appear in
+   `exceptions` with a reason code. `report/scoring.py` checks this — after matching
+   completes, in the same place and same spirit as rule 6's answer-key gate — before it
+   computes a score or calls `emit_results()`. If any scope-only key lacks a corresponding
+   `exceptions` row, `score()` raises `ScoringError` and the run **refuses to emit
+   `results.json`** rather than silently reporting on a record that arithmetic touched but
+   nothing accounted for. This is PROJECT_RULES.md rule 4 ("no third state") enforced at the
+   pipeline's exit gate, not only in CI.
+
+   Covered by **`tests/test_scope_only_accounted.py`** — the eighth protected test (§25),
+   verifying both directions: (a) a scope-only key that legitimately gets an `exceptions`
+   row does not block scoring, and (b) a scope-only key deliberately left unaccounted
+   (simulating a future bug) causes `score()` to raise `ScoringError`, not silently
+   proceed.
+
+A person reading `match_groups` and `group_members` for a given group can now tell, without
+opening any code: which records the group's arithmetic counted
+(`proof_json.scope_only_keys`), that none of them are members (absent from
+`group_members`), and why each one isn't (`exceptions.reason_code` for that key,
+cross-referenced by `audit_log`).
 
 ---
 
@@ -1197,7 +1297,9 @@ The denominator is always the 400 recon lines. Bank transactions marked
 1. **Naive baseline** — exact `order_id` + stated fee + exact UTR + net closes
 2. **Cascade without LLM** (`--no-llm`)
 3. **Cascade with LLM**
-4. **Resolvable ceiling** — 97.2% on three runs, 92.0% on `high-ambiguity`
+4. **Resolvable ceiling** — 97.2% base on three runs, 92.0% on `high-ambiguity`; an actual
+   run may land up to 2 records (6 on `high-ambiguity`) above this if a `CONTRADICTORY_LEDGER`
+   record closes, per §8.2's range and §13.8 — expected, not a bug
 
 ### 17.3 Error analysis
 
@@ -1232,7 +1334,9 @@ The pipeline's only output to the frontend. Static, self-contained, committed.
   },
 
   "baseline": { "name": "exact_id_and_amount", "matched": 0, "match_rate": 0.0 },
-  "ceiling":  { "resolvable": 389, "rate": 0.9725 },
+  "ceiling":  { "resolvable": 389, "rate": 0.9725 }, // base ceiling (§8.2); an actual run's
+                                                       // "matched" may exceed this by up to 2
+                                                       // if a CONTRADICTORY_LEDGER record closes
 
   "llm_contribution": {
     "enabled": true,
@@ -1391,6 +1495,9 @@ class MatchProposal(BaseModel):
     pass_name: str
     origin: Literal["cascade", "llm"]
     proof: ArithmeticProof | None = None    # filled by verify/, never by proposer
+    arithmetic_scope: list[RecordKey] | None = None   # §14.1 / C-008. None => same as
+                                                        # member_keys. When set, MUST be
+                                                        # a superset of member_keys.
 
 class Exception_(BaseModel):
     record_key: RecordKey
@@ -1618,9 +1725,11 @@ Every phase ships with its tests passing. `pytest` green before a phase is compl
 | `test_ambiguous.py` | All ambiguous records unresolved, none matched |
 | `test_injection.py` | The planted record never appears in a match group |
 | `test_no_llm.py` | `--no-llm` produces a complete run |
+| `test_scope_only_accounted.py` | Every `arithmetic_scope`-only key has an `exceptions` row by end-of-run; `score()` raises `ScoringError` and refuses to emit `results.json` if one doesn't (§14.1, C-008) |
 
 **Never skip, weaken, or xfail:** `test_firewall`, `test_money`, `test_answer_key_seal`,
-`test_ambiguous`, `test_injection`, `test_verify`, `test_persistence_regression`.
+`test_ambiguous`, `test_injection`, `test_verify`, `test_persistence_regression`,
+`test_scope_only_accounted`.
 
 `test_firewall.py` is the one that erodes under pressure. On day 3, when fee inference
 will not converge, importing one constant from the generator will fix it and silently

@@ -11,12 +11,18 @@ needed for the arithmetic to succeed. See `docs/challenges-log.md` C-005 for
 the two confirmed instances and how they were verified without opening the
 sealed answer key.
 
-This function implements ONLY §13.7's detection *condition* — no reason
-code, no candidate list, no `Exception_` construction. `aggregate.py` calls
-it purely as a skip guard (defer, don't classify). Phase 4's
-`classify_residual` will import and reuse this same function rather than
-re-deriving the condition — one detection implementation, called from two
-places at two different phases.
+`ambiguous_adjustment_keys()` implements §13.7's detection *condition* and
+returns the specific `record_key`s it matches — no reason code, no
+`Exception_` construction. `has_ambiguous_adjustment()` is the boolean
+wrapper kept for callers that only need the guard. §14.1/C-008:
+`build_settlement_proposal` now uses the keys directly to exclude just the
+ambiguous line(s) from `member_keys` (while keeping the whole settlement in
+`arithmetic_scope`), rather than deferring the entire settlement as it did
+before this amendment. `classify_residual` needs no changes of its own to
+pick this up — a scope-only key stays in `state.unmatched_recon` (it was
+never removed, since only `member_keys` are), so it reaches the same
+per-key detection below on its own and is named `AMBIGUOUS_DUPLICATE`, with
+both candidates listed, exactly as before.
 """
 
 from __future__ import annotations
@@ -26,21 +32,24 @@ import sqlite3
 from recon.db import queries
 from recon.models.pipeline import CascadeState, Exception_
 from recon.models.reasons import REASON_LABELS, ReasonCode
+from recon.models.types import RecordKey
 
 _ALL_PASS_NAMES = ["utr", "exact", "aggregate", "fee_reversal", "timing", "tolerance"]
 
 
-def has_ambiguous_adjustment(db: sqlite3.Connection, settlement_id: str) -> bool:
-    """§13.7's detection condition: does this settlement contain an
-    `adjustment` line with `order_id IS NULL` (true of every adjustment, by
+def ambiguous_adjustment_keys(db: sqlite3.Connection, settlement_id: str) -> list[RecordKey]:
+    """§13.7's detection condition: the `record_key`s of this settlement's
+    `adjustment` lines with `order_id IS NULL` (true of every adjustment, by
     construction — §6.2) whose amount matches at least 2 orders that share
-    the same `customer_id`, `amount`, and calendar date with each other?
+    the same `customer_id`, `amount`, and calendar date with each other.
 
-    A pure boolean signal — never decides what to do about it.
+    A pure detection signal — never decides what to do about the keys it
+    returns.
     """
     adjustment_rows = db.execute(
         queries.SELECT_ADJUSTMENTS_BY_SETTLEMENT_ID, {"settlement_id": settlement_id}
     ).fetchall()
+    keys: list[RecordKey] = []
     for row in adjustment_rows:
         if row["order_id"] is not None:
             continue  # not the ambiguous shape §13.7 describes
@@ -48,8 +57,15 @@ def has_ambiguous_adjustment(db: sqlite3.Connection, settlement_id: str) -> bool
             queries.SELECT_DUPLICATE_ORDER_BUCKET_COUNT, {"amount": row["amount"]}
         ).fetchone()["n"]
         if bucket_count > 0:
-            return True
-    return False
+            keys.append(row["record_key"])
+    return keys
+
+
+def has_ambiguous_adjustment(db: sqlite3.Connection, settlement_id: str) -> bool:
+    """Boolean wrapper over `ambiguous_adjustment_keys()`, kept for callers
+    that only need the guard, not the specific keys.
+    """
+    return bool(ambiguous_adjustment_keys(db, settlement_id))
 
 
 def _duplicate_order_candidates(db: sqlite3.Connection, amount: int) -> list[str]:

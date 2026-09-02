@@ -265,9 +265,10 @@ Format: `<area>: <what changed>` — e.g. `match: infer fee slabs with change-po
 **~4 days.** Phases 1–5 are the submission; Phases 6–8 are upside.
 
 Cut order under pressure: frontend polish → LLM layer → extra datasets.
-**Never cut:** the verifier, the exception list, honest metrics, or the seven protected
+**Never cut:** the verifier, the exception list, honest metrics, or the eight protected
 tests (`test_firewall`, `test_money`, `test_answer_key_seal`, `test_ambiguous`,
-`test_injection`, `test_verify`, `test_persistence_regression`).
+`test_injection`, `test_verify`, `test_persistence_regression`,
+`test_scope_only_accounted`).
 
 A deterministic pipeline with honest numbers and no LLM beats a flashy one with
 unverifiable results. That is not a consolation position — it is the track's actual bar.
