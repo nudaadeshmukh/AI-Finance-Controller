@@ -72,11 +72,19 @@ Create the entire project skeleton. It compiles and the CLI runs. Nothing reconc
 - Every other module: `__init__.py` with the exact signatures from §20.4, bodies raising
   `NotImplementedError`
 - `tests/conftest.py` with an in-memory DB fixture
-- `tests/test_firewall.py` and `tests/test_money.py` — **written and passing now**
+- `tests/test_firewall.py`, `tests/test_money.py` and `tests/test_answer_key_seal.py` —
+  **written and passing now**
 - `.github/workflows/ci.yml` — ruff + pytest
 
+## Frontend in this phase
+Create the `frontend/` directory skeleton only — `package.json`, `vite.config.ts`,
+`index.html`, and empty `src/` subdirectories per §3.2. **No screens, no components, no
+styling.** If you write any frontend file beyond the build config, read
+`reference/design.md` first — it is authoritative for all visual decisions in every phase,
+not just Phase 7.
+
 ## Explicitly NOT in this phase
-No matching logic. No ingest logic. No LLM. No frontend.
+No matching logic. No ingest logic. No LLM. No frontend screens, components or styling.
 
 ## Acceptance
 ```bash
@@ -120,7 +128,13 @@ The four sources load into SQLite, validated, idempotently, with an audit trail.
 - `cli.py run` — wires acquire → ingest, prints a Rich table of counts
 
 ## Key rules
-- One transaction per source file
+- One transaction for the whole `ingest()` call, covering all four sources —
+  not one per source file. A `SourceUnavailable` partway through acquisition
+  must leave zero rows from *any* source for that call, not just the failed
+  one: a per-source scheme would leave earlier sources' writes committed,
+  which is a partial write in every sense that matters. See master spec
+  §7.2 and §12.1. Implemented and tested —
+  `tests/test_ingest.py::test_source_unavailable_partway_through_leaves_no_partial_write`.
 - Running twice produces identical state and no duplicate rows
 - `bank_txns.utr_extracted` stays NULL here — Phase 3 populates it
 
@@ -170,7 +184,7 @@ first, everything has to earn its way through.
   `NOT_A_SETTLEMENT` — excluded, not exceptions.** 5 per run.
 - `match/exact.py` — pass 2 per §13.3. **Skip any settlement containing `fee IS NULL`.**
 - `match/aggregate.py` — pass 3 per §13.3. **Do not attempt to attribute an adjustment to
-  an order.**
+  an order.** The fee-null skip applies here too, not just in `exact`.
 
 ## Tests
 `test_utr.py`, `test_exact.py`, `test_aggregate.py`, `test_verify.py`
@@ -213,10 +227,15 @@ calendar explains ≥95% of payments with both timestamps.
 Each a constant in `match/constants.py` **with a comment justifying it**, echoed into
 `results.json`. **Never widen one to lift a match rate** (`PROJECT_RULES.md` rule 7).
 
-## Records that must NOT be matched (§9.4)
-`AMBIGUOUS_DUPLICATE` (5, or 15 in high-ambiguity), `CROSS_PERIOD_UTR` (4/11),
-`CONTRADICTORY_LEDGER` (2/6). `AMBIGUOUS_DUPLICATE` exceptions **must list both
-candidates.**
+## `match/classify.py` — specific reason codes (§13.7)
+New module. Runs at the end of `run_cascade()`, after pass 6, before the LLM stage. It
+matches nothing; it converts blanket `NO_CANDIDATE` into `AMBIGUOUS_DUPLICATE` (with both
+candidates listed) and `CROSS_PERIOD_UTR`.
+
+## Known answer-key limitation (§13.8)
+`CONTRADICTORY_LEDGER` records close correctly and **will** be matched, scoring ~2 false
+matches per run. **Do not detect them, do not special-case the scorer.** Log it in
+`docs/challenges-log.md` when first observed and report it in Phase 5.
 
 ## Tests
 `test_fee_reversal.py` (both slabs recovered; an approximate slab is **rejected**),
@@ -276,11 +295,12 @@ Commit them.
 The narrow, bounded AI layer — and the demonstration that it cannot do damage.
 
 ## Implement
-- `hypothesize/client.py` — Anthropic wrapper, `llama-3.3-70b-versatile`, 20s timeout
+- `hypothesize/client.py` — Groq wrapper, `llama-3.3-70b-versatile`, 20s timeout
 - `hypothesize/prompt.py` — system block + `<untrusted_source_data>` fence (§15.2).
   **Free text is never interpolated into the instruction section.**
 - `hypothesize/parse.py` — strict JSON → `Hypothesis`. Prose is a parse failure.
-- `hypothesize/cluster.py` — one call per cluster, not per record
+- `hypothesize/cluster.py` — one call per cluster, not per record. **Cluster key:**
+  shared `settlement_utr`; records with no usable UTR cluster by `(customer_id, date)`
 - `inject/hallucination.py`, `inject/unavailable.py`
 - `cli.py inject`
 
@@ -327,7 +347,9 @@ no charting library, no dark mode, no animation beyond a spinner.
 
 # PHASE 8 — README, Error Analysis, Scaling
 
-**Read:** master spec §29 (scaling), §30 (README + checklist)
+**Read:** master spec §29 (scaling), §30 (README + checklist) · `reference/design.md`
+(if producing screenshots or any final styling pass) · `reference/design.md`
+(if producing screenshots or any final styling pass)
 
 ## README — write it last, with real numbers
 Contents per §30.1. Opening line is the pitch from §1.2.
@@ -347,5 +369,5 @@ combinatorial in settlement size**; the fix.
 
 Frontend polish → LLM layer → extra datasets.
 
-**Never cut:** the verifier, the exception list, honest metrics, or the five protected
+**Never cut:** the verifier, the exception list, honest metrics, or the six protected
 tests in §25.

@@ -1,67 +1,70 @@
 ---
 version: alpha
-name: Cal.com-design-analysis
-description: A clean, calendar-software-first interface anchored on white canvas with black primary CTAs and custom Cal Sans display typography. The system reads as friendly modern SaaS — generous whitespace, soft-rounded cards (~12px), product UI fragments shown directly inside cards, and a dark navy footer that visually closes long-scroll pages. Brand voltage comes from the Cal Sans display headline (a custom geometric face) and from product UI artifacts shown in-card rather than from accent colors.
+name: recon-dashboard-design
+description: A financial reconciliation dashboard adapted from ClickHouse's high-contrast database-interface language, inverted to a white canvas. Near-black ink typography in confident Inter, electric yellow as the singular brand accent reserved for primary actions and the "reviewed" moment, and a new data-dense layer — status badges, arithmetic proof tables, and a reconciliation waterfall — built to match the existing flat, bordered, single-accent system. The yellow's scarcity at the element level is preserved; it never appears on a status badge or a money figure, only on primary actions and emphasis.
 
 colors:
-  primary: "#111111"
-  primary-active: "#242424"
-  primary-disabled: "#e5e7eb"
-  ink: "#111111"
-  body: "#374151"
-  muted: "#6b7280"
-  muted-soft: "#898989"
-  hairline: "#e5e7eb"
-  hairline-soft: "#f3f4f6"
+  primary: "#d4c700"
+  primary-active: "#b8ad00"
+  primary-disabled: "#f0edc0"
+  ink: "#0a0a0a"
+  body: "#3a3a3a"
+  body-strong: "#1a1a1a"
+  muted: "#767676"
+  muted-soft: "#a3a3a3"
+  hairline: "#e2e2e2"
+  hairline-strong: "#cfcfcf"
   canvas: "#ffffff"
-  surface-soft: "#f8f9fa"
-  surface-card: "#f5f5f5"
-  surface-strong: "#e5e7eb"
-  surface-dark: "#101010"
-  surface-dark-elevated: "#1a1a1a"
-  on-primary: "#ffffff"
-  on-dark: "#ffffff"
-  on-dark-soft: "#a1a1aa"
-  brand-accent: "#3b82f6"
-  success: "#10b981"
-  warning: "#f59e0b"
-  error: "#ef4444"
-  badge-orange: "#fb923c"
-  badge-pink: "#ec4899"
-  badge-violet: "#8b5cf6"
-  badge-emerald: "#34d399"
+  surface-soft: "#f7f7f5"
+  surface-card: "#fafaf7"
+  surface-elevated: "#f0f0ec"
+  surface-yellow-band: "#d4c700"
+  on-primary: "#0a0a0a"
+  on-dark: "#0a0a0a"
+  on-yellow: "#0a0a0a"
+  accent-emerald: "#1a8a4a"
+  accent-emerald-bg: "#e8f5ec"
+  accent-rose: "#c0392b"
+  accent-rose-bg: "#fbeae8"
+  accent-blue: "#1d5fbf"
+  accent-blue-bg: "#e8f0fc"
+  accent-amber: "#b8860b"
+  accent-amber-bg: "#faf3dc"
+  success: "#1a8a4a"
+  warning: "#b8860b"
+  error: "#c0392b"
 
 typography:
   display-xl:
-    fontFamily: "Cal Sans, Inter, sans-serif"
-    fontSize: 64px
-    fontWeight: 600
-    lineHeight: 1.05
+    fontFamily: "Inter, sans-serif"
+    fontSize: 56px
+    fontWeight: 700
+    lineHeight: 1.1
     letterSpacing: -2px
   display-lg:
-    fontFamily: "Cal Sans, Inter, sans-serif"
-    fontSize: 48px
-    fontWeight: 600
-    lineHeight: 1.1
+    fontFamily: "Inter, sans-serif"
+    fontSize: 40px
+    fontWeight: 700
+    lineHeight: 1.15
     letterSpacing: -1.5px
   display-md:
-    fontFamily: "Cal Sans, Inter, sans-serif"
-    fontSize: 36px
-    fontWeight: 600
-    lineHeight: 1.15
+    fontFamily: "Inter, sans-serif"
+    fontSize: 32px
+    fontWeight: 700
+    lineHeight: 1.2
     letterSpacing: -1px
   display-sm:
-    fontFamily: "Cal Sans, Inter, sans-serif"
-    fontSize: 28px
-    fontWeight: 600
-    lineHeight: 1.2
-    letterSpacing: -0.5px
+    fontFamily: "Inter, sans-serif"
+    fontSize: 24px
+    fontWeight: 700
+    lineHeight: 1.25
+    letterSpacing: -0.3px
   title-lg:
     fontFamily: "Inter, sans-serif"
-    fontSize: 22px
-    fontWeight: 600
+    fontSize: 20px
+    fontWeight: 700
     lineHeight: 1.3
-    letterSpacing: -0.3px
+    letterSpacing: -0.2px
   title-md:
     fontFamily: "Inter, sans-serif"
     fontSize: 18px
@@ -70,53 +73,75 @@ typography:
     letterSpacing: 0
   title-sm:
     fontFamily: "Inter, sans-serif"
-    fontSize: 16px
+    fontSize: 15px
     fontWeight: 600
     lineHeight: 1.4
     letterSpacing: 0
+  stat-display:
+    fontFamily: "Inter, sans-serif"
+    fontSize: 40px
+    fontWeight: 700
+    lineHeight: 1.05
+    letterSpacing: -1px
   body-md:
     fontFamily: "Inter, sans-serif"
-    fontSize: 16px
+    fontSize: 15px
     fontWeight: 400
-    lineHeight: 1.5
-    letterSpacing: 0
+    lineHeight: 1.55
   body-sm:
     fontFamily: "Inter, sans-serif"
-    fontSize: 14px
+    fontSize: 13px
     fontWeight: 400
     lineHeight: 1.5
-    letterSpacing: 0
   caption:
     fontFamily: "Inter, sans-serif"
-    fontSize: 13px
+    fontSize: 12px
     fontWeight: 500
     lineHeight: 1.4
-    letterSpacing: 0
+  caption-uppercase:
+    fontFamily: "Inter, sans-serif"
+    fontSize: 11px
+    fontWeight: 600
+    lineHeight: 1.4
+    letterSpacing: 1px
   code:
     fontFamily: "JetBrains Mono, ui-monospace, monospace"
-    fontSize: 14px
+    fontSize: 13px
     fontWeight: 400
     lineHeight: 1.5
-    letterSpacing: 0
+  money:
+    fontFamily: "JetBrains Mono, ui-monospace, monospace"
+    fontSize: 14px
+    fontWeight: 500
+    lineHeight: 1.4
+    letterSpacing: -0.1px
+  money-lg:
+    fontFamily: "JetBrains Mono, ui-monospace, monospace"
+    fontSize: 20px
+    fontWeight: 600
+    lineHeight: 1.2
   button:
     fontFamily: "Inter, sans-serif"
     fontSize: 14px
     fontWeight: 600
     lineHeight: 1
-    letterSpacing: 0
   nav-link:
     fontFamily: "Inter, sans-serif"
     fontSize: 14px
     fontWeight: 500
     lineHeight: 1.4
-    letterSpacing: 0
+  table-header:
+    fontFamily: "Inter, sans-serif"
+    fontSize: 11px
+    fontWeight: 600
+    lineHeight: 1.3
+    letterSpacing: 0.5px
 
 rounded:
   xs: 4px
   sm: 6px
   md: 8px
   lg: 12px
-  xl: 16px
   pill: 9999px
   full: 9999px
 
@@ -128,15 +153,16 @@ spacing:
   lg: 24px
   xl: 32px
   xxl: 48px
-  section: 96px
+  section: 64px
 
 components:
+  # ---- carried over from source, inverted ----
   button-primary:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.on-primary}"
     typography: "{typography.button}"
     rounded: "{rounded.md}"
-    padding: 12px 20px
+    padding: "12px 20px"
     height: 40px
   button-primary-active:
     backgroundColor: "{colors.primary-active}"
@@ -147,396 +173,576 @@ components:
     textColor: "{colors.muted}"
     rounded: "{rounded.md}"
   button-secondary:
-    backgroundColor: "{colors.canvas}"
+    backgroundColor: "{colors.surface-card}"
     textColor: "{colors.ink}"
     typography: "{typography.button}"
     rounded: "{rounded.md}"
-    padding: 12px 20px
+    padding: "12px 20px"
     height: 40px
-  button-icon-circular:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.full}"
-    size: 36px
+    border: "1px solid {colors.hairline}"
   button-text-link:
     backgroundColor: transparent
     textColor: "{colors.ink}"
     typography: "{typography.button}"
+  button-icon-circular:
+    backgroundColor: "{colors.surface-card}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.full}"
+    size: 32px
+    border: "1px solid {colors.hairline}"
   text-link:
     backgroundColor: transparent
-    textColor: "{colors.ink}"
+    textColor: "{colors.accent-blue}"
     typography: "{typography.body-md}"
   top-nav:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
     typography: "{typography.nav-link}"
-    height: 64px
-  nav-pill-group:
-    backgroundColor: "{colors.surface-soft}"
-    textColor: "{colors.ink}"
-    typography: "{typography.nav-link}"
-    rounded: "{rounded.pill}"
-    padding: 6px
-  hero-band:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.display-xl}"
-    padding: 96px
-  hero-app-mockup-card:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.xl}"
-  feature-card:
+    height: 56px
+    border: "0 0 1px {colors.hairline} solid"
+  feature-card-dark:
     backgroundColor: "{colors.surface-card}"
     textColor: "{colors.ink}"
     typography: "{typography.title-md}"
     rounded: "{rounded.lg}"
-    padding: 32px
-  feature-icon-card:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.title-sm}"
+    padding: "{spacing.xl}"
+    border: "1px solid {colors.hairline}"
+  code-window-card:
+    backgroundColor: "{colors.surface-elevated}"
+    textColor: "{colors.body-strong}"
+    typography: "{typography.code}"
     rounded: "{rounded.lg}"
-    padding: 24px
-  product-mockup-card:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.lg}"
-    padding: 24px
-  testimonial-card:
-    backgroundColor: "{colors.surface-card}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.lg}"
-    padding: 24px
-  pricing-tier-card:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.title-lg}"
-    rounded: "{rounded.lg}"
-    padding: 32px
-  pricing-tier-card-featured:
-    backgroundColor: "{colors.surface-dark}"
-    textColor: "{colors.on-dark}"
-    typography: "{typography.title-lg}"
-    rounded: "{rounded.lg}"
-    padding: 32px
+    padding: "{spacing.lg}"
+    border: "1px solid {colors.hairline-strong}"
   text-input:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
     typography: "{typography.body-md}"
     rounded: "{rounded.md}"
-    padding: 10px 14px
+    padding: "10px 14px"
     height: 40px
+    border: "1px solid {colors.hairline}"
   text-input-focused:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
     rounded: "{rounded.md}"
+    border: "2px solid {colors.primary-active}"
   category-tab:
     backgroundColor: transparent
     textColor: "{colors.muted}"
     typography: "{typography.nav-link}"
-    padding: 8px 14px
     rounded: "{rounded.md}"
+    padding: "8px 14px"
   category-tab-active:
-    backgroundColor: "{colors.canvas}"
+    backgroundColor: "{colors.surface-elevated}"
     textColor: "{colors.ink}"
     typography: "{typography.nav-link}"
     rounded: "{rounded.md}"
-  avatar-circle:
-    backgroundColor: "{colors.surface-card}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.full}"
-    size: 36px
   badge-pill:
-    backgroundColor: "{colors.surface-card}"
+    backgroundColor: "{colors.surface-elevated}"
     textColor: "{colors.ink}"
     typography: "{typography.caption}"
     rounded: "{rounded.pill}"
-    padding: 4px 12px
-  rating-stars:
+    padding: "4px 12px"
+  badge-yellow:
+    backgroundColor: "{colors.primary}"
+    textColor: "{colors.on-primary}"
+    typography: "{typography.caption-uppercase}"
+    rounded: "{rounded.pill}"
+    padding: "4px 12px"
+  stat-callout:
     backgroundColor: transparent
-    textColor: "{colors.badge-orange}"
+    textColor: "{colors.ink}"
+    typography: "{typography.stat-display}"
+  footer:
+    backgroundColor: "{colors.surface-soft}"
+    textColor: "{colors.muted}"
+    typography: "{typography.body-sm}"
+    padding: "{spacing.xl}"
+    border: "1px solid {colors.hairline}"
+
+  # ---- new: reconciliation-specific ----
+  status-badge-matched:
+    backgroundColor: "{colors.accent-emerald-bg}"
+    textColor: "{colors.accent-emerald}"
+    typography: "{typography.caption-uppercase}"
+    rounded: "{rounded.pill}"
+    padding: "3px 10px"
+  status-badge-exception:
+    backgroundColor: "{colors.accent-rose-bg}"
+    textColor: "{colors.accent-rose}"
+    typography: "{typography.caption-uppercase}"
+    rounded: "{rounded.pill}"
+    padding: "3px 10px"
+  status-badge-excluded:
+    backgroundColor: "{colors.surface-elevated}"
+    textColor: "{colors.muted}"
+    typography: "{typography.caption-uppercase}"
+    rounded: "{rounded.pill}"
+    padding: "3px 10px"
+  status-badge-review:
+    backgroundColor: "{colors.accent-amber-bg}"
+    textColor: "{colors.accent-amber}"
+    typography: "{typography.caption-uppercase}"
+    rounded: "{rounded.pill}"
+    padding: "3px 10px"
+  pass-tag-cascade:
+    backgroundColor: "{colors.surface-elevated}"
+    textColor: "{colors.body-strong}"
     typography: "{typography.caption}"
-  cta-band-light:
+    rounded: "{rounded.sm}"
+    padding: "2px 8px"
+    border: "1px solid {colors.hairline-strong}"
+  pass-tag-llm:
+    backgroundColor: "{colors.primary-disabled}"
+    textColor: "{colors.body-strong}"
+    typography: "{typography.caption}"
+    rounded: "{rounded.sm}"
+    padding: "2px 8px"
+    border: "1px solid {colors.primary}"
+  money-cell:
+    backgroundColor: transparent
+    textColor: "{colors.body-strong}"
+    typography: "{typography.money}"
+  money-cell-negative:
+    backgroundColor: transparent
+    textColor: "{colors.accent-rose}"
+    typography: "{typography.money}"
+  money-total:
+    backgroundColor: transparent
+    textColor: "{colors.ink}"
+    typography: "{typography.money-lg}"
+  data-table:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body-sm}"
+    rounded: "{rounded.md}"
+    border: "1px solid {colors.hairline}"
+  data-table-header:
+    backgroundColor: "{colors.surface-soft}"
+    textColor: "{colors.muted}"
+    typography: "{typography.table-header}"
+    padding: "10px 16px"
+    border: "0 0 1px {colors.hairline-strong} solid"
+  data-table-row:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body-sm}"
+    padding: "12px 16px"
+    border: "0 0 1px {colors.hairline} solid"
+  data-table-row-hover:
+    backgroundColor: "{colors.surface-soft}"
+  data-table-row-selected:
+    backgroundColor: "{colors.primary-disabled}"
+  proof-table:
     backgroundColor: "{colors.surface-card}"
     textColor: "{colors.ink}"
-    typography: "{typography.display-sm}"
-    rounded: "{rounded.lg}"
-    padding: 48px
-  footer:
-    backgroundColor: "{colors.surface-dark}"
-    textColor: "{colors.on-dark-soft}"
+    typography: "{typography.code}"
+    rounded: "{rounded.md}"
+    padding: "{spacing.md}"
+    border: "1px solid {colors.hairline-strong}"
+  proof-table-row:
+    backgroundColor: transparent
+    typography: "{typography.money}"
+    padding: "6px 0"
+    border: "0 0 1px {colors.hairline} solid"
+  proof-table-row-total:
+    backgroundColor: "{colors.surface-elevated}"
+    typography: "{typography.money-lg}"
+    padding: "10px 12px"
+    rounded: "{rounded.sm}"
+  proof-delta-zero:
+    backgroundColor: "{colors.accent-emerald-bg}"
+    textColor: "{colors.accent-emerald}"
+    typography: "{typography.money}"
+    rounded: "{rounded.sm}"
+    padding: "4px 10px"
+  proof-delta-nonzero:
+    backgroundColor: "{colors.accent-rose-bg}"
+    textColor: "{colors.accent-rose}"
+    typography: "{typography.money}"
+    rounded: "{rounded.sm}"
+    padding: "4px 10px"
+  waterfall-band-positive:
+    backgroundColor: "{colors.surface-elevated}"
+    textColor: "{colors.ink}"
     typography: "{typography.body-sm}"
-    padding: 64px
+    rounded: "{rounded.sm}"
+    border: "1px solid {colors.hairline-strong}"
+  waterfall-band-negative:
+    backgroundColor: "{colors.accent-rose-bg}"
+    textColor: "{colors.accent-rose}"
+    typography: "{typography.body-sm}"
+    rounded: "{rounded.sm}"
+    border: "1px solid {colors.accent-rose}"
+  waterfall-band-total:
+    backgroundColor: "{colors.primary}"
+    textColor: "{colors.on-primary}"
+    typography: "{typography.title-sm}"
+    rounded: "{rounded.sm}"
+  waterfall-connector:
+    backgroundColor: "{colors.hairline-strong}"
+  audit-trail-item:
+    backgroundColor: transparent
+    textColor: "{colors.body}"
+    typography: "{typography.body-sm}"
+    padding: "8px 0"
+    border: "0 0 1px {colors.hairline} solid"
+  audit-trail-stage-tag:
+    backgroundColor: "{colors.surface-elevated}"
+    textColor: "{colors.muted}"
+    typography: "{typography.caption}"
+    rounded: "{rounded.sm}"
+    padding: "2px 6px"
+  drawer-panel:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.lg}"
+    padding: "{spacing.lg}"
+    border: "1px solid {colors.hairline}"
+  drawer-source-card:
+    backgroundColor: "{colors.surface-card}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body-sm}"
+    rounded: "{rounded.md}"
+    padding: "{spacing.md}"
+    border: "1px solid {colors.hairline}"
+  metric-strip-cell:
+    backgroundColor: "{colors.surface-card}"
+    textColor: "{colors.ink}"
+    typography: "{typography.stat-display}"
+    rounded: "{rounded.lg}"
+    padding: "{spacing.lg}"
+    border: "1px solid {colors.hairline}"
+  metric-strip-label:
+    backgroundColor: transparent
+    textColor: "{colors.muted}"
+    typography: "{typography.caption-uppercase}"
+  filter-chip:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.body}"
+    typography: "{typography.body-sm}"
+    rounded: "{rounded.pill}"
+    padding: "5px 12px"
+    border: "1px solid {colors.hairline-strong}"
+  filter-chip-active:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.canvas}"
+    typography: "{typography.body-sm}"
+    rounded: "{rounded.pill}"
+    padding: "5px 12px"
 ---
 
 ## Overview
 
-Cal.com's marketing surface is a clean, friendly modern-SaaS interface — white canvas (`{colors.canvas}` — #ffffff) with black primary CTAs (`{colors.primary}` — #111111), custom **Cal Sans** display typography, and `{colors.surface-card}` (#f5f5f5) light-gray cards holding product UI fragments. The system reads as confidently engineered without trying to impress — every band has clear hierarchy, generous whitespace, and a single primary action.
+This is the ClickHouse marketing design language inverted to a white canvas and extended
+for a data-dense financial reconciliation dashboard. The posture that made the source
+system worth adapting — one scarce accent color, flat bordered surfaces, no shadows, no
+gradients, monospace for anything numeric — transfers directly to a screen full of money
+and match decisions. What didn't transfer (hero bands, pricing tiers, CTA bands,
+customer-logo strips) has been dropped. What was missing (status badges, an arithmetic
+proof display, a waterfall, an audit trail) has been added in the same voice.
 
-Type voice splits cleanly into two roles: **Cal Sans** (the brand's custom geometric display face — used for h1, h2, h3, and hero headlines) and **Inter** (used for everything else — body, buttons, nav, captions). Cal Sans uses weight 600 with negative letter-spacing (-0.5px to -2px depending on size) — it feels modern, slightly condensed, distinctly Cal.com.
+**The inversion, precisely:** canvas flips from near-black (#0a0a0a) to white (#ffffff);
+ink flips from white to near-black (#0a0a0a). The yellow shifts from a screen-native
+`#faff69` to a print-safe `#d4c700` — the original hex fails contrast against white at
+body-text weight, so it's darkened until it holds on `{colors.canvas}` while still reading
+as the same color family. **Yellow's scarcity rule is unchanged and, if anything,
+tightened**: on this dashboard it appears on `button-primary` and `badge-yellow` only. It
+never appears on a status badge, a money figure, or a table row — those have their own
+semantic colors (emerald / rose / amber) so that "yellow" keeps meaning exactly one thing:
+primary action.
 
-Component voltage comes from **product UI fragments shown directly inside cards** — calendar widgets, scheduling forms, automation diagrams, integration tiles. Cal.com doesn't paint marketing illustrations of the product; it shows the actual product chrome at small scale embedded in the marketing flow.
+**Key characteristics carried over:**
+- Single accent discipline. One yellow, used scarcely, at full saturation.
+- Flat + bordered, never shadowed. Depth comes from `{colors.surface-card}` /
+  `{colors.surface-elevated}` tone steps, not elevation.
+- Inter at weight 700 for display, 600 for titles/buttons, 400 for body. No serif.
+- `{rounded.lg}` (12px) for cards, `{rounded.md}` (8px) for controls, `{rounded.pill}` for
+  badges only.
 
-The footer flips to `{colors.surface-dark}` (#101010) — a deep near-black that visually closes every long-scroll page. The footer is the only dark surface in the system; everything above stays white-with-light-gray-cards.
-
-**Key Characteristics:**
-- White canvas with black primary CTA (`{colors.primary}` — #111111). Buttons are `{rounded.md}` (8px) with confident weight-600 labels. Standard friendly-SaaS button.
-- Custom `Cal Sans` display typeface for headlines (substituted with Inter weight 600 here). Negative letter-spacing on display sizes — geometric, precise, slightly condensed.
-- Light-gray card surfaces (`{colors.surface-card}` — #f5f5f5) for feature cards, testimonials, and pricing tiers (non-featured). The featured pricing tier flips to `{colors.surface-dark}` (the only dark card on light pages).
-- Product UI fragments embedded directly in cards — Cal.com shows real schedule pickers, calendar widgets, integration grids inside its marketing cards. Brand voltage from real product chrome at small scale.
-- Nav-pill-group (`{component.nav-pill-group}`) — a small pill-radius wrapper around grouped nav segments (e.g., the sub-nav switcher between product views). The pill wrapper is one of the system's signature interactive components.
-- Avatars are circular (`{rounded.full}`), 36px diameter, used in testimonial rows and team-listing surfaces.
-- Footer is dark navy (`{colors.surface-dark}` — #101010) with light text (`{colors.on-dark-soft}` — #a1a1aa). The dark footer closes every page even though the body above is white.
-- Spacing rhythm is `{spacing.section}` (96px) between major bands — tight enough to feel modern-SaaS but generous enough to breathe.
-- Border radius is hierarchical: `{rounded.md}` (8px) for buttons + inputs, `{rounded.lg}` (12px) for content cards, `{rounded.xl}` (16px) for the hero app-mockup container, `{rounded.pill}` for nav-pill-group + badges, `{rounded.full}` for avatars + icon buttons.
+**Key characteristics added for this dashboard:**
+- **Money is monospace, always.** `{typography.money}` / `{typography.money-lg}` (JetBrains
+  Mono) for every rupee figure, in every screen. Never in the sans body face — an amount
+  and a label must never share a typeface at a glance.
+- **Status has its own three-color language**, deliberately separate from the yellow
+  brand accent: emerald (matched), rose (exception / false match), amber (requires
+  review). Excluded records get neutral grey — they are not a status, they are a
+  non-event.
+- **The origin of a match is always visible.** `pass-tag-cascade` (grey) vs
+  `pass-tag-llm` (pale yellow outline) on every matched row, so the "deterministic
+  dominates, LLM is a sliver" story is visible without narration, per
+  `master_specification.md` §23.3.
 
 ## Colors
 
 ### Brand & Accent
-- **Primary** (`{colors.primary}` — #111111): The dominant action color. All primary CTAs, h1/h2 display type. Press state shifts to `{colors.primary-active}` (#242424).
-- **Brand Accent** (`{colors.brand-accent}` — #3b82f6): Used sparely on inline links and on a small badge / "Customer story" highlight. Cal.com is a near-monochrome brand — the blue appears rarely.
-- **Badge Pastels** — A small pastel set for category badges and avatar fills: `{colors.badge-orange}` (#fb923c), `{colors.badge-pink}` (#ec4899), `{colors.badge-violet}` (#8b5cf6), `{colors.badge-emerald}` (#34d399). These appear on tag pills and small accent moments inside product UI fragments — never on hero CTAs.
+- **Primary** (`{colors.primary}` — #d4c700): The single brand accent, darkened from the
+  source `#faff69` for white-canvas contrast. Reserved for `button-primary` and
+  `badge-yellow` only — never a status, never a money figure.
+- **Primary Active** (`{colors.primary-active}` — #b8ad00): Pressed state, and doubles as
+  the focus-ring color on `text-input-focused`.
+- **Primary Disabled** (`{colors.primary-disabled}` — #f0edc0): Disabled buttons, and
+  reused as the pale fill behind `pass-tag-llm` and `data-table-row-selected` — the same
+  restraint principle as the source: the tint of the brand color, never the color itself,
+  carries secondary meaning.
 
 ### Surface
-- **Canvas** (`{colors.canvas}` — #ffffff): The default page floor.
-- **Surface Soft** (`{colors.surface-soft}` — #f8f9fa): Nav-pill-group background, very-soft section dividers.
-- **Surface Card** (`{colors.surface-card}` — #f5f5f5): Feature cards, testimonial cards, badge pills, default avatar fills.
-- **Surface Strong** (`{colors.surface-strong}` — #e5e7eb): Hairline border alternative; disabled button background.
-- **Surface Dark** (`{colors.surface-dark}` — #101010): The footer background — the only dark surface on every page. Also used for the featured pricing tier card.
-- **Surface Dark Elevated** (`{colors.surface-dark-elevated}` — #1a1a1a): Used for nested cards inside the dark footer or featured pricing card.
-- **Hairline** (`{colors.hairline}` — #e5e7eb): The 1px border tone on light surfaces. Used on input borders, table dividers, content card outlines (sometimes).
-- **Hairline Soft** (`{colors.hairline-soft}` — #f3f4f6): A barely-visible divider used between sections that share the white canvas.
+- **Canvas** (`{colors.canvas}` — #ffffff): The page floor. Pure white, the direct
+  inversion of the source's near-black.
+- **Surface Soft** (`{colors.surface-soft}` — #f7f7f5): Table headers, footer, section
+  dividers.
+- **Surface Card** (`{colors.surface-card}` — #fafaf7): Feature cards, proof tables,
+  drawer source cards. One step off white — the same "barely lighter than canvas" subtlety
+  the source used in reverse.
+- **Surface Elevated** (`{colors.surface-elevated}` — #f0f0ec): Nested surfaces —
+  code-window fill, active tab, badge-pill background, waterfall's neutral bands.
+- **Hairline** (`{colors.hairline}` — #e2e2e2): Standard 1px border.
+- **Hairline Strong** (`{colors.hairline-strong}` — #cfcfcf): Table-header underline,
+  proof-table border, active input focus fallback.
 
 ### Text
-- **Ink** (`{colors.ink}` — #111111): All headlines and primary text.
-- **Body** (`{colors.body}` — #374151): Default running-text color.
-- **Muted** (`{colors.muted}` — #6b7280): Secondary text — sub-headings, breadcrumbs, footer body.
-- **Muted Soft** (`{colors.muted-soft}` — #898989): Tertiary text — captions, fine-print, copyright lines.
-- **On Primary / On Dark** (`{colors.on-primary}` / `{colors.on-dark}` — #ffffff): Text on primary buttons and dark footer.
-- **On Dark Soft** (`{colors.on-dark-soft}` — #a1a1aa): Footer body text — slightly muted white for the link rows.
+- **Ink** (`{colors.ink}` — #0a0a0a): Headlines, primary values, active nav.
+- **Body** (`{colors.body}` — #3a3a3a): Default running text, audit-trail entries.
+- **Body Strong** (`{colors.body-strong}` — #1a1a1a): Table cell text, money-cell default.
+- **Muted** (`{colors.muted}` — #767676): Captions, table headers, filter-chip inactive
+  text, footer.
+- **Muted Soft** (`{colors.muted-soft}` — #a3a3a3): Placeholder text, disabled labels.
 
-### Semantic
-- **Success** (`{colors.success}` — #10b981): Confirmation states, success badges in product UI.
-- **Warning** (`{colors.warning}` — #f59e0b): Warning callouts.
-- **Error** (`{colors.error}` — #ef4444): Validation errors.
+### Status semantics (new)
+Kept strictly separate from the brand yellow so status always reads unambiguously.
+- **Emerald** (`{colors.accent-emerald}` #1a8a4a / bg `{colors.accent-emerald-bg}`
+  #e8f5ec): Matched, closes, verified.
+- **Rose** (`{colors.accent-rose}` #c0392b / bg `{colors.accent-rose-bg}` #fbeae8):
+  Exception, false match, delta ≠ 0, negative money.
+- **Amber** (`{colors.accent-amber}` #b8860b / bg `{colors.accent-amber-bg}` #faf3dc):
+  "Requires human review" — distinct from a hard exception; this is the ambiguous-record
+  badge per §23.4.
+- **Blue** (`{colors.accent-blue}` #1d5fbf): Informational text links only — never a
+  status.
 
 ## Typography
 
-### Font Family
-The system runs **Cal Sans** for display + brand wordmark and **Inter** for everything else. Cal Sans is Cal.com's custom geometric display typeface — slightly condensed, weight 600, negative letter-spacing. Inter handles body, buttons, navigation, captions, and tabular code blocks. The fallback stack walks `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif` for both families.
+Inter carries the whole system, exactly as in the source — display, body, buttons,
+navigation. **JetBrains Mono is added as a second, deliberate voice reserved for one job:
+anything that is a number derived from money or arithmetic.** This is the one addition to
+the source's "single typeface" principle, and it exists because a reconciliation dashboard
+lives or dies on whether a reviewer can tell, at a glance, "is this a label or a value."
 
-The split is functional:
-- Cal Sans (display, 600 weight, -0.5 to -2px tracking) — h1, h2, h3
-- Inter (body + UI, 400-600 weight, 0 letter-spacing) — paragraphs, labels, buttons, nav
+| Token | Size | Weight | Face | Use |
+|---|---|---|---|---|
+| `{typography.display-xl}` | 56px | 700 | Inter | Not typically used — dashboard has no marketing hero |
+| `{typography.display-lg}` | 40px | 700 | Inter | Screen title, e.g. "Run Overview" |
+| `{typography.display-md}` | 32px | 700 | Inter | Section heads within a screen |
+| `{typography.display-sm}` | 24px | 700 | Inter | Card-group titles |
+| `{typography.title-lg}` | 20px | 700 | Inter | Card titles, drawer header |
+| `{typography.title-md}` | 18px | 600 | Inter | Sub-card titles |
+| `{typography.title-sm}` | 15px | 600 | Inter | Table section labels, waterfall-band-total text |
+| `{typography.stat-display}` | 40px | 700 | Inter | Metric-strip headline numbers (record counts, %) |
+| `{typography.body-md}` | 15px | 400 | Inter | Default running text |
+| `{typography.body-sm}` | 13px | 400 | Inter | Table cells, audit trail, captions |
+| `{typography.caption}` | 12px | 500 | Inter | Badge labels, filter chips |
+| `{typography.caption-uppercase}` | 11px | 600 | Inter | Status-badge text, table-header labels |
+| `{typography.code}` | 13px | 400 | JetBrains Mono | Reason codes, record_key, technical strings |
+| `{typography.money}` | 14px | 500 | JetBrains Mono | **Every rupee figure in a table cell** |
+| `{typography.money-lg}` | 20px | 600 | JetBrains Mono | Headline totals — bank credited, gross orders |
+| `{typography.button}` | 14px | 600 | Inter | Button labels |
+| `{typography.table-header}` | 11px | 600 | Inter | Data-table column headers |
 
-### Hierarchy
-
-| Token | Size | Weight | Line Height | Letter Spacing | Use |
-|---|---|---|---|---|---|
-| `{typography.display-xl}` | 64px | 600 | 1.05 | -2px | Homepage h1 ("The better way to schedule your meetings") — Cal Sans |
-| `{typography.display-lg}` | 48px | 600 | 1.1 | -1.5px | Section heads ("Your all-purpose scheduling app") — Cal Sans |
-| `{typography.display-md}` | 36px | 600 | 1.15 | -1px | Sub-section heads, card titles — Cal Sans |
-| `{typography.display-sm}` | 28px | 600 | 1.2 | -0.5px | CTA-band heads, pricing tier prices — Cal Sans |
-| `{typography.title-lg}` | 22px | 600 | 1.3 | -0.3px | Pricing plan names — Inter |
-| `{typography.title-md}` | 18px | 600 | 1.4 | 0 | Feature card titles, intro paragraphs |
-| `{typography.title-sm}` | 16px | 600 | 1.4 | 0 | Small card titles, list labels |
-| `{typography.body-md}` | 16px | 400 | 1.5 | 0 | Default running-text |
-| `{typography.body-sm}` | 14px | 400 | 1.5 | 0 | Footer body, fine-print |
-| `{typography.caption}` | 13px | 500 | 1.4 | 0 | Badge labels, captions |
-| `{typography.code}` | 14px | 400 | 1.5 | 0 | Code snippets, API examples — JetBrains Mono |
-| `{typography.button}` | 14px | 600 | 1.0 | 0 | Standard button labels |
-| `{typography.nav-link}` | 14px | 500 | 1.4 | 0 | Top-nav menu items |
-
-### Principles
-Cal Sans is the brand voice — every display headline uses it. Inter handles the supporting type. The boundary is strict: never put body copy in Cal Sans, never put a display headline in Inter. Cal Sans without negative letter-spacing reads as off-brand — the -0.5 to -2px tracking is part of the voice.
-
-Display weight stays at 600 across all sizes — never 700, never 500. The middle weight is what makes Cal Sans feel modern and confident without becoming bombastic.
-
-### Note on Font Substitutes
-If Cal Sans is unavailable, **Inter** at weight 600 with -0.04em letter-spacing is a usable approximation. The geometric character of Cal Sans differs from Inter's humanist forms, but the substitution preserves the weight + tracking signature. **Manrope** at weight 700 is another close alternative.
+**Principle: if it's a rupee amount or a `record_key`/`reason_code`, it's JetBrains Mono.
+Everything else — every label, every heading, every sentence of exception text — is
+Inter.** This single rule is what lets §23.3's Match Explorer hold 400 rows without the
+eye losing track of which column is which.
 
 ## Layout
 
-### Spacing System
-- **Base unit:** 4px.
-- **Tokens:** `{spacing.xxs}` 4px · `{spacing.xs}` 8px · `{spacing.sm}` 12px · `{spacing.md}` 16px · `{spacing.lg}` 24px · `{spacing.xl}` 32px · `{spacing.xxl}` 48px · `{spacing.section}` 96px.
-- **Section padding:** `{spacing.section}` (96px) — the universal vertical rhythm between editorial bands.
-- **Card internal padding:** `{spacing.xl}` (32px) for feature cards and pricing tier cards; `{spacing.lg}` (24px) for testimonial and product-mockup cards.
-- **Gutters:** `{spacing.lg}` (24px) between cards in 3-up grids; `{spacing.md}` (16px) inside footer columns.
+### Spacing
+Unchanged from source: 4px base unit, tokens `{spacing.xxs}`→`{spacing.section}`. The
+source's 96px section rhythm is tightened to `{spacing.section}` = 64px, because a
+dashboard's screens are denser and shorter than a marketing page's scroll.
 
-### Grid & Container
-- **Max content width:** ~1200px centered on marketing pages.
-- **Editorial body:** Single 12-column grid; hero band often uses 7/5 split (h1 left, app mockup card right).
-- **Feature card grids:** 3-up at desktop, 2-up at tablet, 1-up at mobile.
-- **Pricing grid:** 4-up at desktop, 2-up at tablet, 1-up at mobile.
-- **Footer:** 4-column link list at desktop, wrapping to 2-up at tablet, 1-up at mobile.
+### Grid
+- Max content width ~1280px, matching the source.
+- Run Overview (§23.1): 4-column metric-strip row, then a 4-column source-card row below.
+- Match Explorer (§23.3): full-width `data-table`, filter-chip row above it.
+- Record drawer (§23.5): fixed-width panel (~480px) sliding from the right, 2×2 grid of
+  `drawer-source-card` above a scrollable `audit-trail-item` list.
 
-### Whitespace Philosophy
-Cal.com uses generous but not excessive whitespace — section padding sits at 96px (modern-SaaS standard), and card internal padding stays at 32px. The rhythm is calibrated for fast scanning: every band has a single h1 + h2 + supporting cards, never densely packed lists. The result reads as confident-not-shouting.
+### Whitespace
+Denser than the source's marketing rhythm — this is a working tool, not a landing page.
+Table rows compress to 12px vertical padding; card padding drops to `{spacing.lg}` (24px)
+from the source's `{spacing.xl}` (32px).
 
 ## Elevation & Depth
 
-| Level | Treatment | Use |
-|---|---|---|
-| Flat | No shadow, no border | Body sections, top nav, hero bands |
-| Soft hairline | 1px `{colors.hairline}` border | Inputs, table dividers, occasionally on cards |
-| Card surface | `{colors.surface-card}` background — no shadow | Feature cards, testimonials |
-| Subtle drop shadow | Faint shadow at low alpha | Pricing tier cards, hover-elevated states (the system uses `0 1px 2px rgba(0,0,0,0.05)` and `0 4px 12px rgba(0,0,0,0.08)`) |
-| Featured tier | `{colors.surface-dark}` background, no shadow needed | The featured pricing tier inverts to dark surface — color contrast does the elevation work |
-
-The elevation philosophy is **soft and modern** — small drop shadows on elevated cards, color-block contrast for emphasis. No heavy shadows, no neumorphism, no glassmorphism.
-
-### Decorative Depth
-- Calendar widgets and product UI fragments embedded inside marketing cards carry their own internal shadows from the product UI itself — these are not system tokens, they're product chrome shown as content.
-- Avatar circles in testimonial sections sometimes carry pastel fill colors (`{colors.badge-orange}`, `{colors.badge-pink}`, etc.) — adds a small chromatic flourish without breaking the monochrome brand voice.
+Unchanged philosophy: **no shadows, ever.** Depth is tone-stepping between
+`{colors.canvas}` → `{colors.surface-card}` → `{colors.surface-elevated}`, exactly as the
+source stepped `{colors.canvas}` → `{colors.surface-card}` → `{colors.surface-elevated}` in
+the dark direction. A `drawer-panel` sitting over the page gets a `{colors.hairline}`
+border, not a shadow — the source's rule that yellow-vs-dark contrast does the elevation
+work becomes, here, white-vs-bordered-card contrast doing the same job.
 
 ## Shapes
 
-### Border Radius Scale
-
-| Token | Value | Use |
-|---|---|---|
-| `{rounded.xs}` | 4px | Almost no use — reserved for badge accents |
-| `{rounded.sm}` | 6px | Small inline buttons, dropdown items |
-| `{rounded.md}` | 8px | Standard CTA buttons, text inputs, category tabs |
-| `{rounded.lg}` | 12px | Content cards (feature cards, testimonial cards, pricing tier cards) |
-| `{rounded.xl}` | 16px | Hero app-mockup card (a slightly larger radius for the marquee component) |
-| `{rounded.pill}` | 9999px | Nav-pill-group, badge pills |
-| `{rounded.full}` | 9999px / 50% | Avatars, icon buttons |
-
-### Photography Geometry
-Avatar photos use `{rounded.full}` (perfect circles) at 36px or 40px. Product UI fragments inside marketing cards retain their native chrome (which often has its own internal radii — e.g., calendar grid cells, button rows). Hero illustration zones use 16:9 or 4:3 ratios with `{rounded.xl}` corners.
+Unchanged from source: `{rounded.md}` (8px) for controls, `{rounded.lg}` (12px) for cards,
+`{rounded.pill}` for badges only. New: `{rounded.sm}` (6px) is used more heavily here than
+in the source, for `pass-tag-*`, `proof-delta-*`, and `waterfall-band-*` — small inline
+chips that are one step down from a full badge-pill.
 
 ## Components
 
-### Top Navigation
+### Carried over from the source (inverted, unchanged in structure)
+`button-primary` / `-active` / `-disabled`, `button-secondary`, `button-text-link`,
+`button-icon-circular`, `text-link`, `top-nav`, `feature-card-dark`, `code-window-card`,
+`text-input` / `-focused`, `category-tab` / `-active`, `badge-pill`, `badge-yellow`,
+`stat-callout`, `footer`. All structural rules are unchanged from the source spec — only
+color values inverted.
 
-**`top-nav`** — White nav bar pinned to the top of every page. 64px tall, `{colors.canvas}` background. Carries the Cal.com wordmark + logo at left (the lowercase "Cal.com" with the brand circle), primary horizontal menu (Product, Solutions, Resources, Pricing, Enterprise) center, right-side cluster with "Sign in" text-link, "Sign up free" `{component.button-primary}`, and a sometimes-visible language selector. Menu items in `{typography.nav-link}` (Inter 14px / 500).
+### New — status semantics
 
-**`nav-pill-group`** — A small pill-radius wrapper around 2-3 sub-nav segments (e.g., the product-mode switcher between "Personal" / "Teams" / "Enterprise"). Background `{colors.surface-soft}` with internal padding 6px, rounded `{rounded.pill}`. Active segment renders as a white-canvas pill with a subtle drop shadow inside the wrapper. The pill-in-pill treatment is one of Cal.com's signature interactive components.
+**`status-badge-matched`** — Emerald pill. Background `{colors.accent-emerald-bg}`, text
+`{colors.accent-emerald}`, type `{typography.caption-uppercase}`, `{rounded.pill}`,
+padding `3px 10px`. Used on every row in Match Explorer (§23.3) whose `status ==
+"matched"`.
 
-### Buttons
+**`status-badge-exception`** — Rose pill, same shape. Used on Exception List (§23.4) rows
+and any false match.
 
-**`button-primary`** — The signature primary CTA. Background `{colors.primary}` (#111111), text `{colors.on-primary}`, type `{typography.button}` (Inter 14px / 600), padding 12px × 20px, height 40px, rounded `{rounded.md}` (8px). Active state `button-primary-active` shifts to `{colors.primary-active}` (#242424).
+**`status-badge-excluded`** — Neutral grey pill, same shape. Used for `NOT_A_SETTLEMENT`
+records — deliberately the quietest badge in the system, because exclusion is correct
+behaviour, not an event worth emphasis.
 
-**`button-secondary`** — White button with hairline outline. Background `{colors.canvas}`, text `{colors.ink}`, 1px hairline border, same padding + height + radius as primary.
+**`status-badge-review`** — Amber pill. The "Requires human review" badge named explicitly
+in §23.4 for `AMBIGUOUS_DUPLICATE` records.
 
-**`button-icon-circular`** — 36 × 36px circular icon button. Background `{colors.canvas}`, hairline border, ink-color icon. Used for share, "view more", carousel arrows.
+**`pass-tag-cascade`** — Small grey outlined chip carrying the pass name (`exact`,
+`aggregate`, `fee_reversal`…). Background `{colors.surface-elevated}`, border
+`{colors.hairline-strong}`.
 
-**`button-text-link`** — Inline text button, no background. Used for "Sign in" in the top nav and inline CTA links inside cards.
+**`pass-tag-llm`** — Same shape, pale-yellow-outlined instead of grey. Background
+`{colors.primary-disabled}`, border `{colors.primary}`. **This is the only place yellow's
+tint appears outside a primary button** — a deliberate, visible marker that a record was
+resolved by the LLM layer, so the sliver is countable at a glance across the whole table.
 
-**`text-link`** — Inline body links in `{colors.ink}` (the brand keeps inline links monochrome). Underlined on hover (not documented per the no-hover policy, but mentioned for context).
+### New — money and proof display
 
-### Cards & Containers
+**`money-cell`** — Every rupee figure in a table row. JetBrains Mono, `{typography.money}`,
+right-aligned by convention (not encoded here — a layout rule for the frontend).
 
-**`hero-band`** — White-canvas hero with a 7-5 grid: h1 + sub-headline + button row on the left, `{component.hero-app-mockup-card}` on the right. Vertical padding `{spacing.section}` (96px).
+**`money-cell-negative`** — Same, in rose, for debits/refunds shown as negative.
 
-**`hero-app-mockup-card`** — A larger product-UI mockup card showing the actual Cal.com booking widget with calendar grid, time slots, and a primary "Confirm" button inside. Background `{colors.canvas}`, 1px hairline border, rounded `{rounded.xl}` (16px), subtle drop shadow. Used as the hero's right-side artifact.
+**`money-total`** — Headline totals (bank credited, gross orders) at `{typography.money-lg}`.
 
-**`feature-card`** — Used in 3-up feature grids ("With us, appointment scheduling is easy"). Background `{colors.surface-card}` (#f5f5f5), rounded `{rounded.lg}` (12px), internal padding `{spacing.xl}` (32px). Carries a small icon at top, an `{typography.title-md}` headline, and a body description in `{typography.body-md}`.
+**`proof-table`** — The `ArithmeticProof` display inside the record drawer (§23.5). Card
+surface `{colors.surface-card}`, monospace body, bordered. Renders as a labeled list:
+gross, fees, tax, refunds, expected_net, observed_net, delta — each a `proof-table-row`.
 
-**`feature-icon-card`** — A simpler card variant used in 4-up feature grids on lower-density bands. Background `{colors.canvas}` with hairline border, rounded `{rounded.lg}`, padding `{spacing.lg}` (24px). Carries a small icon, `{typography.title-sm}` title, short description.
+**`proof-table-row-total`** — The `expected_net = observed_net` closing line, set apart
+with `{colors.surface-elevated}` background and `{typography.money-lg}`.
 
-**`product-mockup-card`** — A card showing actual Cal.com product UI fragments (workflow editor, calendar grid, integration grid, automation flow). Background `{colors.canvas}`, rounded `{rounded.lg}`, padding `{spacing.lg}` (24px). The product UI inside has its own internal chrome — these cards display the product, they don't decorate around it.
+**`proof-delta-zero`** — Small emerald pill wrapping `delta: 0` — the visual "this closes"
+confirmation.
 
-**`testimonial-card`** — Used in customer-quote grids. Background `{colors.surface-card}`, rounded `{rounded.lg}`, padding `{spacing.lg}` (24px). Top row carries a `{component.avatar-circle}` + name + role; below sits the testimonial quote in `{typography.body-md}`.
+**`proof-delta-nonzero`** — Same shape in rose, for a rejected proposal's proof. This is
+the component that carries the `llm-hallucination` failure-injection moment from
+§24 — the model's confident proposal, shown next to a rose `delta ≠ 0`, is the single most
+important frame in the demo video.
 
-**`pricing-tier-card`** — Standard tier card. Background `{colors.canvas}`, rounded `{rounded.lg}`, padding `{spacing.xl}` (32px). Carries the plan name in `{typography.title-lg}`, price in `{typography.display-sm}`, feature checklist in `{typography.body-md}`, and a `{component.button-primary}` at the bottom.
+### New — waterfall (Reconciliation Bridge, §23.2)
 
-**`pricing-tier-card-featured`** — The featured tier (typically "Teams"). Background flips to `{colors.surface-dark}` (#101010), text inverts to `{colors.on-dark}`. The dark surface IS the featured-tier signal — no accent border, no badge, no scale shift.
+**`waterfall-band-positive`** — A neutral grey-bordered horizontal bar for an additive
+step (e.g. "Prior cycle spillover"). Clickable, filtering Match Explorer per §23.2.
 
-### Inputs & Forms
+**`waterfall-band-negative`** — Rose-bordered bar for a subtractive step (fees, tax,
+refunds, settled-next-cycle).
 
-**`text-input`** — Standard text input. Background `{colors.canvas}`, text `{colors.ink}`, type `{typography.body-md}`, rounded `{rounded.md}` (8px), padding 10px × 14px, height 40px. 1px hairline border in `{colors.hairline}`.
+**`waterfall-band-total`** — The single yellow bar marking the final "Bank credited" line
+— **the only waterfall band allowed to use the brand accent**, because it is the one
+figure the entire screen exists to prove.
 
-**`text-input-focused`** — Focus state. Border thickens or shifts to `{colors.ink}` for emphasis.
+**`waterfall-connector`** — The thin joining line between bands, `{colors.hairline-strong}`.
 
-### Tags / Badges
+### New — audit trail & drawer (§23.5)
 
-**`badge-pill`** — Small pill label used for category tags ("Product", "Article", "New") and pastel-fill avatar substitutes. Background `{colors.surface-card}` or one of the badge pastels (`{colors.badge-orange}`, `{colors.badge-pink}`, etc.), text `{colors.ink}`, type `{typography.caption}` (13px / 500), rounded `{rounded.pill}`, padding 4px × 12px.
+**`audit-trail-item`** — One row per audit-log entry for a record: stage, action, detail.
+Plain list, bottom-hairline separated, no card chrome — this is meant to read like a log,
+not a feature list.
 
-**`avatar-circle`** — 36px diameter, rounded `{rounded.full}`. Either holds a photo or a pastel fill with initials in `{typography.caption}`.
+**`audit-trail-stage-tag`** — Small grey tag prefixing each entry (`match.exact`,
+`verify`, `hypothesize`).
 
-**`rating-stars`** — Inline star rating in `{colors.badge-orange}` (#fb923c). Used near testimonial avatars to display a 5-star satisfaction score.
+**`drawer-panel`** — The record drawer itself. Bordered, no shadow, `{rounded.lg}`.
 
-### Tab / Filter
+**`drawer-source-card`** — One of the four side-by-side source records inside the drawer.
+`{colors.surface-card}`, bordered, monospace for any field value, Inter for field labels.
 
-**`category-tab`** + **`category-tab-active`** — Used inside the nav-pill-group. Inactive: transparent background, `{colors.muted}` text. Active: `{colors.canvas}` background, `{colors.ink}` text, subtle drop shadow inside the pill-group wrapper. Padding 8px × 14px, rounded `{rounded.md}`.
+### New — dashboard chrome
 
-### CTA / Footer
+**`metric-strip-cell`** — One headline metric on Run Overview (§23.1): match rate,
+runtime, unresolved count. Bordered card, `{typography.stat-display}` value, label below
+in `metric-strip-label`.
 
-**`cta-band-light`** — A pre-footer "Smarter, simpler scheduling" CTA card. Background `{colors.surface-card}`, rounded `{rounded.lg}`, padding `{spacing.xxl}` (48px). Carries an h2 in `{typography.display-sm}`, a sub-line, and a `{component.button-primary}` centered.
-
-**`footer`** — Dark navy footer that closes every page. Background `{colors.surface-dark}` (#101010), text `{colors.on-dark-soft}`. 4-column link list at desktop covering Product / Solutions / Company / Resources. Vertical padding 64px. The Cal.com wordmark sits at the top-left in `{colors.on-dark}`. The footer is the only dark surface on every page — the deliberate inversion visually closes the page.
+**`filter-chip`** / **`filter-chip-active`** — Match Explorer's per-pass filter row.
+Active state inverts to solid ink-on-white, matching the source's `category-tab-active`
+logic but as a pill rather than a rectangular tab, since these are toggleable multi-select
+filters rather than a single-select nav.
 
 ## Do's and Don'ts
 
 ### Do
-- Reserve `{colors.primary}` (#111111) for primary CTAs and h1/h2 type. Cal.com's button is near-black, not blue.
-- Use Cal Sans for every display headline. Pair with Inter body. Never blur the boundary.
-- Apply negative letter-spacing on display sizes (-0.5 to -2px). Cal Sans without it reads as off-brand.
-- Use `{component.feature-card}` (light gray) and `{component.product-mockup-card}` (white with chrome) deliberately — the gray cards signal "abstract feature claim", white cards signal "look at the actual product".
-- Embed real product UI fragments inside marketing cards. Don't paint marketing illustrations of the product when you can show the product itself.
-- Keep avatar circles at 36px, perfect circles, sometimes with pastel fills. Avatars are the only place where badge pastels appear.
-- Use `{component.nav-pill-group}` for grouped sub-nav segments. The pill-in-pill treatment is signature.
-- End every page with the dark footer. The light-to-dark transition is part of the editorial rhythm.
+- Reserve `{colors.primary}` for `button-primary`, `badge-yellow`, `pass-tag-llm`'s pale
+  outline, and `waterfall-band-total`. Four places. Not five.
+- Set every rupee figure in JetBrains Mono via `{typography.money}` or
+  `{typography.money-lg}` — no exceptions, no rupee amount in Inter.
+- Use the emerald/rose/amber status language consistently across all four screens —
+  matched is always emerald, exception is always rose, review is always amber, everywhere.
+- Show `pass-tag-cascade` vs `pass-tag-llm` on every matched row so the cascade-dominates
+  story is visible without a caption.
+- Keep `status-badge-excluded` visually quiet — it should read as "nothing happened here,"
+  not as a fourth status competing with the other three.
 
 ### Don't
-- Don't use accent colors (`{colors.brand-accent}`, badge pastels) on primary CTAs. The system is monochrome at the action layer.
-- Don't bold display weight beyond 600. Cal Sans at 700 reads as bombastic.
-- Don't use rounded radius beyond `{rounded.xl}` (16px) on cards. Larger radii read as consumer-app, not professional booking software.
-- Don't put dark surface cards anywhere except the footer and the featured pricing tier. The dark surface is a deliberate, scarce signal.
-- Don't repeat the same surface mode in two consecutive bands. Cal.com's pacing alternates white → light-gray → white → product-mockup-card → white → dark-footer.
-- Don't add hover state styling beyond what the system already encodes — primary darkens on press; nothing else changes.
+- Don't put yellow on a status badge, a money figure, or a table row background. It has
+  exactly one job: mark the primary action or the one total that matters.
+- Don't introduce a shadow anywhere. Depth is tone-stepping only, per the source system.
+- Don't render a `record_key`, `reason_code`, or amount in Inter — if it's Mono-eligible
+  content per the typography table, it must be Mono.
+- Don't give `AMBIGUOUS_DUPLICATE` a rose badge. It is amber (`status-badge-review`) —
+  distinct from a hard exception, because both candidates are plausible; it's not wrong,
+  it's unresolved.
+- Don't round `data-table` corners beyond `{rounded.md}` (8px) — dense tabular data reads
+  better with restrained radii than with the `{rounded.lg}` used on cards.
 
 ## Responsive Behavior
 
-### Breakpoints
+Per `master_specification.md` §23, this is a desktop-first internal tool; no phone
+breakpoint is required. Two breakpoints suffice.
 
-| Name | Width | Key Changes |
+| Name | Width | Key changes |
 |---|---|---|
-| Mobile | < 768px | Hamburger nav; hero h1 64→32px; hero-app-mockup-card stacks below content; feature grids 1-up; pricing 1-up; footer 4 cols → 1 |
-| Tablet | 768–1024px | Top nav stays horizontal but tightens; nav-pill-group wraps; feature cards 2-up; pricing 2-up |
-| Desktop | 1024–1440px | Full top-nav with all menu items; 3-up feature cards; 4-up pricing tiers |
-| Wide | > 1440px | Same as desktop with more outer breathing room; max content width caps at 1200px |
+| Desktop | ≥ 1024px | Full 4-column metric strip; `data-table` at full column count; drawer slides in at 480px fixed width without reflowing the table |
+| Compact | < 1024px | Metric strip 2×2; `data-table` drops secondary columns (pass tag moves into a row-expand); drawer becomes full-width overlay |
 
-### Touch Targets
-- `{component.button-primary}` at minimum 40 × 40px.
-- `{component.button-icon-circular}` at exactly 36 × 36 — slightly under WCAG's 44 × 44 but the centered icon and full-circle silhouette compensate.
-- `{component.text-input}` height is 40px.
-- `{component.category-tab}` rendered inside nav-pill-group has 8 × 14 padding; effective tap area meets 44px+ with the surrounding pill.
-
-### Collapsing Strategy
-- Top nav collapses to hamburger at < 768px; menu opens as a full-screen sheet.
-- Hero band's 7-5 grid collapses to single-column on mobile — h1 + sub-head + buttons first, then the app-mockup card below.
-- Feature grids reduce columns rather than scaling cards down.
-- Pricing tier cards collapse 4 → 2 → 1; featured-tier dark surface stays visually distinct at every breakpoint.
-- Nav-pill-group wraps to multi-row on tablet if the segments don't fit horizontally.
-- Avatar + testimonial card layouts stay grid-aligned at every breakpoint.
-
-### Image Behavior
-- Product UI fragments inside cards retain native aspect ratios; the cards themselves resize.
-- Avatar photos crop to circles at every breakpoint.
-- Hero app-mockup card scales proportionally on mobile — the calendar grid stays legible.
+Touch targets are not a primary concern (mouse/trackpad tool), but `button-primary` and
+`filter-chip` retain the source's 40px / medium targets for consistency.
 
 ## Iteration Guide
 
-1. Focus on ONE component at a time. Reference its YAML key directly (`{component.feature-card}`, `{component.pricing-tier-card-featured}`).
-2. Variants of an existing component (`-active`, `-disabled`, `-focused`) live as separate entries in `components:`.
-3. Use `{token.refs}` everywhere — never inline hex.
-4. Never document hover. Default and Active/Pressed states only.
-5. Display headlines stay Cal Sans 600 with negative letter-spacing. Body stays Inter 400. The trinity does not blur.
-6. The dark footer is the only dark surface on most pages. Don't add other dark cards casually.
-7. When in doubt about emphasis: bigger Cal Sans before bolder Cal Sans.
+1. Same discipline as the source: one component at a time, reference by YAML key, never
+   inline a hex or a px value that already has a token.
+2. New status colors (emerald/rose/amber) are semantic and closed — do not add a fourth
+   without updating this file and `master_specification.md` §20.3's reason-code table in
+   the same change.
+3. Every new component touching money must use `{typography.money}` or `-lg}` — check this
+   before merging, the same way `test_money.py` checks the backend.
+4. If a new screen element needs emphasis, reach for size/weight in Inter before reaching
+   for the yellow. The source's rule holds: bigger before more color.
 
 ## Known Gaps
 
-- The dembrandt frequency analyzer captured `Buttons: 0 variants` — Cal.com renders most CTAs as styled `<a>` link elements rather than `<button>` tags, which dembrandt's button selector doesn't capture. Button styles are documented from screenshot ground-truth + standard Cal Sans / Inter baselines.
-- Cal Sans is licensed to Cal.com and not available as a public web font; substitutes are documented in the typography section.
-- The badge pastel set (orange / pink / violet / emerald) is documented from observed avatar fill colors; exact hex values may shift seasonally.
-- Animation and transition timings (calendar slot picker, schedule confirmation, integration grid hover-reveal) are not in scope.
-- Form validation states beyond `{component.text-input-focused}` are not extracted — error / success states would need a sign-up or booking flow to confirm.
-- The actual booking widget surface (cal.com/{username}) is the product, not a marketing surface; its spec is out of scope.
-- Avatar photos in testimonial sections sometimes carry pastel circular fills with initials instead of photographs; both treatments coexist on the same page.
+- No dark mode. The source had none either; not needed for a four-day submission.
+- Chart-library-free per `master_specification.md` §23.6 — the waterfall must be built as
+  bordered `div`/`svg` bands using these tokens, not a charting dependency.
+- Animation/transition timings not specified; the source recommended none beyond default
+  browser behavior, and a reconciliation tool has no motion requirement beyond the
+  drawer's slide-in.

@@ -88,25 +88,353 @@ reading `member_keys` could have been led to credit a match that should never ex
 
 ---
 
-<!--
-Copy this block for each new challenge. Number sequentially. Newest at the bottom.
+### C-003 — Windows console can't render the spec's own prose (Phase 1)
 
-### C-00N — <one-line symptom> (Phase N)
+**Phase:** 1 — Project Foundation
 
-**Phase:**
+**What broke:** `python -m recon --help` crashed with `UnicodeEncodeError:
+'charmap' codec can't encode character '→' in position 31` — a full Rich
+traceback, not a clean CLI error. Separately, once that was fixed, `--help`
+rendered `inject` and `validate`'s descriptions with `�` in place of `§` and
+the em dash, and `run`'s description silently lost the literal text
+`[hypothesize]` entirely — it just vanished from the output with no error.
 
-**What broke:**
+**Root cause:** Two independent problems, both from writing docstrings the
+way the spec documents themselves are written. First: this environment's
+terminal uses the legacy Windows `cp1252` codepage, which has no glyph for
+`→`, `—`, or `§`; Rich's legacy-Windows renderer raises rather than
+substituting. Second: Typer/Rich treats a docstring's `[...]` as Rich console
+markup (a style tag), not literal text — `[hypothesize]` was silently
+interpreted as an (unknown, so dropped) style span rather than printed.
 
-**Root cause:**
+**Fix:** Rewrote every CLI help string and `console.print()` call in
+`recon/cli.py` to plain ASCII (`->` for arrows, `--` for em dashes, `section
+N` or `SN` for `§`, and `(hypothesize)` instead of `[hypothesize]`). Left a
+comment at the top of `cli.py` explaining why.
 
-**Fix:**
+**Prevention:** No automated test added yet — this was caught by literally
+running the Phase 1 acceptance commands, which is why the acceptance checklist
+existing matters. Worth a `test_no_llm.py`-adjacent smoke test later that
+invokes every CLI command's `--help` and asserts exit 0, so a future
+mid-refactor docstring copy-paste from the (Unicode-heavy) master spec doesn't
+silently reintroduce this on a reviewer's Windows machine — the acceptance
+criterion is "reviewer clones and runs in under 60 seconds," and a crash on
+`--help` on a stock Windows terminal would fail that on the very first command.
 
-**Prevention:**
-
-**Demo relevant?** Yes / No — <if yes, which moment in the video>
+**Demo relevant?** No — but worth a one-line README caveat if the demo video
+is recorded on Windows, since `--help`'s output is the very first thing a
+reviewer sees.
 
 ---
--->
+
+### C-004 — Two spec rules contradicted each other on partial-failure durability (Phase 2)
+
+**Phase:** 2 — Data Layer
+
+**What broke:** Nothing crashed or tested wrong on its own — this was caught
+by re-reading the master spec, not by a failing test. §7.2 says ingest uses
+"one transaction per source file." §12.1 separately says a `SourceUnavailable`
+during acquire must leave "no partial write." With one transaction per
+source, the two are incompatible: if source 3 of 4 fails, sources 1-2's rows
+are *already durably committed* by the time source 3 raises — a `run.db` that
+looks fully ingested (two of four tables populated) but silently isn't.
+
+**Root cause:** The implementation guide's Phase 2 "key rule" (one
+transaction per source) was implemented literally and in isolation, without
+checking it against §12.1's cross-cutting acquire-stage guarantee stated
+elsewhere in the same document. Neither rule is wrong on its own; they were
+never checked against each other until this review.
+
+**Fix:** Flagged the contradiction explicitly rather than picking a side
+myself. The user resolved it in favor of §12.1 (the stronger, more consequential
+guarantee — a corrupted-looking `run.db` is worse than a visible failure) and
+chose wrapping the whole `ingest()` call in one outer transaction over the
+alternative (deleting already-committed rows for the run_id after a failure),
+since the outer-transaction approach is atomic by construction and can never
+touch data left behind by a separate, already-successful earlier run.
+Implemented in `recon/ingest/__init__.py`, with the deviation from §7.2's
+literal text documented in the module docstring, not silently absorbed.
+
+**Prevention:** Added
+`test_source_unavailable_partway_through_leaves_no_partial_write` in
+`tests/test_ingest.py` — a source-3-of-4 failure now asserts zero rows in all
+four source tables and in `audit_log`. The near-miss here is the pattern to
+watch for going forward: a phase's own "key rule" can look locally correct
+and still contradict a guarantee stated in a different section — worth a
+second pass across sections before calling a phase done, not just within one.
+
+**Demo relevant?** No — but it's a legitimate "failure recovery" data point
+for the README/video if a concrete example of designed-in partial-failure
+handling is wanted beyond the LLM-hallucination story.
+
+---
+
+### C-005 — `aggregate` produced confirmed false matches on ambiguous adjustments (Phase 3)
+
+**Phase:** 3 — Verifier + Cascade Passes 1-3
+
+**What broke:** Nothing crashed. `aggregate.py` was implemented literally
+per §13.3 ("same equation, for settlements where refunds and adjustments net
+against payments"), and passed its own unit tests. Running it against the
+real frozen datasets (not a synthetic fixture) surfaced the actual bug:
+`aggregate` was successfully closing settlement groups that included an
+`adjustment`-type recon line with `order_id IS NULL` — the exact shape §13.7
+later assigns `AMBIGUOUS_DUPLICATE` to — and committing them as `matched`.
+
+**Root cause:** the settlement-level closing equation
+(Σorder.amount − Σfee − Σtax − Σrefund.debit − Σadjustment.debit =
+bank.credit) only needs *aggregate* totals to balance. It never needs to know
+*which* of two candidate orders an ambiguous adjustment "really" belongs to —
+the generator built the data to be internally consistent across the whole
+settlement regardless. So the group closes and verifies as mathematically
+true, while being factually wrong to claim as a match for that specific
+adjustment record, since attribution to a specific order is genuinely
+undecidable from the data.
+
+**Verification, without opening the sealed answer key:** cross-referenced
+each `aggregate`-matched adjustment's `amount` against `orders.json` (source
+data, not the answer key) for ≥2 orders sharing `customer_id` + `amount` +
+calendar date — §13.7's own detection condition. Two matched adjustments hit
+this signature exactly:
+- `holiday-skew`: `recon:rfnd_gBsETchiT4q8A8` (₹1,599, `order_AdbelbDMzBpQBX`
+  / `order_EO5DGVrZoolHkH`, same customer, same date)
+- `high-ambiguity`: `recon:rfnd_WwXMfvkqs4UU07` (₹2,999,
+  `order_QmmQ79LEXptIcF` / `order_PVdbWuHqrfjN2W`)
+
+Two other matched adjustments (`heavy-refunds`'s `rfnd_RJYakewYbG6R3R`,
+`high-ambiguity`'s `rfnd_yuDRYiSoSqQN0q`) did **not** show the signature —
+confirming not every adjustment is ambiguous, so a blanket "skip all
+adjustments" guard would have been wrong too (over-conservative, leaving
+legitimately resolvable settlements unmatched).
+
+**Fix:** added `has_ambiguous_adjustment(db, settlement_id)` to
+`match/classify.py` — a phase early, deliberately: only the boolean
+detection condition from §13.7, no reason code, no candidate list, no
+`Exception_` construction (that stays Phase 4's `classify_residual`).
+`build_settlement_proposal` (`match/exact.py`, shared by `exact` and
+`aggregate`) calls it and returns `None` — *defers*, does not exclude — when
+true, so the settlement stays open for Phase 4 to classify properly.
+Re-ran against all four datasets after the fix: both confirmed-ambiguous
+adjustments are now deferred; both legitimately-resolvable ones still match.
+
+**Prevention:** this is the second phase in a row where a pass implemented
+literally per its own section's text produced a real correctness problem
+only visible when run against the real data (C-004 was a cross-section spec
+contradiction; this one is a single section's algorithm having a
+consequence its own text doesn't mention). The pattern to watch: **finishing
+a pass's unit tests is not sufficient — always run it against all four real
+frozen datasets and inspect what it actually matched before calling a phase
+done**, especially for any pass touching refunds, adjustments, or anything
+else the project's own difficulty classes flag as hard.
+
+**Demo relevant?** Yes — this is a strong, concrete failure-recovery story:
+a pass built exactly to spec still produced a false match, caught by running
+it against real data mid-build (not discovered later in Phase 5 scoring),
+verified without touching the sealed answer key, and fixed with the smallest
+possible slice of forward logic rather than either shipping the bug or fully
+building out Phase 4 early.
+
+---
+
+### C-006 — Cascade writes never committed; every test suite run was green anyway (Phase 3)
+
+**Phase:** 3 — Verifier + Cascade Passes 1-3
+
+**What broke:** `pytest` was fully green (39/39) and a manual CLI run against
+`clean-august` printed a plausible-looking cascade table (`exact matched=88`).
+But running the CLI twice in separate invocations against the same `run.db`
+showed the second run repeating `utr in=400` — the residual hadn't shrunk at
+all. Opening the database file directly (fresh connection, after the CLI
+process had fully exited) showed `match_groups: 0`, `group_members: 0`. Every
+row `verify()`/`commit()` and `UtrPass` had written during the cascade was
+gone the moment the process ended.
+
+**Root cause:** `verify()`'s `commit()`, and `UtrPass`'s direct
+`persist_exception()`/`audit.record()` calls, all used plain `db.execute()`
+with no surrounding transaction or explicit `conn.commit()` anywhere in
+`run_cascade()`. `ingest()` had its own `with transaction(db):` wrapper (the
+C-004 fix), but the cascade never got one — `run_cascade()` was written,
+tested, and appeared to work, and the missing commit was never noticed
+because nothing in the test suite ever closed the connection before
+asserting against it. Python's `sqlite3` rolls back an open, uncommitted
+transaction when a connection closes; the CLI's `conn.close()` right after
+`run_cascade()` silently discarded the entire cascade's work every time.
+
+**Why `pytest` didn't catch it — worth its own sentence:** every
+`test_verify.py`/`test_utr.py`/`test_exact.py`/`test_aggregate.py` test uses
+the `db` fixture from `conftest.py`, which hands back one `sqlite3.Connection`
+that stays open for the whole test. SQLite lets a connection read its own
+uncommitted writes — that's ordinary read-consistency, not a bug — so every
+`db.execute("SELECT COUNT(*) FROM match_groups")` assertion in the suite
+passed correctly against data that was never actually durable. The bug is
+invisible to any test that never closes the connection and reopens a new one,
+which describes the entire suite as it stood. In-memory, single-connection
+tests can prove the *logic* is right and still miss that the *persistence*
+is wrong.
+
+**Fix:** wrapped each pass's `run()` call and its subsequent verify/commit
+loop in one `with transaction(db):` block in `run_cascade()` (one transaction
+per pass, per §7.2's still-current rule for the cascade — only ingest's
+granularity changed under C-004). On a pass failure, `state`'s residual lists
+are now rebuilt from the database rather than trusted from pre-exception
+in-memory mutations, so state can never drift from what actually committed.
+Verified for real, not just via pytest: ran the CLI fresh as its own process
+to completion, let it exit fully, then opened `run.db` from a brand-new
+`sqlite3.connect()` call in a separate Python invocation — `match_groups: 20`,
+`group_members: 196`, `exceptions: 5`, with a real proof row readable back
+from disk.
+
+**Prevention:** `tests/test_persistence_regression.py`, added the same
+session — a real (non-`:memory:`) SQLite file, one connection ingests and
+runs the cascade and closes fully, then a brand-new connection to the same
+file asserts `match_groups`/`group_members`/`exceptions`/`audit_log` all
+contain the expected rows, plus a second test confirming a reopened-file
+rerun stays idempotent. Verified the test is load-bearing, not just
+green-by-luck: temporarily reverted the transaction fix, confirmed both
+tests fail with the exact symptom (`match_groups: 0`), then restored the fix
+and confirmed they pass again. Promoted to a protected test — added as the
+seventh in PROJECT_RULES.md's "never cut" list and master spec §25, never to be
+skipped, weakened, or xfailed, same standing as `test_answer_key_seal`. This
+exact class of bug — logic correct, persistence silently absent — can no
+longer hide behind an all-green in-memory suite in a later phase.
+
+**Demo relevant?** Yes, arguably more than C-005: this is the sharper
+"tests passed, the product didn't work" story — worth having in the
+failure-recovery narrative precisely because it wasn't caught by the test
+suite, it was caught by insisting on checking the real artifact before
+calling the phase done.
+
+---
+
+### C-007 — `gross` double-counted a refunded order's amount from an unrelated settlement (Phase 3)
+
+**Phase:** 3 — Verifier + Cascade Passes 1-3
+
+**What broke:** Nothing crashed, and the wrong number looked entirely
+plausible on its own — `clean-august`'s cascade matched 88/400 after passes
+1-3, which is *below* the 126/400 naive baseline. Asked to confirm this was
+expected (naive credits records without requiring UTR-regex indexing, while
+`exact`/`aggregate` defer whole fee-null settlements), the plausible
+explanation turned out to be only part of the story. Measuring directly
+against source data: 126 recon lines sit in UTR-indexed, no-fee-null
+settlements — exactly the naive-baseline number — but only 88 of those were
+actually matching. The other 38, all in settlements containing a refund
+line, were failing to close with deltas in the tens of thousands of rupees.
+
+**Root cause:** `verify/arithmetic.py`'s `compute_closing_equation()` summed
+`order.amount` for **every** order referenced by **any** member recon line,
+including refund lines. A refund's `order_id` links back to the order it
+refunds — which, very often, was *paid* (and settled, and closed) in an
+earlier, unrelated settlement cycle. That order's full amount was already
+correctly credited to `gross` when *that* settlement closed; summing it
+again here double-counted it into the *current* settlement's gross, by
+exactly the refunded order's amount. Confirmed precisely, not just
+plausibly: for the first failing case
+(`recon:pay_97zXBmzveuvMFn`'s settlement, UTR `162526546968`), the proof's
+`delta` was exactly ₹24,794 (2,479,400 paise) off — and the sum of the three
+refunded orders' `amount` fields (`order_sPkqRMpzphjmbp` ₹16,497,
+`order_9DoZzOllOQBzbV` ₹7,398, `order_roIskXDKVXXFJG` ₹899) is exactly
+₹24,794. One of the three, `order_9DoZzOllOQBzbV`, has
+`status: "partially_refunded"` — direct confirmation its original payment
+line is not among this settlement's members at all.
+
+**Fix:** `compute_closing_equation()` now derives the payment-order set
+itself from `recon_lines` (only orders referenced by a `payment`-type line),
+rather than blindly summing whatever `Order` objects a caller passes in —
+so an extra, informational, refund-linked order can never leak into `gross`,
+regardless of what `build_settlement_proposal` includes as descriptive group
+members. Re-ran all four datasets after the fix: `clean-august` moved from
+88/400 to **exactly 126/400**, matching the naive baseline number precisely
+(88 exact + 38 aggregate). `heavy-refunds` 35→80, `holiday-skew` 76→114,
+`high-ambiguity` 57→125. Re-verified C-005's ambiguous-adjustment guard
+still holds under the fixed arithmetic across all four datasets (0 flagged).
+
+**Prevention:** this is the third bug in a row (after C-005, C-006) found
+only by measuring against real data and a real, independently-computed
+expectation (the naive baseline number), not by unit tests with synthetic
+fixtures — every existing unit test used a single settlement with no
+cross-settlement refund relationship, so this exact shape never appeared in
+them. Added
+`test_refund_pointing_at_an_order_from_a_different_settlement_c007_regression`
+in `tests/test_aggregate.py` (a refund whose `order_id` points at an order
+paid in a wholly different settlement) and verified it's load-bearing, not
+green-by-luck: temporarily reintroduced the bug (summed all orders again),
+confirmed the test fails with the exact original symptom (`matched: 0`
+where `2` was expected), then restored the fix and confirmed it passes.
+
+**Demo relevant?** Yes — a concrete "the number looked plausible and was
+still wrong" story, and the discipline that caught it (being asked to
+justify a discrepancy against an independently-computed baseline, rather
+than accepting the first explanation that fit) is worth naming directly in
+the video's failure-recovery section.
+
+---
+
+### C-008 — The ambiguous-adjustment guard blocks an entire settlement, not just the ambiguous line (Phase 4)
+
+**Phase:** 4 — Cascade Passes 4-6
+
+**What broke:** Nothing crashed. After wiring `fee_reversal`, `timing` and
+`tolerance`, clean-august's match count (350/400) was well short of §8.2's
+measured resolvable ceiling (389/400) — a 39-record gap. Measuring precisely
+which residual records were affected: 40/40 of clean-august's `NO_CANDIDATE`
+exceptions belonged to settlements that also contained an ambiguous
+adjustment (§13.7's signature). Across all four datasets, 80-97% of
+`NO_CANDIDATE` traces to the same cause. One settlement in clean-august has
+23 recon lines (a normal size — §13.1 documents settlements up to 32) and
+exactly one ambiguous adjustment; the C-005 guard (`has_ambiguous_adjustment`,
+called from `build_settlement_proposal`) defers the *entire* 23-line
+settlement to keep that one line out of `match_groups`, not just the line
+itself.
+
+**Root cause:** `verify()` derives every arithmetic input (`gross`, `fees`,
+`tax`, `refunds`) strictly and exclusively from `proposal.member_keys` — read
+`recon/verify/__init__.py` directly to confirm before proposing a fix, not
+from memory. There is no independent settlement-level query and no channel
+for a record to contribute to the closing equation without being a declared
+group member. So a settlement containing an ambiguous adjustment has exactly
+two options under the current architecture: include the ambiguous line as a
+member (closes correctly, but puts it in `match_groups` — forbidden by
+PROJECT_RULES.md rule 8 and `test_ambiguous.py`) or exclude it (the equation is then
+short by exactly that line's debit and never closes) — with no third path
+that keeps arithmetic correct while excluding just the one record.
+
+**Options considered:** (1) let the arithmetic use the ambiguous line's debit
+while excluding only it from `group_members`, emitting both a match for the
+rest and a separate `AMBIGUOUS_DUPLICATE` exception for that one record —
+rejected: checked directly that this needs either a new `MatchProposal` field
+(e.g. an arithmetic-only-not-membership key list) or a new `verify()`
+parameter, neither documented in §20.2/§20.4 — exactly the undocumented
+model/signature surface PROJECT_RULES.md rule 12 says to stop and ask about rather
+than invent under time pressure, and a real architecture change, not a Phase
+4-sized fix. (2) keep deferring the whole settlement, accept the ceiling
+miss, report the mechanism honestly. Chose (2).
+
+**Fix:** none — this is the deliberate, understood, and now precisely
+quantified cost of holding PROJECT_RULES.md rule 8 and rule 4 ("no third state")
+exactly to their literal text rather than engineering around them. The
+`has_ambiguous_adjustment` guard is unchanged. `test_ambiguous.py` tests the
+actual behavior: the ambiguous adjustment stays unmatched, *and* its
+settlement-mates do too, and the test asserts that precisely — not a smaller
+claim that would hide the real scope.
+
+**Prevention:** report this exact mechanism and the measured collateral
+counts (40/40 in clean-august, 55/69, 51/56, 110/113 in the other three) in
+Phase 5's error analysis and the README, not just the aggregate unresolved
+number — "5 ambiguous adjustments" reads very differently from "5 ambiguous
+adjustments currently costing 40+ otherwise-resolvable records," and burying
+the difference would be exactly the kind of inflated-claim failure this
+track's honesty bar exists to catch. If time allows later, revisit whether a
+documented, deliberately-added `MatchProposal` field is worth proposing to
+the user for a future session — not decided here.
+
+**Demo relevant?** Yes — arguably the strongest failure-recovery moment yet:
+a rule held under real, quantified pressure to relax it (a 39-record ceiling
+miss is a big, visible number), with the exact mechanism measured and
+reported rather than the guard being loosened to make the number look
+better.
+
+---
 
 ## Summary table
 
@@ -116,3 +444,9 @@ Keep this current — it is what goes in the README and the video.
 |---|---|---|---|---|
 | C-001 | 0 | Fee-reversal class was trivially easy | Fee-null lines sampled onto a 0% method | No |
 | C-002 | 0 | Unresolvable records implied a group | Answer key inherited settlement membership | No |
+| C-003 | 1 | CLI crashed / mis-rendered help text on Windows | cp1252 can't encode →/—/§; `[x]` parsed as Rich markup | No |
+| C-004 | 2 | §7.2 and §12.1 contradicted each other on partial-write durability | Per-source transactions committed early sources before a later source's failure | No |
+| C-005 | 3 | `aggregate` produced confirmed false matches on ambiguous adjustments | Settlement-level equation balances without per-order attribution | **Yes** |
+| C-006 | 3 | Cascade writes never committed; 39/39 pytest green the whole time | No transaction/commit around verify()/commit(); tests never closed the connection | **Yes** |
+| C-007 | 3 | `gross` double-counted a refund's unrelated original order | `compute_closing_equation` summed all orders, not just payment-referenced ones | **Yes** |
+| C-008 | 4 | Ambiguous-adjustment guard blocks a whole settlement (39-record ceiling miss) | `verify()` can't exclude one member's arithmetic without excluding its membership | **Yes** |

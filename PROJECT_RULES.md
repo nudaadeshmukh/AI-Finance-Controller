@@ -63,13 +63,17 @@ certainly no. This project wins on **restraint**, not on AI surface area.
 
 6. **Only `report/scoring.py` may open `answer_key.json`, and only after matching
    completes.** No other module reads it, references it, or imports from a module that
-   does.
+   does. `tests/test_answer_key_seal.py` enforces this. The failure mode is not malice —
+   it is a debugging session on day 3 with a stuck match rate, where eyeballing the key
+   "just to see" feels harmless. It isn't.
 
 7. **Tolerance constants are fixed before measurement, never widened after.** They live in
    `match/constants.py`, each with a comment justifying its value, and are echoed into
-   `results.json` so they appear in the UI. If you find yourself wanting to widen one to
-   lift a match rate, **stop and say so instead** — that impulse is the thing the rule
-   exists to catch.
+   `results.json` so they appear in the UI. The amount allowance is **derived, not flat**:
+   2 paise per member payment whose fee was derived, and 0 otherwise — a stated fee cannot
+   drift, so a settlement of stated fees must close exactly (§13.6). If you find yourself
+   wanting to widen anything to lift a match rate, **stop and say so instead** — that
+   impulse is the thing the rule exists to catch.
 
 8. **The 11 ambiguous records per run (32 in `high-ambiguity`) must stay unresolved.**
    They are the deliverable, not a failure. `AMBIGUOUS_DUPLICATE` exceptions must list
@@ -96,6 +100,22 @@ certainly no. This project wins on **restraint**, not on AI surface area.
     documented, stop and ask rather than improvising. This project is graded partly on
     architecture discipline, and undocumented surface breaks that.
 
+13. **Two records per run will score as false matches, and that is expected.** The answer
+    key marks 2 payments (6 in `high-ambiguity`) `CONTRADICTORY_LEDGER` on the basis of a
+    ledger entry the closing equation does not include. They close correctly and will be
+    matched. **Do not special-case the scorer and do not try to detect them** — that would
+    require inferring how the data was generated, which rule 2 forbids. Report it in the
+    Phase 5 error analysis, `docs/challenges-log.md`, and the README. See §13.8.
+
+14. **Never use force operations without explicit permission** — no `git push --force`
+    or `--force-with-lease`, no `git reset --hard` on commits not made this session, no
+    `rm -rf`, no overwriting a file the user didn't ask to overwrite, no destructive
+    database operation outside the schema this spec defines. If a task seems to need one,
+    stop and ask, and say exactly what the force operation would do and to what. This
+    matters more than usual here because the repository and its commit history are
+    graded artifacts — a force-push that rewrites history is itself a problem, not just a
+    risk to working code.
+    
 ## Scope exclusions (locked)
 
 **Do not build:** web server, authentication, RBAC, file upload, user accounts, dashboard
@@ -129,7 +149,7 @@ Full folder structure: `reference/master_specification.md` §3.2.
 
 ## Tech stack (locked)
 
-Python 3.11+ · SQLite (stdlib) · Pydantic v2 · Typer + Rich · Anthropic SDK
+Python 3.11+ · SQLite (stdlib) · Pydantic v2 · Typer + Rich · Groq SDK
 (`llama-3.3-70b-versatile`) · Jinja2 · httpx · pytest + ruff · Vite + React (static)
 
 **Five runtime dependencies. Do not add more without asking.** Every dependency is
@@ -192,8 +212,9 @@ assembled.
   typography, colour, component styling. Authoritative for **how** the frontend looks.
   It is **not** authoritative for what the screens contain — `master_specification.md`
   §23 owns screen content, data shown, and rules. If the two ever appear to disagree
-  about *what* a screen shows, §23 wins; `design.md` only governs *how* it looks. Read it
-  before writing any frontend code.
+  about *what* a screen shows, §23 wins; `design.md` only governs *how* it looks.
+  **Read it before writing any frontend code, not just before Phase 7** — this includes
+  the `frontend/` skeleton in Phase 1 and any screenshot or styling work in Phase 8.
 - **`docs/project-progress.md`** — running memory across sessions.
 - **`docs/challenges-log.md`** — every error and challenge, logged as it happens.
 
@@ -244,8 +265,9 @@ Format: `<area>: <what changed>` — e.g. `match: infer fee slabs with change-po
 **~4 days.** Phases 1–5 are the submission; Phases 6–8 are upside.
 
 Cut order under pressure: frontend polish → LLM layer → extra datasets.
-**Never cut:** the verifier, the exception list, honest metrics, or the five protected
-tests (`test_firewall`, `test_money`, `test_ambiguous`, `test_injection`, `test_verify`).
+**Never cut:** the verifier, the exception list, honest metrics, or the seven protected
+tests (`test_firewall`, `test_money`, `test_answer_key_seal`, `test_ambiguous`,
+`test_injection`, `test_verify`, `test_persistence_regression`).
 
 A deterministic pipeline with honest numbers and no LLM beats a flashy one with
 unverifiable results. That is not a consolation position — it is the track's actual bar.

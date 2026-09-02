@@ -1,0 +1,14 @@
+# Pinned exact versions — PROJECT_RULES.md: "reviewer must trust without reading."
+# Five runtime dependencies (pydantic, typer, rich, groq, jinja2, httpx) plus
+# stdlib sqlite3. pytest and ruff are dev-only, listed separately below.
+
+pydantic==2.13.5
+typer==0.27.2
+rich==15.0.0
+groq==1.7.0
+jinja2==3.1.6
+httpx==0.28.1
+
+# --- dev / test -------------------------------------------------------------
+pytest==8.4.2
+ruff==0.16.5
