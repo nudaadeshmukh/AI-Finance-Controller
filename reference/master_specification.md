@@ -117,7 +117,8 @@ razorpay-recon/
 │
 ├── reference/
 │   ├── master_specification.md     # THIS FILE — the only technical spec
-│   └── implementation_guide.md     # phase-by-phase build order
+│   ├── implementation_guide.md     # phase-by-phase build order
+│   └── design.md                   # frontend visual system — see §23
 │
 ├── docs/
 │   ├── project-progress.md         # running memory across sessions
@@ -155,6 +156,7 @@ razorpay-recon/
 │   ├── match/
 │   │   ├── __init__.py             # run_cascade(), PASSES
 │   │   ├── base.py                 # Pass protocol
+│   │   ├── classify.py             # residual → specific reason codes (§13.7)
 │   │   ├── constants.py            # tolerances, each with justifying comment
 │   │   ├── money.py                # round_half_up — matcher's OWN copy
 │   │   ├── utr.py                  # pass 1
@@ -165,7 +167,7 @@ razorpay-recon/
 │   │   └── tolerance.py            # pass 6
 │   │
 │   ├── hypothesize/
-│   │   ├── client.py               # Anthropic wrapper, timeout, retry
+│   │   ├── client.py               # Groq wrapper, timeout, retry
 │   │   ├── prompt.py               # system block + untrusted fence
 │   │   ├── parse.py                # strict JSON → Hypothesis
 │   │   └── cluster.py              # cluster_residual()
@@ -207,6 +209,7 @@ razorpay-recon/
 ├── tests/
 │   ├── conftest.py
 │   ├── test_firewall.py            # no generator imports
+│   ├── test_answer_key_seal.py     # answer key opened only by report/
 │   ├── test_money.py               # no floats
 │   ├── test_determinism.py
 │   ├── test_idempotency.py
@@ -258,14 +261,14 @@ No upward imports. No cycles.
 | Money | Integer paise, no floats |
 | Data manipulation | Plain Python — **no pandas** |
 | CLI | Typer + Rich |
-| LLM | Anthropic SDK, `claude-haiku-4-5` |
+| LLM | Groq SDK, `llama-3.3-70b-versatile` |
 | Templating | Jinja2 |
 | HTTP | httpx |
 | Tests | pytest; lint: ruff |
 | Frontend | Vite + React, static build |
 
-**Four runtime dependencies plus httpx. Do not add more without asking.** Every
-dependency is something a reviewer must trust without reading.
+**Five runtime dependencies: pydantic, typer+rich, groq, jinja2, httpx. Do not add more
+without asking.** Every dependency is something a reviewer must trust without reading.
 
 ---
 
@@ -581,10 +584,25 @@ CREATE TABLE audit_log (
 
 ### 7.2 Transaction boundaries
 
-One transaction per source file at ingest. One per pass in the cascade — a half-applied
-pass would corrupt the residual for the next. One per cluster in the LLM stage.
-`audit_log` writes participate in the enclosing transaction; audit and effect are never
-separable.
+**Ingest is one transaction for the whole call, covering all four sources —
+not one transaction per source file.** §12.1 requires that a `SourceUnavailable`
+raised partway through acquisition leave no partial write: not just from the
+source that failed, but from any source already read successfully earlier in
+the same call. A per-source transaction scheme cannot give that guarantee —
+by the time source 3 of 4 fails, sources 1–2 are already durably committed,
+which is a partial write in every sense that matters, even though each
+individual source's own transaction is internally clean. A single outer
+transaction gives the guarantee atomically: nothing commits until every
+source in the call succeeds. Implemented in `recon/ingest/__init__.py` and
+covered by
+`tests/test_ingest.py::test_source_unavailable_partway_through_leaves_no_partial_write`,
+which asserts zero rows in all four source tables (and `audit_log`) after a
+simulated failure on the third of four sources.
+
+One transaction per pass in the cascade — a half-applied pass would corrupt
+the residual for the next. One per cluster in the LLM stage. `audit_log`
+writes participate in the enclosing transaction in all three stages; audit
+and effect are never separable.
 
 ---
 
@@ -635,6 +653,11 @@ settlement net closes with no derivation.
 **`high-ambiguity` is designed to score worse.** Four flattering runs would invite
 exactly the suspicion the track bar warns about. A visible degradation on harder data is
 stronger evidence than a uniformly good number.
+
+### 8.3.1 `manifest.json`
+
+Generator metadata only. **The pipeline reads nothing from it except `run_id` and
+`label`.** Other fields are generation statistics; do not build logic on them.
 
 ### 8.4 Deliberate data-quality defects
 
@@ -769,7 +792,11 @@ Ingested ──validation fails──> Malformed ──> Exception
 `Excluded` is distinct from `Exception`, and the distinction matters. The 5 unrelated
 bank debits per run are *correctly* not matched. Counting them as exceptions understates
 performance; matching them is a false match. They get
-`reason_code = "NOT_A_SETTLEMENT"` and leave **both numerator and denominator**.
+`reason_code = "NOT_A_SETTLEMENT"`.
+
+**To be precise:** the denominator is the 400 recon lines. Bank transactions are not recon
+lines, so these 5 were never in the scored population. The reason code records that they
+were seen and deliberately excluded — it does not place them in any match-rate figure.
 
 ---
 
@@ -820,7 +847,7 @@ guarantee behind §4.2.
 |---|---|
 | In | Residual records, clustered; read-only `DerivedFacts` |
 | Out | `list[MatchProposal]`, `origin="llm"` |
-| Skipped when | `--no-llm`, residual empty, or `ANTHROPIC_API_KEY` absent |
+| Skipped when | `--no-llm`, residual empty, or `GROQ_API_KEY` absent |
 | Failure | Never raises. See §15.4 |
 
 ### 12.5 Verify
@@ -899,7 +926,8 @@ compute closure with **stated** fee/tax only. **Skip any settlement containing
 `fee IS NULL`** — that is pass 4.
 
 **`aggregate`:** same equation, for settlements where refunds and adjustments net against
-payments. Adjustments carry `order_id = NULL` by construction and contribute to the net
+payments. **The fee-null skip applies here too** — any settlement containing a payment with
+`fee IS NULL` is deferred to pass 4, in both `exact` and `aggregate`. Adjustments carry `order_id = NULL` by construction and contribute to the net
 with no order member.
 
 **Do not attempt to attribute an adjustment to an order.** For the 5 ambiguous
@@ -907,13 +935,22 @@ duplicates this is precisely the trap.
 
 ### 13.4 Pass 4 — `fee_reversal` (the payments-literacy pass)
 
-**Step 1 — observe.** For every payment with a stated fee:
-`bps = round_half_up(fee * 10000, amount)`. Bucket by `method`. Discard buckets with
-fewer than 3 observations.
+**Step 1 — observe.** Filter to `type == "payment" AND fee IS NOT NULL` — **319 lines in
+`clean-august`, not 400.** Refunds and adjustments carry `fee = 0` with `amount > 0`;
+including them injects 40 spurious 0-bps observations and destroys the change-point scan.
+
+For each: `bps = round_half_up(fee * 10000, amount)`. Bucket by `method`. Discard buckets
+with fewer than 3 observations — **no slab is derived for a discarded bucket and no rate
+is guessed.** Its fee-null lines fall through to `timing` and `tolerance` like any other
+residual, then to `NO_CANDIDATE`. Log the abandoned inference to `audit_log`.
 
 **Step 2 — detect a change point.** If one bps value accounts for ≥95%, single slab.
 Otherwise sort by `created_at` and scan candidate splits, maximising mode purity on both
 sides. Accept only if both sides reach ≥95% purity **and** have ≥5 observations.
+
+**A candidate split is an index where `bps` differs between consecutive observations** —
+not every index boundary, not day boundaries. That keeps the search proportional to the
+number of distinct transitions.
 
 **Step 3 — validate before use.** A slab is accepted only if it reproduces
 `credit == amount − fee − tax` **exactly** on 100% of stated-fee lines in its period,
@@ -939,6 +976,10 @@ change was **discovered, not configured**.
 Accept only if the calendar explains ≥95% of payments with both timestamps. Below that,
 record low confidence and let affected records fall through to tolerance.
 
+**Never match on `bank_txns.value_date`.** The recon↔bank join is by UTR only. Zero lag
+between `settled_at` and `value_date` happens to hold in this data, but a matcher that
+depends on it would break on real data.
+
 ### 13.6 Pass 6 — `tolerance`
 
 Three narrow allowances. Each is a constant in `match/constants.py` **with a comment
@@ -946,11 +987,64 @@ justifying it**, echoed into `results.json`.
 
 | Allowance | Value | Justification |
 |---|---|---|
-| Amount delta | ≤ 2 paise | Independent half-up rounding on fee and tax each contribute ≤1 |
+| Amount delta | ≤ 2 paise **per derived-fee line**, 0 otherwise | See below |
 | UTR suffix truncation | ≤ 2 digits | Observed bank formatting defect; **requires unique prefix match** |
 | Ledger posting lag | ≤ 1 day | Accountants book same-day or next-day |
 
+**The amount allowance is derived, not flat.** A settlement whose member payments all
+carry a *stated* fee must close with `delta == 0` exactly — a stated fee cannot drift.
+Only a fee recovered in `fee_reversal` can be off, by at most 1 paise on the fee and 1 on
+the tax, since both round half-up independently.
+
+```
+allowed_delta = 2 * (number of member payments whose fee was DERIVED)
+```
+
+For a settlement with no derived fees this is 0. Settlements average 6.6 lines and reach
+32, so a flat settlement-level constant of 2 would be simultaneously too tight for a
+multi-line derived settlement and far too loose for a single stated one. Scaling by
+derived lines only is both tighter and more honest.
+
+Emitted as `tolerance_constants.amount_delta_paise_per_derived_line: 2`.
+
 A truncated UTR matching two settlements is **ambiguity, not a match.**
+
+### 13.7 `classify_residual` — assigning specific reason codes
+
+Runs at the end of `run_cascade()`, after pass 6 and **before** the LLM stage. It does not
+match anything. It converts blanket `NO_CANDIDATE` into specific, honest reason codes.
+
+```python
+# match/classify.py
+def classify_residual(db: Connection, state: CascadeState) -> list[Exception_]
+```
+
+| Detection | Emits |
+|---|---|
+| Unmatched adjustment with `order_id IS NULL`, where ≥2 orders share the same `customer_id`, `amount` and calendar date | `AMBIGUOUS_DUPLICATE`, `candidates` = those order record_keys |
+| Unmatched recon line whose `settlement_utr` matches no bank transaction, after both `utr` and `tolerance` have run | `CROSS_PERIOD_UTR` |
+| Everything else still unresolved | `NO_CANDIDATE` |
+
+**Never pick one candidate.** Listing both is the deliverable.
+
+`CONTRADICTORY_LEDGER` is **not** detected here — see §13.8.
+
+### 13.8 Known answer-key limitation — report, do not fix
+
+The answer key marks 2 recon payments per run (6 in `high-ambiguity`) as
+`CONTRADICTORY_LEDGER`. Those payments have an order, a stated fee, a settlement and a
+bank transaction. **They close correctly under the closing equation, which does not
+include ledger entries at all.**
+
+The matcher will therefore match them, and scoring will count them as **false matches**.
+This is a defect in the answer key, not in the matcher.
+
+**Do not special-case the scorer. Do not attempt to detect them.** Detecting them would
+require inferring how the data was generated, which §4.2 forbids.
+
+Expect ~2 false matches per run traceable to this. State it explicitly in the Phase 5
+error analysis, in `docs/challenges-log.md`, and in the README. Reporting a known
+limitation honestly is a stronger signal than a clean number obtained by special-casing.
 
 ---
 
@@ -995,7 +1089,7 @@ testable assertion rather than a promise.
 
 ```python
 def propose(residual: list[RecordKey], db: Connection, facts: DerivedFacts,
-            client: Anthropic | None, *, model: str = "claude-haiku-4-5",
+            client: Groq | None, *, model: str = "llama-3.3-70b-versatile",
             timeout_s: int = 20) -> list[MatchProposal]
 ```
 
@@ -1006,8 +1100,10 @@ None, the residual is empty, or the API is unavailable. **Never raises.**
 
 The task is narrow and structured — read a small residual set, propose a candidate
 grouping as JSON. Deep reasoning is unnecessary **because the verifier, not the model,
-establishes truth.** We chose the smallest model that cleared the bar. Escalation to
-`claude-sonnet-5` is a one-line change, decided by measurement, not assumption.
+establishes truth.** Groq's inference speed keeps the hypothesis stage from dominating
+runtime, and the OpenAI-compatible client means the provider is swappable in one place.
+We chose the smallest capable model; escalation is a config change, decided by
+measurement, not assumption.
 
 ### 15.2 Prompt contract
 
@@ -1034,6 +1130,9 @@ frontend as evidence the architecture works.
 
 One call per residual cluster, not per record. Clusters are single-digit, so cost and
 latency are bounded by ambiguity rather than record count.
+
+**Clustering key:** residual records sharing a `settlement_utr` form one cluster. Records
+with no usable UTR cluster by `(customer_id, calendar date)`.
 
 ### 15.4 Failure matrix
 
@@ -1090,7 +1189,8 @@ rate.** A number without a trail is a claim; a number with one is evidence.
 | **Unresolved rate** | records sent to exceptions ÷ 400 |
 | **Throughput** | records/sec, **separately** for cascade and LLM |
 
-Excluded records (`NOT_A_SETTLEMENT`) leave both numerator and denominator.
+The denominator is always the 400 recon lines. Bank transactions marked
+`NOT_A_SETTLEMENT` are not recon lines and appear in neither numerator nor denominator.
 
 ### 17.2 Required comparisons in every run
 
@@ -1156,8 +1256,8 @@ The pipeline's only output to the frontend. Static, self-contained, committed.
   ],
 
   "passes": [
-    { "name": "exact",        "matched": 0, "runtime_ms": 0 },
     { "name": "utr",          "matched": 0, "runtime_ms": 0 },
+    { "name": "exact",        "matched": 0, "runtime_ms": 0 },
     { "name": "aggregate",    "matched": 0, "runtime_ms": 0 },
     { "name": "fee_reversal", "matched": 0, "runtime_ms": 0 },
     { "name": "timing",       "matched": 0, "runtime_ms": 0 },
@@ -1197,7 +1297,7 @@ The pipeline's only output to the frontend. Static, self-contained, committed.
   ],
 
   "tolerance_constants": {
-    "amount_delta_paise": 2,
+    "amount_delta_paise_per_derived_line": 2,
     "utr_truncation_digits": 2,
     "ledger_lag_days": 1
   }
@@ -1358,6 +1458,7 @@ def ingest(adapter: SourceAdapter, db: Connection) -> IngestReport
 
 # match/
 def run_cascade(db: Connection, run_id: RunId, *, passes=PASSES) -> CascadeResult
+def classify_residual(db: Connection, state: CascadeState) -> list[Exception_]
 def extract_utr(description: str) -> str | None
 def infer_slabs(lines: list[ReconLine]) -> list[FeeSlab]
 def derive_fee(amount: Paise, slab: FeeSlab) -> tuple[Paise, Paise]
@@ -1417,8 +1518,8 @@ exceptions — they are `Exception_` *records* written to the database.
 
 | Variable | Required | Purpose |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | No | Absent → LLM stage skipped, run completes |
-| `RECON_LLM_MODEL` | No | Default `claude-haiku-4-5` |
+| `GROQ_API_KEY` | No | Absent → LLM stage skipped, run completes |
+| `RECON_LLM_MODEL` | No | Default `llama-3.3-70b-versatile` |
 | `RECON_LLM_TIMEOUT_S` | No | Default 20 |
 | `RAZORPAY_KEY_ID` | No | Only for `--source razorpay` |
 | `RAZORPAY_KEY_SECRET` | No | Only for `--source razorpay` |
@@ -1469,6 +1570,9 @@ Click any row → all four source records side by side, plus the full audit trai
 where the hallucination-rejection moment is visible.
 
 ### 23.6 Rules
+- **All visual decisions — layout, typography, colour, spacing, component styling — come
+  from `reference/design.md`. Read it before writing any frontend code.** This section
+  specifies content only and deliberately contains no visual specification
 - `src/lib/format.ts` is the **only** place paise become rupees
 - `types.ts` asserts `schema_version === 1`
 - Display `tolerance_constants`
@@ -1502,9 +1606,11 @@ Every phase ships with its tests passing. `pytest` green before a phase is compl
 | Test | Protects |
 |---|---|
 | `test_firewall.py` | §4.2 — no generator imports in `match/`, `hypothesize/`, `verify/` |
+| `test_answer_key_seal.py` | §4.6 — no module outside `report/` reads `answer_key.json` |
 | `test_money.py` | §4.1 — no float in any model or `results.json` |
 | `test_determinism.py` | Same seed, byte-identical dataset |
 | `test_idempotency.py` | Two runs, identical results, no duplicate rows |
+| `test_persistence_regression.py` | Cascade writes survive a real connection close + reopen — not just an in-memory, single-connection assertion (C-006) |
 | `test_ingest.py` | Malformed rows recorded, not raised |
 | `test_utr/exact/aggregate/timing/tolerance.py` | Per-pass, one fixture per class |
 | `test_fee_reversal.py` | Both slabs recovered; an approximate slab is **rejected** |
@@ -1513,12 +1619,21 @@ Every phase ships with its tests passing. `pytest` green before a phase is compl
 | `test_injection.py` | The planted record never appears in a match group |
 | `test_no_llm.py` | `--no-llm` produces a complete run |
 
-**Never skip, weaken, or xfail:** `test_firewall`, `test_money`, `test_ambiguous`,
-`test_injection`, `test_verify`.
+**Never skip, weaken, or xfail:** `test_firewall`, `test_money`, `test_answer_key_seal`,
+`test_ambiguous`, `test_injection`, `test_verify`, `test_persistence_regression`.
 
 `test_firewall.py` is the one that erodes under pressure. On day 3, when fee inference
 will not converge, importing one constant from the generator will fix it and silently
 void the entire result. **The test exists because discipline will not hold at 2am.**
+
+`test_persistence_regression.py` exists because the other six protect against a
+mistake someone would *notice* — a wrong number, an imported constant, a widened
+tolerance. This one protects against a mistake that produces **no wrong number at
+all**: 39/39 tests green, a plausible-looking CLI table, and an empty database the
+moment the process exits, because every existing test asserted against the same
+long-lived open connection that wrote the data. It must run against a real file on
+disk and must close the writing connection before reopening — an in-memory,
+single-connection test cannot catch this class of bug by construction (§7.2, C-006).
 
 ---
 
@@ -1633,7 +1748,7 @@ Must contain:
 
 Frontend polish → LLM layer → extra datasets.
 
-**Never cut:** the verifier, the exception list, honest metrics, or the five protected
+**Never cut:** the verifier, the exception list, honest metrics, or the six protected
 tests in §25.
 
 A deterministic pipeline with honest numbers and no LLM beats a flashy one with

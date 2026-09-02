@@ -1,0 +1,48 @@
+[project]
+name = "recon"
+version = "0.1.0"
+description = "Multi-source financial reconciliation pipeline — Razorpay AI Buildathon 2026, Track 04"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+readme = "README.md"
+dependencies = [
+    "pydantic==2.13.5",
+    "typer==0.27.2",
+    "rich==15.0.0",
+    "groq==1.7.0",
+    "jinja2==3.1.6",
+    "httpx==0.28.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.4.2",
+    "ruff==0.16.5",
+]
+
+[project.scripts]
+recon = "recon.__main__:app"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["recon*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Makes `recon` importable for `pytest` without requiring `pip install -e .` -
+# a fresh clone only runs `pip install -r requirements.txt` (see .env.example
+# and CLAUDE.md: "every variable optional... zero setup").
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = ["recon/generate"]
+
+[tool.ruff.lint]
+# recon/generate is outside the pipeline's dependency graph (CLAUDE.md rule 2)
+# and is excluded above rather than linted to this project's conventions.
+select = ["E", "F", "I", "UP"]
