@@ -47,10 +47,28 @@ def verify(proposal: MatchProposal, db: sqlite3.Connection, facts: DerivedFacts)
     real circular import — Python must fully execute `match/__init__.py`
     (which needs `recon.verify` to already exist) before any `recon.match.X`
     submodule becomes importable. Deferring to call time breaks the cycle.
+
+    §14.1/C-008: when `proposal.arithmetic_scope` is set, the equation is
+    read and summed over THAT (a superset of `member_keys`), not
+    `member_keys` alone — but the derived-fee tolerance count (`allowed_delta`,
+    §13.6) still only counts derivations belonging to `member_keys`, per its
+    "member payment" wording. `scope_only_keys` on the returned proof is the
+    set difference, always `[]` when `arithmetic_scope` is `None`.
     """
     from recon.match.base import find_applicable_slab
     from recon.match.constants import AMOUNT_DELTA_PAISE_PER_DERIVED_LINE
     from recon.match.fee_reversal import derive_fee
+
+    member_keys_set = set(proposal.member_keys)
+    if proposal.arithmetic_scope is None:
+        scope_keys = proposal.member_keys
+    else:
+        scope_keys = proposal.arithmetic_scope
+        if not member_keys_set <= set(scope_keys):
+            raise ValueError(
+                f"MatchProposal {proposal.group_id!r}: member_keys must be a subset of "
+                "arithmetic_scope when arithmetic_scope is set (§14.1)"
+            )
 
     orders: list[Order] = []
     recon_lines: list[ReconLine] = []
@@ -59,15 +77,15 @@ def verify(proposal: MatchProposal, db: sqlite3.Connection, facts: DerivedFacts)
     derived_count = 0
     has_unresolved_fee = False
 
-    for member_key in proposal.member_keys:
-        prefix, _, _ = member_key.partition(":")
+    for scope_key in scope_keys:
+        prefix, _, _ = scope_key.partition(":")
         if prefix == "order":
-            order = read_order(db, member_key)
+            order = read_order(db, scope_key)
             any_missing = any_missing or order is None
             if order is not None:
                 orders.append(order)
         elif prefix == "recon":
-            line = read_recon_line(db, member_key)
+            line = read_recon_line(db, scope_key)
             any_missing = any_missing or line is None
             if line is not None:
                 if line.type == "payment" and (line.fee is None or line.tax is None):
@@ -75,19 +93,20 @@ def verify(proposal: MatchProposal, db: sqlite3.Connection, facts: DerivedFacts)
                     if slab is not None:
                         fee, tax = derive_fee(line.amount, slab)
                         line = line.model_copy(update={"fee": fee, "tax": tax})
-                        derived_count += 1
+                        if scope_key in member_keys_set:
+                            derived_count += 1
                     else:
                         has_unresolved_fee = True
                 recon_lines.append(line)
         elif prefix == "bank":
-            txn = read_bank_txn(db, member_key)
+            txn = read_bank_txn(db, scope_key)
             any_missing = any_missing or txn is None
             if txn is not None:
                 bank_txns.append(txn)
         elif prefix == "ledger":
             # Ledger entries are not part of the closing equation (§13.1);
             # read only to confirm the key resolves to a real row.
-            entry = read_ledger_entry(db, member_key)
+            entry = read_ledger_entry(db, scope_key)
             any_missing = any_missing or entry is None
         else:
             any_missing = True
@@ -105,6 +124,8 @@ def verify(proposal: MatchProposal, db: sqlite3.Connection, facts: DerivedFacts)
     # never a flat per-settlement constant.
     allowed_delta = AMOUNT_DELTA_PAISE_PER_DERIVED_LINE * derived_count
 
+    scope_only_keys = sorted(set(scope_keys) - member_keys_set)
+
     return build_proof(
         gross,
         fees,
@@ -114,12 +135,20 @@ def verify(proposal: MatchProposal, db: sqlite3.Connection, facts: DerivedFacts)
         observed_net,
         verifiable=verifiable,
         allowed_delta=allowed_delta,
+        scope_only_keys=scope_only_keys,
     )
 
 
 def commit(proposal: MatchProposal, proof: ArithmeticProof, db: sqlite3.Connection) -> None:
     """THE ONLY WRITER of `match_groups`. No confidence threshold, no
     override flag, no fast path — `proof.closes` is the sole gate.
+
+    §14.1/C-008: `proof.scope_only_keys` are counted in `proof` but never
+    written to `group_members` — a plain `"matched"` audit entry for one
+    would be false. Each instead gets its own `"counted_not_committed"`
+    entry, in addition to (never instead of) the per-member entries below,
+    so `audit.trail(key)` shows the connection without anyone needing to
+    cross-reference `match_groups.proof_json` by hand.
     """
     detail = {
         "pass_name": proposal.pass_name,
@@ -153,3 +182,6 @@ def commit(proposal: MatchProposal, proof: ArithmeticProof, db: sqlite3.Connecti
         # (CLAUDE.md rule 4) — clear any stale exception from an earlier run.
         db.execute(queries.DELETE_EXCEPTION_BY_KEY, {"record_key": member_key})
         audit.record(db, "verify", member_key, "matched", detail)
+
+    for scope_only_key in proof.scope_only_keys:
+        audit.record(db, "verify", scope_only_key, "counted_not_committed", detail)

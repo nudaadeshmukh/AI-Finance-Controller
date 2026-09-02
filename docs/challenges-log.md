@@ -410,29 +410,87 @@ than invent under time pressure, and a real architecture change, not a Phase
 4-sized fix. (2) keep deferring the whole settlement, accept the ceiling
 miss, report the mechanism honestly. Chose (2).
 
-**Fix:** none — this is the deliberate, understood, and now precisely
-quantified cost of holding CLAUDE.md rule 8 and rule 4 ("no third state")
-exactly to their literal text rather than engineering around them. The
-`has_ambiguous_adjustment` guard is unchanged. `test_ambiguous.py` tests the
-actual behavior: the ambiguous adjustment stays unmatched, *and* its
-settlement-mates do too, and the test asserts that precisely — not a smaller
-claim that would hide the real scope.
+**Fix (as first landed):** none — this was, at the time, the deliberate,
+understood, and precisely quantified cost of holding CLAUDE.md rule 8 and
+rule 4 ("no third state") exactly to their literal text rather than
+engineering around them. `has_ambiguous_adjustment` was left unchanged;
+`test_ambiguous.py` tested the whole-settlement-deferred behavior directly.
 
-**Prevention:** report this exact mechanism and the measured collateral
-counts (40/40 in clean-august, 55/69, 51/56, 110/113 in the other three) in
-Phase 5's error analysis and the README, not just the aggregate unresolved
-number — "5 ambiguous adjustments" reads very differently from "5 ambiguous
-adjustments currently costing 40+ otherwise-resolvable records," and burying
-the difference would be exactly the kind of inflated-claim failure this
-track's honesty bar exists to catch. If time allows later, revisit whether a
-documented, deliberately-added `MatchProposal` field is worth proposing to
-the user for a future session — not decided here.
+**Prevention (as first landed):** report this exact mechanism and the
+measured collateral counts (40/40 in clean-august, 55/69, 51/56, 110/113 in
+the other three) in Phase 5's error analysis and the README, not just the
+aggregate unresolved number. Revisit whether a documented, deliberately-added
+`MatchProposal` field is worth proposing for a future session — not decided
+at the time.
 
-**Demo relevant?** Yes — arguably the strongest failure-recovery moment yet:
-a rule held under real, quantified pressure to relax it (a 39-record ceiling
-miss is a big, visible number), with the exact mechanism measured and
-reported rather than the guard being loosened to make the number look
-better.
+**Update — resolved via §14.1 (`arithmetic_scope`), same session:**
+option (1) was reconsidered under explicit instruction and re-tested
+directly against clean-august's real deferred settlements (not the sealed
+answer key) rather than reasoned about abstractly: `verify()` with
+`member_keys` narrowed to exclude the ambiguous adjustment closes with a
+delta *exactly* equal to the excluded line's debit, every time (23-line
+settlement: delta=1,299,900; 12-line: delta=499,900; 9-line: delta=949,800,
+matching two excluded adjustments) — confirming decoupling scope from
+membership is necessary, not optional, and that it works mechanically once
+`verify()` is given a second, wider key list to sum over.
+
+The rejection reason from the first pass — undocumented `MatchProposal`
+field / `verify()` signature, CLAUDE.md rule 12 — was resolved by doing what
+rule 12 actually asks: stopping and asking, then amending
+`reference/master_specification.md` §14 (new §14.1) and §20.2 *before*
+writing any implementation, the same pattern as the §7.2 amendment for
+C-004. The amendment also had to close a new problem the first pass hadn't
+needed to consider: if `verify()`'s proof sums over more than `commit()`
+writes as members, that gap must be reconstructable from committed data
+alone, not just from reading `recon/` source. Landed as: `MatchProposal.
+arithmetic_scope: list[RecordKey] | None`, `ArithmeticProof.scope_only_keys`
+(free — `proof_json` already stores the whole model), one extra
+`audit_log` entry per scope-only key (`"counted_not_committed"`), and a
+runtime-enforced invariant — `report/scoring.check_scope_only_accounted()`,
+pulled a phase early like `has_ambiguous_adjustment` was in Phase 3 —
+raising `ScoringError` and refusing to emit `results.json` if any scope-only
+key lacks an `exceptions` row by end-of-run. Covered by the eighth protected
+test, `tests/test_scope_only_accounted.py`.
+
+Measured result, all four datasets, `--no-llm`: clean-august 350→390,
+heavy-refunds →312, holiday-skew →377, high-ambiguity →366 (out of 400
+recon lines each). `AMBIGUOUS_DUPLICATE` counts post-fix — 5/5/5/15 — match
+§9.4's designed table exactly, confirming the fix recovers exactly the
+collateral records and nothing more: no previously-genuine ambiguity was
+silently resolved.
+
+**Follow-up check — clean-august's 390 exceeds §8.2's published ceiling of
+389 by one; traced before proceeding, not assumed correct.** A blast-radius
+diff — every recon key `arithmetic_scope` could possibly newly match, vs.
+everything outside that set — shows the fix's own contribution is exactly
+40 keys, all inside its 4 known settlements; the other 350 matched keys are
+identical, by count and by identity, to the pre-fix baseline, and
+`match/{aggregate,tolerance,fee_reversal,utr}.py` / `verify/arithmetic.py`
+have zero diff this session. So the +1 predates this session's work — it
+cannot be a new false match from `arithmetic_scope`. Source-data trace
+(never the sealed key, rule 6): each dataset's `ledger_entries` has exactly
+2 `account='suspense'` rows (6 in `high-ambiguity`) whose `source_ref`
+resolves to no real order receipt — the exact §6.4/§9.4 `CONTRADICTORY_LEDGER`
+signature, in the exact designed count, in all four runs. §13.8 already
+states these close correctly and will be matched as false matches; the
+389/368 ceiling assumed 0 of them ever would, understating the honestly
+achievable range by 0-2 (0-6 on `high-ambiguity`). Checked the other three
+datasets with the same method, not by assuming clean-august's outcome
+generalizes: all four show the same 2-suspense-row (6 for high-ambiguity)
+signature, so the range applies uniformly. **§8.2 corrected from a flat
+ceiling to a range (389-391 / 368-374)** in `reference/master_specification.md`,
+with the reasoning attributed to this finding rather than presented as new.
+Could not identify the specific `CONTRADICTORY_LEDGER` record_key from
+source data alone — every `suspense` entry's `source_ref` is deliberately
+wrong, exactly as §13.8 predicts, which is itself confirming evidence, not
+a gap in the check.
+
+**Demo relevant?** Yes, more so now — the full arc is on record: a rule held
+under real pressure (option 1 rejected the first time specifically because
+it required undocumented surface), then genuinely resolved once the correct
+process (amend the spec first, close the transparency gap the amendment
+itself surfaces, then implement) was followed instead of either engineering
+around the rule or giving up on the 39/40/etc records permanently.
 
 ---
 
@@ -449,4 +507,4 @@ Keep this current — it is what goes in the README and the video.
 | C-005 | 3 | `aggregate` produced confirmed false matches on ambiguous adjustments | Settlement-level equation balances without per-order attribution | **Yes** |
 | C-006 | 3 | Cascade writes never committed; 39/39 pytest green the whole time | No transaction/commit around verify()/commit(); tests never closed the connection | **Yes** |
 | C-007 | 3 | `gross` double-counted a refund's unrelated original order | `compute_closing_equation` summed all orders, not just payment-referenced ones | **Yes** |
-| C-008 | 4 | Ambiguous-adjustment guard blocks a whole settlement (39-record ceiling miss) | `verify()` can't exclude one member's arithmetic without excluding its membership | **Yes** |
+| C-008 | 4 | Ambiguous-adjustment guard blocked a whole settlement (39-record ceiling miss) — **resolved** via §14.1 `arithmetic_scope` | `verify()` couldn't exclude one member's arithmetic without excluding its membership; fixed by giving it a separate, audit-transparent scope list | **Yes** |

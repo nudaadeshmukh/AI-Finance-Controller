@@ -2,14 +2,17 @@
 unresolved. They are the deliverable, not a failure. Never skip, weaken, or
 xfail this file (§25).
 
-Per C-008 (docs/challenges-log.md): the ambiguous-adjustment guard defers the
-ENTIRE settlement containing the ambiguous line, not just the line itself —
-`verify()` derives its arithmetic strictly from `proposal.member_keys` (no
-independent settlement query), so there is no way to keep the equation
-correct while excluding only the ambiguous member without inventing
-undocumented model surface. This file tests that actual, understood
-behavior — including its settlement-mates staying unresolved too — not a
-narrower claim that would hide the real scope.
+C-008 (docs/challenges-log.md) originally found that the ambiguous-adjustment
+guard deferred the ENTIRE settlement containing the ambiguous line, not just
+the line itself — `verify()` derived its arithmetic strictly from
+`proposal.member_keys`, with no way to keep the equation correct while
+excluding only the ambiguous member. §14.1's `arithmetic_scope` resolves
+this: the equation is still computed over the whole settlement, but only the
+ambiguous line is excluded from `member_keys`. This file now tests THAT
+behavior — the ambiguous record itself stays unresolved and correctly named,
+while its settlement-mates are no longer collateral damage. See
+`tests/test_scope_only_accounted.py` for the audit-transparency mechanism
+(`arithmetic_scope`/`scope_only_keys`) itself.
 """
 
 from __future__ import annotations
@@ -95,14 +98,14 @@ def _bank_txn(txn_id: str, utr: str, credit: int) -> dict:
     }
 
 
-def test_ambiguous_adjustment_and_its_settlement_mates_stay_unresolved(
+def test_ambiguous_adjustment_stays_unresolved_but_settlement_mates_now_match(
     db: sqlite3.Connection,
 ) -> None:
     """A settlement with two unrelated, cleanly-resolvable payments PLUS the
     ambiguous pair (two same-customer/amount/date orders and the adjustment
-    that nets against one of them, unknown which). The whole settlement -
-    all four recon lines - must stay unmatched (C-008's documented scope,
-    not a bug).
+    that nets against one of them, unknown which). Post-§14.1: only the
+    ambiguous adjustment itself stays unmatched - its settlement-mates are no
+    longer collateral damage (C-008, resolved).
     """
     same_customer = "cust_ambig0000001"
     same_ts = 1_780_400_000
@@ -132,15 +135,20 @@ def test_ambiguous_adjustment_and_its_settlement_mates_stay_unresolved(
 
     run_cascade(db, "test")
 
-    assert db.execute("SELECT COUNT(*) AS n FROM match_groups").fetchone()["n"] == 0
     matched_keys = {row["record_key"] for row in db.execute("SELECT record_key FROM group_members")}
+    assert "recon:rfnd_ambig0000001" not in matched_keys, "the ambiguous line must never match"
     for key in (
-        "recon:rfnd_ambig0000001",
         "recon:pay_ambig0000001",
         "recon:pay_ambig0000002",
-        "recon:pay_ambig0000003",  # the collateral cost, per C-008
+        "recon:pay_ambig0000003",
     ):
-        assert key not in matched_keys
+        assert key in matched_keys, f"{key} is no longer collateral damage (C-008 resolved)"
+
+    exc = db.execute(
+        "SELECT * FROM exceptions WHERE record_key = ?", ("recon:rfnd_ambig0000001",)
+    ).fetchone()
+    assert exc is not None
+    assert exc["reason_code"] == "AMBIGUOUS_DUPLICATE"
 
 
 def test_classify_residual_names_the_ambiguous_adjustment_with_both_candidates(

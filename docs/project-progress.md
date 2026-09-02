@@ -616,8 +616,26 @@ timing-skewed, per §8.2's difficulty distribution.
   `SELECT_MATCHED_RECON_GROUP_MEMBERS`
 - `tests/test_fee_reversal.py`, `test_timing.py`, `test_tolerance.py`,
   `test_ambiguous.py` — written and passing (59 total, up from 42 at end of
-  Phase 3). `test_ambiguous.py` tests the ACTUAL behavior described in
-  C-008 below (settlement-mates also stay unresolved), not a narrower claim
+  Phase 3). `test_ambiguous.py` originally tested the whole-settlement-
+  deferred behavior described in the first version of C-008 below; both it
+  and `test_aggregate.py`'s C-005 regression test were later rewritten (see
+  the C-008 update further down) once §14.1 resolved that behavior — they
+  now assert the corrected outcome, not a narrower claim
+- **C-008 resolved, same session:** `MatchProposal.arithmetic_scope` /
+  `ArithmeticProof.scope_only_keys` (§14.1, `reference/master_specification.md`)
+  — `verify()` can now sum over a wider scope than what `commit()` writes as
+  `group_members`, so a settlement's clean payments match even when it also
+  contains one ambiguous adjustment; the excluded adjustment falls through to
+  `classify_residual` as `AMBIGUOUS_DUPLICATE`, unchanged. Closes the
+  audit-transparency gap this creates via three committed-data-only signals:
+  `proof_json.scope_only_keys`, an extra `audit_log` entry per scope-only key
+  (`"counted_not_committed"`), and a runtime-enforced invariant —
+  `report/scoring.check_scope_only_accounted()` (pulled a phase early, same
+  pattern as `has_ambiguous_adjustment` in Phase 3), raising `ScoringError`
+  and refusing to emit `results.json` if a scope-only key ever lacks an
+  `exceptions` row by end-of-run. New 8th protected test:
+  `tests/test_scope_only_accounted.py`. See the C-008 entry in
+  `docs/challenges-log.md` for the full resolution trace.
 
 **Files modified:**
 ```
@@ -626,61 +644,78 @@ recon/verify/{__init__,proof}.py
 recon/db/queries.py
 tests/{test_fee_reversal,test_timing,test_tolerance,test_ambiguous}.py
 docs/project-progress.md, docs/challenges-log.md
+
+# C-008 resolution, same session, added after the above:
+recon/models/pipeline.py                — MatchProposal.arithmetic_scope, ArithmeticProof.scope_only_keys
+recon/verify/{__init__,proof}.py        — verify() scope-vs-membership split, commit() audit entry
+recon/match/classify.py                 — ambiguous_adjustment_keys() (has_ambiguous_adjustment now a wrapper)
+recon/match/exact.py                    — build_settlement_proposal() no longer defers whole settlement
+recon/db/queries.py                     — record_key added to SELECT_ADJUSTMENTS_BY_SETTLEMENT_ID;
+                                           SELECT_CLOSED_MATCH_GROUP_PROOFS, SELECT_EXCEPTION_RECORD_KEYS added
+recon/report/scoring.py                 — check_scope_only_accounted(), pulled forward a phase early
+tests/test_scope_only_accounted.py      — new, 8th protected test
+tests/{test_ambiguous,test_aggregate}.py — rewritten to assert the corrected (not deferred-whole) outcome
+reference/master_specification.md       — new §14.1; §20.2 model fields; §13.7 note; §25 8th test;
+                                           §8.2 ceiling corrected to a range (see below)
+CLAUDE.md                               — protected-test list, seven -> eight
 ```
 
 **Tests:**
-- pytest: 59 passed
+- pytest: 64 passed (was 59; +5 for `test_scope_only_accounted.py`)
 - ruff: clean
 
-**Measured results (real, against all four frozen datasets — raw matched
-count, NOT yet validated against the answer key; that's Phase 5):**
+**Measured results (real, against all four frozen datasets, post-§14.1 fix —
+raw matched count, NOT yet validated against the answer key; that's Phase 5):**
 
-| Dataset | exact | aggregate | fee_reversal | timing | tolerance | Total matched | AMBIGUOUS_DUPLICATE | CROSS_PERIOD_UTR | NOT_A_SETTLEMENT | NO_CANDIDATE |
-|---|---|---|---|---|---|---|---|---|---|---|
-| clean-august | 88 | 38 | 215 | 0 | 9 | 350/400 | 5 | 5 | 5 | 40 |
-| heavy-refunds | 30 | 50 | 167 | 0 | 10 | 257/400 | 5 | 69 | 5 | 69 |
-| holiday-skew | 76 | 38 | 187 | 0 | 25 | 326/400 | 5 | 13 | 56 | 5 |
-| high-ambiguity | 55 | 70 | 124 | 0 | 7 | 256/400 | 15 | 16 | 5 | 113 |
+| Dataset | exact | aggregate | fee_reversal | timing | tolerance | Total matched | AMBIGUOUS_DUPLICATE | CROSS_PERIOD_UTR | NOT_A_SETTLEMENT |
+|---|---|---|---|---|---|---|---|---|---|
+| clean-august | 88 | 38 | 244 | 0 | 20 | **390/400** | 5 | 5 | 5 |
+| heavy-refunds | 30 | 50 | 222 | 0 | 10 | **312/400** | 5 | 69 | 5 |
+| holiday-skew | 76 | 44 | 232 | 0 | 25 | **377/400** | 5 | 13 | 5 |
+| high-ambiguity | 55 | 93 | 211 | 0 | 7 | **366/400** | 15 | 16 | 5 |
 
-`timing` matches 0 recon lines in every run — by design (see above); its
-contribution is calendar confidence (>=95% in all four runs) and ledger
-attachment, neither of which is a recon-line match. `high-ambiguity`'s
-`AMBIGUOUS_DUPLICATE = 15` matches §9.4's documented count for that dataset
-exactly, confirming `has_ambiguous_adjustment` generalizes correctly beyond
-clean-august's 5. `heavy-refunds`' comparatively high `CROSS_PERIOD_UTR`
-(69 recon lines across 14 distinct settlements) was checked directly against
-source data — none of those 14 settlement UTRs appear anywhere in that run's
-51 bank transactions, even at an 8-digit prefix level — genuine cross-period
-data, not an extraction bug, consistent with heavy-refunds being the
-hardest dataset (lowest naive baseline, §8.3: 19.8%).
+(The original table here showed 350/257/326/256 with a large `NO_CANDIDATE` column —
+that was the pre-§14.1 state, before C-008's fix; `NO_CANDIDATE` is now 0 in all four
+runs, since every previously-`NO_CANDIDATE` collateral record either matches now or is
+correctly named `AMBIGUOUS_DUPLICATE`/`CROSS_PERIOD_UTR`.)
+
+`timing` still matches 0 recon lines in every run — by design, unchanged. `high-ambiguity`'s
+`AMBIGUOUS_DUPLICATE = 15` and clean/heavy/holiday's `= 5` each match §9.4's documented count
+exactly, confirming the fix recovers precisely the collateral records and resolves no
+genuine ambiguity. `heavy-refunds`' `CROSS_PERIOD_UTR = 69` is unchanged from Phase 4's
+original measurement (genuine cross-period data, verified directly against source bank
+data at the time, unaffected by this session's change).
+
+**clean-august's 390/400 exceeds §8.2's originally-published flat ceiling of 389 — traced
+and explained, not a bug:** a blast-radius diff (every key `arithmetic_scope` could possibly
+have newly matched vs. everything outside that set) shows the 40 newly-matched records are
+exactly and only inside the fix's 4 known settlements, and the other 350 matched records are
+byte-identical, by count and by key, to the pre-fix baseline — `match/{aggregate,tolerance,
+fee_reversal,utr}.py` and `verify/arithmetic.py` have zero diff this session. So the +1 over
+389 predates this session's work entirely. Source-data trace (never the sealed key): each
+dataset's `ledger_entries` has exactly 2 `account='suspense'` rows (6 in `high-ambiguity`)
+with a `source_ref` matching no real order receipt — the exact §6.4/§9.4 `CONTRADICTORY_LEDGER`
+signature, in the exact designed count, in all four runs. §13.8 already states these close
+correctly and will be matched; the ceiling's 389/368 assumed 0 of them ever would, understating
+the honestly-achievable range by 0-2 (0-6). **§8.2 corrected to a range (389-391 / 368-374)
+for this reason** — see `reference/master_specification.md` §8.2 and `docs/challenges-log.md`
+C-008 for the full trace.
 
 **Remaining work:**
 Phases 5-8. Phase 5 (Scoring, Baseline, `results.json`) is next and will be
 the first time these numbers are actually checked against the sealed answer
 key — that's when true match rate, precision, and false-match rate become
-knowable, including the honest ~2 `CONTRADICTORY_LEDGER` false matches per
-run flagged in §13.8 (not yet observed directly, since scoring hasn't run).
+knowable, including the honest ~1-2 `CONTRADICTORY_LEDGER` false matches per
+run flagged in §13.8 (circumstantially confirmed present in the data this
+session, not yet formally scored against the key).
 
 **Known issues / TODOs:**
-- **C-008, the headline finding of this phase** (see challenges-log): the
-  `has_ambiguous_adjustment` guard (built a phase early in Phase 3, C-005)
-  defers an ambiguous adjustment's **entire settlement**, not just the one
-  ambiguous line — `verify()` derives its arithmetic strictly from
-  `proposal.member_keys` with no independent settlement-level query, so
-  there is no way under the current architecture to keep a settlement's
-  arithmetic correct while excluding just one member's *membership* without
-  inventing an undocumented `MatchProposal` field or `verify()` parameter.
-  Measured, precisely: this costs 40/40 of clean-august's remaining
-  `NO_CANDIDATE` residual, and 80-97% of the other three runs'. This is why
-  clean-august sits at 350/400 rather than the 389/400 measured ceiling — a
-  39-record gap almost entirely attributable to one architectural choice,
-  made deliberately to hold CLAUDE.md rule 8 ("must stay unresolved") and
-  rule 4 ("no third state") to their literal text rather than engineer
-  around them under time pressure. **Report this exact mechanism in Phase
-  5's error analysis and the README — not just the aggregate unresolved
-  count.** If time allows, this is worth revisiting with the user in a later
-  phase as a possible deliberate, documented model extension — not decided
-  here.
+- C-008 is resolved (see above and `docs/challenges-log.md`) — no longer an
+  open issue. Kept here, struck through in spirit rather than deleted, so the
+  phase's history stays honest: the original architectural finding (whole-
+  settlement deferral, a genuine 39-record ceiling miss) was real, measured,
+  and reported before the fix existed; it was not assumed resolvable in
+  advance.
 - `match/base.py` now hosts `find_applicable_slab()` instead of
   `fee_reversal.py` (where §20.4 nominally places it) specifically to avoid
   a circular import: `match/__init__.py` imports `verify`/`commit` from

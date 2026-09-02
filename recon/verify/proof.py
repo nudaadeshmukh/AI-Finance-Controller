@@ -13,11 +13,16 @@ never a flat constant. A proposal with zero derived lines gets
 `tolerance_applied` reports how much of that budget was actually spent
 (`0` whenever `delta` was already `0`, even if a nonzero budget existed) —
 it is what `results.json` surfaces so a nonzero value is always visible.
+
+`scope_only_keys` (§14.1/C-008) passes straight through to the returned
+`ArithmeticProof` — this function doesn't compute it, the caller (`verify()`)
+does, since it's the set difference of two lists `build_proof` never sees.
 """
 
 from __future__ import annotations
 
 from recon.models.pipeline import ArithmeticProof
+from recon.models.types import RecordKey
 
 
 def build_proof(
@@ -30,6 +35,7 @@ def build_proof(
     *,
     verifiable: bool,
     allowed_delta: int = 0,
+    scope_only_keys: list[RecordKey] | None = None,
 ) -> ArithmeticProof:
     delta = expected_net - observed_net
     closes = verifiable and abs(delta) <= allowed_delta
@@ -44,4 +50,5 @@ def build_proof(
         delta=delta,
         closes=closes,
         tolerance_applied=tolerance_applied,
+        scope_only_keys=scope_only_keys or [],
     )

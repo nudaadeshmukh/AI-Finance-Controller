@@ -166,10 +166,11 @@ SELECT_MATCHED_RECON_GROUP_MEMBERS = """
 SELECT group_id, record_key FROM group_members WHERE record_key LIKE 'recon:%'
 """
 
-# match/classify.py's has_ambiguous_adjustment() — §13.7's detection
-# condition only (no reason code / candidate construction, that's Phase 4).
+# match/classify.py's has_ambiguous_adjustment() / ambiguous_adjustment_keys()
+# — §13.7's detection condition (record_key needed since §14.1/C-008:
+# build_settlement_proposal excludes these specific keys from member_keys).
 SELECT_ADJUSTMENTS_BY_SETTLEMENT_ID = """
-SELECT amount, order_id FROM recon_lines
+SELECT record_key, amount, order_id FROM recon_lines
 WHERE settlement_id = :settlement_id AND type = 'adjustment'
 """
 
@@ -200,6 +201,15 @@ WHERE amount = :amount
       HAVING COUNT(*) >= 2
   )
 """
+
+# report/scoring.py's check_scope_only_accounted() — §14.1/C-008's runtime
+# invariant: every scope-only key in a closed group's proof must have an
+# exceptions row by end-of-run.
+SELECT_CLOSED_MATCH_GROUP_PROOFS = """
+SELECT group_id, proof_json FROM match_groups WHERE closes = 1
+"""
+
+SELECT_EXCEPTION_RECORD_KEYS = "SELECT record_key FROM exceptions"
 
 SELECT_AUDIT_TRAIL = """
 SELECT seq, ts, stage, record_key, action, detail_json

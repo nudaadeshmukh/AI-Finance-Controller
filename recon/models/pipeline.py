@@ -30,6 +30,9 @@ class ArithmeticProof(BaseModel):
     delta: int  # expected − observed; must be 0 (within any applied tolerance)
     closes: bool
     tolerance_applied: int = 0  # nonzero is SURFACED in the UI
+    scope_only_keys: list[RecordKey] = []  # §14.1/C-008 — always [] unless
+    # proposal.arithmetic_scope was set; the keys counted toward this proof
+    # that are NOT in group_members (audit-transparency requirement).
 
 
 class MatchProposal(BaseModel):
@@ -44,6 +47,9 @@ class MatchProposal(BaseModel):
     pass_name: str
     origin: Literal["cascade", "llm"]
     proof: ArithmeticProof | None = None
+    arithmetic_scope: list[RecordKey] | None = None  # §14.1/C-008. None => same
+    # as member_keys. When set, MUST be a superset of member_keys — verify()
+    # sums over this, commit() still writes group_members from member_keys only.
 
 
 class Exception_(BaseModel):
