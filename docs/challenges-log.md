@@ -593,6 +593,85 @@ every comparison number in the submission is regenerable from the repo.
 
 ---
 
+### C-011 — `infer_slabs` clamps the earliest card slab to first-observed evidence, not the window edge (Phase 5, found during error analysis)
+
+**Phase:** 5 — found while investigating why heavy-refunds scores 68.25% (far
+below the other three).
+
+**What broke:** Nothing crashed. 14 of heavy-refunds' 88 unresolved records
+(two whole settlements, `utr=790205592763` and `utr=201562670970`) were marked
+`NO_CANDIDATE` even though their bank txn is present in the statement, the
+answer key marks every line resolvable, and the settlement closes at
+`delta == 0`. Found by running C-009's check at volume — "does any unresolved
+record have a bank txn the key calls absent?" — and finding these 14 had a
+present bank txn but a *different* cause from C-009.
+
+**Root cause:** `infer_slabs` (`match/fee_reversal.py`) bounds each fee slab's
+`period_start` / `period_end` by the dates of the **stated** fees it observed as
+evidence. Where a method's earliest observed stated fee sits well inside the
+ingest window (sparse evidence), the slab's `period_start` stops there instead
+of reaching the data-window start — so a fee-null payment of that method dated
+earlier can't be derived, `find_applicable_slab` returns `None`, and
+`build_settlement_proposal`'s fee-null guard (all-or-nothing) bails on the
+**entire** settlement, taking every trivially-derivable line down with the one
+undated fee. In heavy-refunds the earliest stated card fee is 2026-06-11; two
+card payments with dropped fees are dated 2026-06-07 / 2026-06-10.
+
+**Verification, without the generator:** hand-computed `round_half_up(amount *
+200, 10000)` + `round_half_up(fee * 1800, 10000)` for the two fee-null card
+lines — 33,996+6,119 = 40,115 and 7,996+1,439 = 9,435 — both equal
+`amount − credit` exactly, so the rate is not in doubt.
+
+**Scope was wider than first thought.** The first pass called this
+"heavy-refunds only" — because only the *card* method was checked. Regenerating
+after the fix showed the bug also touched `wallet` and `netbanking` window
+edges in **holiday-skew (+5)** and **high-ambiguity (+3)**. clean-august was
+genuinely untouched (its slabs already reached the window edges). So: 3 of 4
+datasets, 22 records total.
+
+**Fix (applied):** `_extend_outer_edges_to_window()` in `match/fee_reversal.py`.
+After inference, each method's earliest slab has its `period_start` extended to
+`min(created_at)` over every ingested line, and its latest slab's `period_end`
+to `max(created_at)` — **outer edges only**. The gap between two consecutive
+slabs of the same method (an unannounced rate change) is genuinely ambiguous
+for the day or two between the last observation of one rate and the first of
+the next, and is left exactly as inferred. Each widened slab is re-run through
+`_validate_slab` against its own observations; `inferred_bps` never changes so
+this always passes, but the gate is real. Principled, not tuning: "no evidence
+of a rate change before the earliest rate we can see" means that rate applies
+to the whole earlier period — and a wrong extension produces no false match
+(the settlement just fails to close and stays unresolved), it is not a
+correctness risk.
+
+**Measured effect (strict scoring, `--no-llm`), before → after:**
+- clean-august 367 → **367** (0 change — verified byte-identical results)
+- heavy-refunds 273 → **287** (+14), unresolved 88 → 74
+- holiday-skew 341 → **346** (+5), unresolved 23 → 18
+- high-ambiguity 304 → **307** (+3), unresolved 31
+
+**Zero false matches introduced.** Every one of the 22 newly-matched records:
+`resolvable: true` in the key, proof `delta == 0`, `closes == true`; the
+poisoned-group count (3/3/3/7) is unchanged. And **`NO_CANDIDATE` is now 0 in
+all four runs** — every unresolved record carries a specific reason
+(`CROSS_PERIOD_UTR` or `AMBIGUOUS_DUPLICATE`), not a catch-all.
+
+**Prevention:** `tests/test_fee_reversal.py` — three C-011 regression tests:
+earliest slab extends to the window start; only outer edges move (inner
+change-point gap preserved); a widened slab still validates and derives the
+pre-slab line at the real rate. The broader lesson (4th in a row after
+C-005/C-007/C-008): a pass validated on its own fixtures and on aggregate match
+rate can still have a boundary bug that only a per-record "why is *this
+specific record* unresolved?" pass finds — and the first characterisation of
+that bug can itself be too narrow (card-only) until the fix is regenerated
+against all four datasets.
+
+**Demo relevant?** Yes — not accepting a low number as "probably just design".
+heavy-refunds being the hardest dataset was the expected story; digging anyway
+found 22 records across 3 datasets that shouldn't have been hard, and cleared
+`NO_CANDIDATE` to zero everywhere.
+
+---
+
 ## Summary table
 
 Keep this current — it is what goes in the README and the video.
@@ -609,3 +688,4 @@ Keep this current — it is what goes in the README and the video.
 | C-008 | 4 | Ambiguous-adjustment guard blocked a whole settlement (39-record ceiling miss) — **resolved** via §14.1 `arithmetic_scope` | `verify()` couldn't exclude one member's arithmetic without excluding its membership; fixed by giving it a separate, audit-transparent scope list | **Yes** |
 | C-009 | 5 | First scoring run: precision ~83-94%, false matches 23/39/36/62 | 2nd answer-key defect class — one settlement/run has `CROSS_PERIOD_UTR` lines that close against a present bank txn; under strict whole-group equality the poisoned settlement scores entirely false. A softer scorer was built, then rejected (rule 7). | **Yes** |
 | C-010 | 5 | Naive baseline measured 126/80/121/152, not the committed 126/79/120/147 | Original figures came from a Phase 0 script never committed; §8.3's "exact UTR"/"stated fee" left latitude | No |
+| C-011 | 5 | 22 resolvable records (3 datasets) marked NO_CANDIDATE despite a present, closing bank txn | `infer_slabs` clamped each method's outer slab edges to first/last observed stated fee, not the data-window; pre-slab fee-null payments bailed their whole settlements. Fixed: extend outer edges to the window, inner change-point gaps untouched. NO_CANDIDATE now 0 everywhere. | **Yes** |
