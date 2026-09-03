@@ -1,7 +1,107 @@
-{# recon/report/templates/report.html.j2 — static HTML report, §12.6, §20.4.
-   Placeholder; populated when report/html.py is implemented in Phase 5. #}
+{# recon/report/report.html.j2 — static reconciliation report (§12.6, §20.4).
+   Rendered by report/html.py from an emitted results.json. No JS, no CDN,
+   no external assets — a single file a reviewer opens directly. Visual
+   language is deliberately minimal; reference/design.md governs the Phase 7
+   React frontend, not this. #}
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><title>Reconciliation report — placeholder</title></head>
-<body><p>Not implemented until Phase 5.</p></body>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reconciliation report — {{ doc.label }}</title>
+<style>
+  :root { color-scheme: light; }
+  body { font: 14px/1.5 -apple-system, Segoe UI, Roboto, sans-serif; margin: 0;
+         background: #f7f7f5; color: #1a1a1a; }
+  main { max-width: 900px; margin: 0 auto; padding: 32px 20px 64px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: #666; margin: 0 0 24px; }
+  h2 { font-size: 15px; margin: 32px 0 10px; }
+  table { border-collapse: collapse; width: 100%; background: #fff;
+          border: 1px solid #e2e2dd; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid #eeeeee; }
+  th { background: #f0f0ec; font-weight: 600; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .cards { display: flex; flex-wrap: wrap; gap: 12px; }
+  .card { flex: 1 1 150px; background: #fff; border: 1px solid #e2e2dd;
+          padding: 12px 14px; }
+  .card .k { color: #666; font-size: 12px; }
+  .card .v { font-size: 18px; font-weight: 600; margin-top: 2px; }
+  .neg { color: #a11; } .pos { color: #161; } .tot { font-weight: 700; }
+  .note { color: #666; font-size: 12px; margin-top: 8px; }
+  code { background: #eee; padding: 1px 4px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>{{ doc.label }} <span style="color:#999">/ {{ doc.run_id }}</span></h1>
+  <p class="sub">schema v{{ doc.schema_version }} · seed {{ doc.seed }} · data as of epoch {{ doc.generated_at }}</p>
+
+  <div class="cards">
+    <div class="card"><div class="k">Records processed</div><div class="v">{{ doc.summary.records_processed }}</div></div>
+    <div class="card"><div class="k">Match rate</div><div class="v">{{ doc.summary.match_rate | pct }}</div></div>
+    <div class="card"><div class="k">Matched &amp; correct</div><div class="v">{{ doc.summary.matched if doc.summary.matched is not none else '--' }}</div></div>
+    <div class="card"><div class="k">False matches</div><div class="v neg">{{ doc.summary.false_matches if doc.summary.false_matches is not none else '--' }}</div></div>
+    <div class="card"><div class="k">Unresolved</div><div class="v">{{ doc.summary.unresolved }}</div></div>
+    <div class="card"><div class="k">Excluded</div><div class="v">{{ doc.summary.excluded }}</div></div>
+  </div>
+
+  <h2>Comparisons (§17.2)</h2>
+  <table>
+    <tr><th>Measure</th><th class="num">Records / 400</th><th class="num">Rate</th></tr>
+    <tr><td>Naive baseline (<code>{{ doc.baseline.name }}</code>)</td><td class="num">{{ doc.baseline.matched }}</td><td class="num">{{ doc.baseline.match_rate | pct }}</td></tr>
+    <tr><td>Cascade (no LLM)</td><td class="num">{{ doc.summary.matched if doc.summary.matched is not none else '--' }}</td><td class="num">{{ doc.summary.match_rate | pct }}</td></tr>
+    <tr><td>Cascade + LLM</td><td class="num">--</td><td class="num">-- (Phase 6)</td></tr>
+    <tr><td>Resolvable ceiling (base, §8.2)</td><td class="num">{{ doc.ceiling.resolvable if doc.ceiling.resolvable is not none else '--' }}</td><td class="num">{{ doc.ceiling.rate | pct }}</td></tr>
+  </table>
+  <p class="note">Match precision {{ doc.summary.match_precision | pct }}. §13.8: ~2 false matches/run (6 on high-ambiguity) are answer-key <code>CONTRADICTORY_LEDGER</code> records that close correctly — expected, not special-cased.</p>
+
+  <h2>Reconciliation bridge</h2>
+  <table>
+    {% for band in doc.bridge %}
+    <tr class="{% if band.sign == '=' %}tot{% elif band.sign == '-' %}neg{% elif band.sign == '+' %}pos{% endif %}">
+      <td>{{ band.sign }} {{ band.label }}</td>
+      <td class="num">{{ band.amount | rupees }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <p class="note">Closes to the paise: gross − fees − tax − refunds − settled-next + prior-spillover = bank credited.</p>
+
+  <h2>Cascade passes</h2>
+  <table>
+    <tr><th>Pass</th><th class="num">Matched (recon lines)</th><th class="num">ms</th></tr>
+    {% for p in doc.passes %}
+    <tr><td>{{ p.name }}</td><td class="num">{{ p.matched }}</td><td class="num">{{ p.runtime_ms }}</td></tr>
+    {% endfor %}
+  </table>
+
+  <h2>Derived fee slabs</h2>
+  <table>
+    <tr><th>Method</th><th>From</th><th>To</th><th class="num">bps</th><th class="num">n</th><th>Reproduces all stated?</th></tr>
+    {% for s in doc.derived_fee_slabs %}
+    <tr><td>{{ s.method }}</td><td>{{ s.period_start }}</td><td>{{ s.period_end }}</td><td class="num">{{ s.inferred_bps }}</td><td class="num">{{ s.sample_size }}</td><td>{{ s.reproduces_all_stated }}</td></tr>
+    {% endfor %}
+  </table>
+
+  <h2>Exceptions — {{ doc.exceptions | length }} unresolved, no guess recorded</h2>
+  <table>
+    <tr><th>Record</th><th>Reason</th><th>Detail</th><th>Candidates</th></tr>
+    {% for e in doc.exceptions %}
+    <tr>
+      <td><code>{{ e.record_key }}</code></td>
+      <td>{{ e.reason_code }}</td>
+      <td>{{ e.reason_text }}</td>
+      <td>{% for c in e.candidates %}<code>{{ c }}</code> {% endfor %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <h2>Tolerance constants (§18)</h2>
+  <table>
+    {% for k, v in doc.tolerance_constants.items() %}
+    <tr><td><code>{{ k }}</code></td><td class="num">{{ v }}</td></tr>
+    {% endfor %}
+  </table>
+</main>
+</body>
 </html>

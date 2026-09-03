@@ -668,9 +668,20 @@ this metric should credit.
 | Run | Naive baseline | Ceiling | Headroom |
 |---|---|---|---|
 | `clean-august` | 126/400 (31.5%) | 97.2% | **65.8 pp** |
-| `heavy-refunds` | 79/400 (19.8%) | 97.2% | **77.5 pp** |
-| `holiday-skew` | 120/400 (30.0%) | 97.2% | **67.2 pp** |
-| `high-ambiguity` | 147/400 (36.8%) | 92.0% | **55.2 pp** |
+| `heavy-refunds` | 80/400 (20.0%) | 97.2% | **77.2 pp** |
+| `holiday-skew` | 121/400 (30.25%) | 97.2% | **67.0 pp** |
+| `high-ambiguity` | 152/400 (38.0%) | 92.0% | **54.0 pp** |
+
+**Baseline reconciled to committed code in Phase 5.** The original figures
+(126 / 79 / 120 / 147) were produced by a one-off Phase 0 script that was not
+kept in the repo. `report/baseline.py` implements the §8.3 definition
+precisely and reproducibly — exact `order_id` join, stated fee (no
+derivation), a single unambiguous digit-run UTR in the bank description, and
+settlement net closing at `delta == 0` — and measures 126 / 80 / 121 / 152.
+The 0-5 record differences are within the ambiguity of "exact UTR" and
+"stated fee" the prose left open; the table now reflects the number a
+reviewer can regenerate with `python -m recon run`. The headroom story is
+unchanged.
 
 **`high-ambiguity` is designed to score worse.** Four flattering runs would invite
 exactly the suspicion the track bar warns about. A visible degradation on harder data is
@@ -678,8 +689,10 @@ stronger evidence than a uniformly good number.
 
 ### 8.3.1 `manifest.json`
 
-Generator metadata only. **The pipeline reads nothing from it except `run_id` and
-`label`.** Other fields are generation statistics; do not build logic on them.
+Generator metadata only. **The pipeline reads nothing from it except `run_id`, `label`
+and `seed`.** `seed` is read only to fill `results.json`'s §18 provenance block (it
+appears nowhere else in the data); no matching or scoring logic may depend on it. Other
+fields are generation statistics; do not build logic on them.
 
 ### 8.4 Deliberate data-quality defects
 
@@ -1074,6 +1087,34 @@ require inferring how the data was generated, which §4.2 forbids.
 Expect ~2 false matches per run traceable to this. State it explicitly in the Phase 5
 error analysis, in `docs/challenges-log.md`, and in the README. Reporting a known
 limitation honestly is a stronger signal than a clean number obtained by special-casing.
+
+**Phase 5 addendum — a second instance of the same pattern, `CROSS_PERIOD_UTR`
+(`docs/challenges-log.md` C-009).** Each run has exactly **one** settlement in
+which the answer key marks a subset of the payment lines `CROSS_PERIOD_UTR`
+("settlement falls outside the export window; no corresponding bank record") —
+while the bank record demonstrably **is** in the statement and the whole
+settlement closes against it at `delta == 0`. The matcher closes it (correctly —
+nothing in the source data distinguishes those lines). Poisoned-line counts per
+run: clean-august 4, heavy-refunds 1, holiday-skew 4, high-ambiguity 7.
+heavy-refunds' other 3 `CROSS_PERIOD_UTR` records, and every `CROSS_PERIOD_UTR`
+line not in that one settlement, are genuinely unresolvable (bank record truly
+absent) and correctly go to exceptions. Same rule as above: **do not detect, do
+not special-case** — the scorer treats every `resolvable: false` reason code
+identically.
+
+**Scoring rule (Phase 5, `report/scoring.py`) — strict whole-group equality.**
+A committed group is correct iff its recon-key set is **identical** to the
+answer key's true cluster (true cluster built by grouping the key on
+`true_group_id`). A group containing any `resolvable: false` record can never
+equal a true cluster, so the **entire group** — the poisoned record and its
+genuinely-resolvable settlement-mates — scores as a false match. Per run this
+poisons 3 / 3 / 3 / 7 settlements: **23 / 39 / 36 / 62 false matches** (the
+6/3/6/13 poisoned `CONTRADICTORY_LEDGER` + `CROSS_PERIOD_UTR` records dragging
+17/36/30/49 resolvable settlement-mates with them). A softer "score only the
+resolvable members, count the poisoned record standalone" reading was tried and
+**rejected** — it lifted precision to ~96-99% and was attractive only *after*
+the strict number was known, precisely the failure mode CLAUDE.md rule 7 guards
+against. The harder number is the headline.
 
 ---
 
@@ -1583,8 +1624,13 @@ def cluster_residual(residual: list[RecordKey], db: Connection) -> list[list[Rec
 
 # report/
 def score(db: Connection, answer_key: Path) -> ScoreReport
+def sealed_key_for(run_id: RunId) -> Path | None      # Phase 5: the one module allowed to
+                                                       # name the sealed key resolves its path
 def compute_baseline(db: Connection) -> BaselineResult
-def emit_results(report: ScoreReport, path: Path) -> None
+def assemble_results(db, score, baseline, cascade, facts, *,   # Phase 5: the sketch below
+                     run_id, label, seed) -> ResultsDocument   # became this — see note
+def emit_results(db, score, baseline, cascade, facts, path, *,
+                 run_id, label, seed) -> None
 def emit_html(results: Path, out: Path) -> None
 
 # audit/
@@ -1594,6 +1640,20 @@ def trail(db, record_key) -> list[AuditEvent]
 
 Adapters return **raw dicts**, not models — validation belongs to `ingest/` so there is
 exactly one place where a malformed row is handled.
+
+**Phase 5 `report/` signature note.** The `emit_results` sketch above was
+`emit_results(report: ScoreReport, path)`. That is not enough to build the §18
+document: it needs the naive baseline, the per-pass table and timings, the
+learned fee slabs, and every source table. Resolved by keeping `score()` narrow
+(it is the one function with sealed-key access; its job is the metric numbers,
+not document assembly) and moving assembly into `assemble_results()`, with
+`emit_results()` a thin serializer over it. `run_id`/`label`/`seed` are
+keyword-only because §18 requires them and they are in neither the DB nor any
+other argument. `emit_html()` is unchanged — it reads the emitted
+`results.json`, so the HTML can never drift from it. `ResultsDocument` (in
+`report/results.py`) is the assembled §18 document; `sealed_key_for(run_id)`
+lets non-`report/scoring` callers ask "is there a key, and where?" without
+naming the sealed file (`tests/test_answer_key_seal.py`).
 
 ---
 

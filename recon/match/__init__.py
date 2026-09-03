@@ -64,15 +64,21 @@ class CascadeResult(BaseModel):
     """Return type of `run_cascade()` (§20.4). Fields are provisional, sized
     to what §19's per-pass CLI table and §18's `passes` array need (`PassStat`
     per pass) plus cascade-level totals. `extra="forbid"` so a typo'd field
-    fails loudly rather than silently validating. Revise as the cascade is
-    built out further in Phase 4.
+    fails loudly rather than silently validating.
+
+    Phase 5: `run_id` and `derived` were added so `report/` can assemble
+    `results.json` without re-running the cascade — `derived` (the learned
+    fee slabs / calendar) is not persisted to any table, and `passes` /
+    `runtime_ms` cannot be reconstructed from `audit_log` alone.
     """
 
     model_config = {"extra": "forbid"}
 
+    run_id: str = ""
     passes: list[PassStat] = []
     total_matched: int = 0
     runtime_ms: int = 0
+    derived: DerivedFacts = DerivedFacts()
 
 
 def _build_initial_state(db: sqlite3.Connection, run_id: RunId) -> CascadeState:
@@ -162,9 +168,11 @@ def run_cascade(
             audit.record(db, "match.classify", exc.record_key, "classified", detail)
 
     return CascadeResult(
+        run_id=run_id,
         passes=pass_stats,
         total_matched=sum(ps.matched for ps in pass_stats),
         runtime_ms=sum(ps.runtime_ms for ps in pass_stats),
+        derived=state.derived,
     )
 
 

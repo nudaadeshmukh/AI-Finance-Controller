@@ -1,8 +1,8 @@
 """Typer CLI - Section 19. `run`, `inject`, `report`, `validate`.
 
-Phase 3: `run` wires acquire -> ingest -> cascade (passes 1-3) and prints a
-Rich table of counts plus a per-pass table. Hypothesize and report are wired
-in later phases.
+Phase 5: `run` wires acquire -> ingest -> cascade -> scoring -> results.json
+(+ optional HTML). `report` re-emits those artifacts from an existing run.db
+without re-running the cascade. Hypothesize (LLM) is still Phase 6.
 
 Plain ASCII only in help/output text below - this runs in Windows terminals
 using the legacy cp1252 codepage by default, which chokes on arrows, section
@@ -20,11 +20,15 @@ from rich.console import Console
 from rich.table import Table
 
 from recon.adapters import get_adapter
-from recon.config import db_path_for, load_config
+from recon.config import db_path_for, load_config, out_path_for
 from recon.db.connection import connect
-from recon.errors import ConfigurationError, SourceUnavailable
+from recon.errors import ConfigurationError, ScoringError, SourceUnavailable
 from recon.ingest import ingest
-from recon.match import run_cascade
+from recon.match import CascadeResult, run_cascade
+from recon.report.baseline import compute_baseline
+from recon.report.html import emit_html
+from recon.report.results import emit_results
+from recon.report.scoring import check_scope_only_accounted, score, sealed_key_for
 
 app = typer.Typer(
     name="recon",
@@ -37,23 +41,80 @@ err_console = Console(stderr=True)
 _ALL_RUN_IDS = ["clean-august", "heavy-refunds", "holiday-skew", "high-ambiguity"]
 
 
-def _resolve_run_ids(dataset: str) -> list[str]:
-    """§8.3.1: the pipeline reads nothing from manifest.json except run_id and
-    label. Read here only to resolve `--dataset all` into the concrete list.
+def _resolve_run_meta(dataset: str) -> list[dict]:
+    """Resolve `--dataset` to a list of {run_id, label, seed}.
+
+    §8.3.1 says the pipeline reads only `run_id` and `label` from
+    `manifest.json`; `seed` is read here too, solely for `results.json`'s
+    §18 provenance block (documented deviation - see docs/project-progress.md).
     """
-    if dataset != "all":
-        return [dataset]
     manifest_path = Path("data") / "manifest.json"
-    if not manifest_path.is_file():
-        return _ALL_RUN_IDS
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    return [entry["run_id"] for entry in manifest]
+    entries: list[dict] = []
+    if manifest_path.is_file():
+        entries = json.loads(manifest_path.read_text(encoding="utf-8"))
+    by_id = {e["run_id"]: e for e in entries}
+
+    run_ids = _ALL_RUN_IDS if dataset == "all" else [dataset]
+    out: list[dict] = []
+    for run_id in run_ids:
+        entry = by_id.get(run_id, {})
+        out.append(
+            {
+                "run_id": run_id,
+                "label": entry.get("label", run_id),
+                "seed": int(entry.get("seed", 0)),
+            }
+        )
+    return out
+
+
+def _cascade_json_path(run_id: str, config) -> Path:
+    return db_path_for(run_id, config).parent / "cascade.json"
 
 
 _DATASET_HELP = "clean-august | heavy-refunds | holiday-skew | high-ambiguity | all"
 _FRESH_HELP = "Discard any existing database for this run first."
 _NO_LLM_HELP = "Skip the LLM hypothesis stage entirely."
 _QUIET_HELP = "Suppress the live progress table."
+
+
+def _emit_artifacts(
+    conn,
+    run_meta: dict,
+    cascade_result: CascadeResult,
+    config,
+    *,
+    out_override: str | None,
+    html: bool,
+) -> dict:
+    """Shared by `run` and `report`: scope-only gate -> score -> baseline ->
+    results.json (+ optional HTML). Returns the summary dict written."""
+    run_id = run_meta["run_id"]
+    check_scope_only_accounted(conn)  # §14.1/C-008 exit gate - raises ScoringError
+
+    sealed_key = sealed_key_for(run_id)
+    score_report = score(conn, sealed_key) if sealed_key is not None else None
+    if score_report is None:
+        err_console.print(f"[yellow]No sealed key for {run_id}; metrics omitted (S12.6).[/yellow]")
+
+    baseline = compute_baseline(conn)
+    out_path = Path(out_override) if out_override else out_path_for(run_id, config)
+    emit_results(
+        conn,
+        score_report,
+        baseline,
+        cascade_result,
+        cascade_result.derived,
+        out_path,
+        run_id=run_id,
+        label=run_meta["label"],
+        seed=run_meta["seed"],
+    )
+    if html:
+        emit_html(out_path, out_path.parent / "report.html")
+
+    doc = json.loads(out_path.read_text(encoding="utf-8"))
+    return {"summary": doc["summary"], "baseline": doc["baseline"], "ceiling": doc["ceiling"]}
 
 
 @app.command()
@@ -63,14 +124,16 @@ def run(
     source: Annotated[str, typer.Option(help="fixture | razorpay")] = "fixture",
     db: Annotated[str | None, typer.Option(help="Override the SQLite path.")] = None,
     out: Annotated[str | None, typer.Option(help="Override the results.json output path.")] = None,
+    html: Annotated[bool, typer.Option("--html", help="Also emit the static HTML report.")] = False,
     fresh: Annotated[bool, typer.Option("--fresh", help=_FRESH_HELP)] = False,
     quiet: Annotated[bool, typer.Option("--quiet", help=_QUIET_HELP)] = False,
 ) -> None:
     """Run the full pipeline: acquire, ingest, cascade, (hypothesize), verify, report."""
-    del no_llm, out, quiet  # accepted now for the full §19 contract; used from Phase 3+ onward
+    del quiet  # accepted for the full S19 contract; live table is always shown for now
     config = load_config()
 
-    for run_id in _resolve_run_ids(dataset):
+    for run_meta in _resolve_run_meta(dataset):
+        run_id = run_meta["run_id"]
         console.print(f"[bold]{run_id}[/bold]")
         db_path = Path(db) if db else db_path_for(run_id, config)
         if fresh and db_path.exists():
@@ -82,6 +145,14 @@ def run(
             try:
                 report = ingest(adapter, conn)
                 cascade_result = run_cascade(conn, run_id)
+                if not no_llm:
+                    console.print("[yellow]LLM stage lands in Phase 6; continuing.[/yellow]")
+                _cascade_json_path(run_id, config).write_text(
+                    cascade_result.model_dump_json(indent=2), encoding="utf-8"
+                )
+                summary = _emit_artifacts(
+                    conn, run_meta, cascade_result, config, out_override=out, html=html
+                )
             finally:
                 conn.close()
         except SourceUnavailable as exc:
@@ -90,40 +161,54 @@ def run(
         except ConfigurationError as exc:
             err_console.print(f"[red]ConfigurationError:[/red] {exc}")
             raise typer.Exit(code=1) from exc
+        except ScoringError as exc:
+            err_console.print(f"[red]ScoringError:[/red] {exc}")
+            raise typer.Exit(code=3) from exc
 
-        table = Table(title=f"Ingested ({run_id})")
-        table.add_column("source")
-        table.add_column("count", justify="right")
-        for field_name in ("orders", "recon_lines", "bank_txns", "ledger_entries"):
-            table.add_row(field_name, str(getattr(report, field_name)))
-        table.add_row("malformed", str(report.malformed))
-        console.print(table)
-        console.print(
-            f"Ingested: orders {report.orders} | recon_lines {report.recon_lines} | "
-            f"bank_txns {report.bank_txns} | ledger_entries {report.ledger_entries}"
-        )
-
-        pass_table = Table(title=f"Cascade ({run_id})")
-        pass_table.add_column("pass")
-        pass_table.add_column("in", justify="right")
-        pass_table.add_column("matched", justify="right")
-        pass_table.add_column("deferred", justify="right")
-        pass_table.add_column("ms", justify="right")
-        for ps in cascade_result.passes:
-            pass_table.add_row(
-                ps.name, str(ps.in_count), str(ps.matched), str(ps.deferred), str(ps.runtime_ms)
-            )
-        console.print(pass_table)
-        console.print(
-            f"Matched {cascade_result.total_matched}/{report.recon_lines}   "
-            f"Cascade {cascade_result.runtime_ms}ms"
-        )
-        console.print(
-            "[yellow]STUB[/yellow] hypothesize/verify-remaining/report "
-            "not implemented until Phase 4+"
-        )
+        _print_ingest(report, run_id)
+        _print_cascade(cascade_result, report.recon_lines, run_id)
+        _print_summary(summary)
 
     raise typer.Exit(code=0)
+
+
+def _print_ingest(report, run_id: str) -> None:
+    table = Table(title=f"Ingested ({run_id})")
+    table.add_column("source")
+    table.add_column("count", justify="right")
+    for field_name in ("orders", "recon_lines", "bank_txns", "ledger_entries"):
+        table.add_row(field_name, str(getattr(report, field_name)))
+    table.add_row("malformed", str(report.malformed))
+    console.print(table)
+
+
+def _print_cascade(cascade_result: CascadeResult, recon_lines: int, run_id: str) -> None:
+    pass_table = Table(title=f"Cascade ({run_id})")
+    pass_table.add_column("pass")
+    pass_table.add_column("in", justify="right")
+    pass_table.add_column("matched", justify="right")
+    pass_table.add_column("deferred", justify="right")
+    pass_table.add_column("ms", justify="right")
+    for ps in cascade_result.passes:
+        pass_table.add_row(
+            ps.name, str(ps.in_count), str(ps.matched), str(ps.deferred), str(ps.runtime_ms)
+        )
+    console.print(pass_table)
+
+
+def _print_summary(summary: dict) -> None:
+    s = summary["summary"]
+    matched = s["matched"] if s["matched"] is not None else "--"
+    false_matches = s["false_matches"] if s["false_matches"] is not None else "--"
+    ceiling = summary["ceiling"]["resolvable"]
+    console.print(
+        f"Matched {matched}/400   False matches {false_matches}   Unresolved {s['unresolved']}"
+    )
+    console.print(
+        f"Baseline {summary['baseline']['matched']}/400   "
+        f"Ceiling {ceiling if ceiling is not None else '--'}/400   "
+        f"Cascade {s['runtime_ms_cascade']}ms"
+    )
 
 
 _SCENARIO_HELP = "llm-hallucination | llm-unavailable | prompt-injection"
@@ -142,9 +227,42 @@ def inject(
 def report(
     dataset: Annotated[str, typer.Option(help="Run id, e.g. clean-august")] = "clean-august",
     html: Annotated[bool, typer.Option("--html", help="Also emit the static HTML report.")] = False,
+    db: Annotated[str | None, typer.Option(help="Override the SQLite path.")] = None,
+    out: Annotated[str | None, typer.Option(help="Override the results.json output path.")] = None,
 ) -> None:
-    """Re-emit results.json (and optionally the HTML report) for an existing run."""
-    console.print(f"STUB report: dataset={dataset!r} html={html} -- not implemented until Phase 5")
+    """Re-emit results.json (and optionally HTML) from an existing run.db.
+
+    Requires `run` to have been executed first: reads `run.db` plus the
+    `cascade.json` sidecar (the learned fee slabs / per-pass timings, which
+    are not persisted to any table).
+    """
+    config = load_config()
+    for run_meta in _resolve_run_meta(dataset):
+        run_id = run_meta["run_id"]
+        db_path = Path(db) if db else db_path_for(run_id, config)
+        cascade_json = _cascade_json_path(run_id, config)
+        if not db_path.exists() or not cascade_json.is_file():
+            err_console.print(
+                f"[red]No prior run for {run_id}[/red] - "
+                f"run `python -m recon run --dataset {run_id}` first."
+            )
+            raise typer.Exit(code=1)
+
+        cascade_result = CascadeResult.model_validate_json(
+            cascade_json.read_text(encoding="utf-8")
+        )
+        conn = connect(db_path)
+        try:
+            summary = _emit_artifacts(
+                conn, run_meta, cascade_result, config, out_override=out, html=html
+            )
+        except ScoringError as exc:
+            err_console.print(f"[red]ScoringError:[/red] {exc}")
+            raise typer.Exit(code=3) from exc
+        finally:
+            conn.close()
+        console.print(f"[bold]{run_id}[/bold]")
+        _print_summary(summary)
     raise typer.Exit(code=0)
 
 

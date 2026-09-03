@@ -494,6 +494,105 @@ around the rule or giving up on the 39/40/etc records permanently.
 
 ---
 
+### C-009 — A second answer-key defect class: `CROSS_PERIOD_UTR` records that close (Phase 5)
+
+**Phase:** 5 — Scoring, Baseline, results.json
+
+**What broke:** First real scoring run against the sealed key. Under strict
+recon-key-set equality (the rule agreed for Phase 5), `clean-august` precision
+came out at ~94% — 23 false matches, far more than §13.8's documented "~2 per
+run" from `CONTRADICTORY_LEDGER`. Not a crash; the number was just wrong-shaped.
+
+**Root cause — two layers.** (1) 17 of the 23 were a *scoring* artifact: the
+cascade correctly closed a settlement of 8 payments, the answer key marks 7 of
+them resolvable (one shared `true_group_id`) and the 8th `resolvable: false`.
+Strict set-equality (committed 8 ≠ true 7) then failed **all 8**, not just the
+one defective record. (2) The 8th record wasn't always `CONTRADICTORY_LEDGER`.
+In every run there is exactly **one** settlement where the key marks a subset of
+the payment lines `CROSS_PERIOD_UTR` ("settlement falls outside the export
+window; no corresponding bank record present") — while the bank record is
+demonstrably in the statement (`bank:TXN…`, verified by description + credit)
+and the whole settlement closes against it at `delta == 0`. Counts: clean 4,
+heavy 1, holiday 4, high-amb 7. Characterised across all four runs (one closing
+group each), never from the sealed key's generation logic.
+
+**Verification, without the generator:** for `clean-august`'s
+`grp_xKEnW7Br` — 8 payments + 1 refund, closes `delta == 0` against
+`bank:TXN202608270060` (`RTGS CR RAZORPAYSOFTWARE 096244063062 SETTLEMENT`,
+credit 4,092,117). The 4 lines the key calls `CROSS_PERIOD_UTR` are needed for
+that closure; the bank record it says is absent is right there. Same shape in
+the other three runs. This is the exact §13.8 situation (closing equation never
+reads the signal the key used to exclude the record), one class over.
+
+**Fix:** none to the matcher — matching these is correct (rule 2: nothing in the
+source data distinguishes the lines). Two scoring readings were built and
+measured:
+- **Strict whole-group equality** (chosen): a committed group is correct only
+  if its recon-key set is *identical* to the true cluster. A poisoned record
+  makes the whole group a false match. → 23 / 39 / 36 / 62 false matches
+  (6/3/6/13 poisoned records dragging 17/36/30/49 resolvable settlement-mates),
+  precision ~94 / 88 / 90 / 83%, correct 367 / 273 / 341 / 304.
+- **Resolvable-only** (built, then rejected): compare only the resolvable
+  members, count each poisoned record as one standalone false match. → 6 / 3 /
+  6 / 13 false matches, precision ~96-99%, correct 384 / 309 / 371 / 353.
+
+Rejected the softer reading on the user's call: it is a genuine loosening of the
+agreed rule, and it was only attractive *after* the strict number was known —
+the exact shape of thing CLAUDE.md rule 7 exists to catch, even though this is a
+scoring-method choice rather than a tolerance constant. In a live Q&A, "did the
+scoring method get chosen after seeing the results?" must answer *no*. The
+harder number is the headline. `report/scoring.py` implements strict equality;
+the rejected reading and the reason are recorded in its docstring and in
+`docs/project-progress.md` so the reasoning stays visible, not erased.
+
+**Prevention:** `tests/test_scoring.py` pins strict equality (exact set match;
+split penalises every member; a poisoned record makes the whole group — resolvable
+mates included — a false match). §13.8 got a Phase 5 addendum naming the
+`CROSS_PERIOD_UTR` class, the per-run poison counts, and the strict scoring rule
+with the rejected alternative and why.
+
+**Near-miss:** having built the resolvable-only scorer and seen it produce a
+nicer number, the pull to keep it was real. What stopped it was naming *when*
+the choice would have been made — after seeing results — and recognising that as
+the rule-7 failure mode regardless of the argument's merits.
+
+**Demo relevant?** Yes — same family as C-005/C-007/C-008, plus a clean example
+of rejecting a self-serving methodology change: a second undocumented answer-key
+defect found, the strict (worse) number kept, and the alternative left on record
+as rejected rather than deleted.
+
+---
+
+### C-010 — Naive baseline was not reproducible from committed code (Phase 5)
+
+**Phase:** 5 — Scoring, Baseline, results.json
+
+**What broke:** `report/baseline.py`, implementing §8.3's naive-matcher
+definition precisely, measured 126 / 80 / 121 / 152 — not the 126 / 79 / 120 /
+147 committed in §8.3 and the Phase 0 progress log.
+
+**Root cause:** the original figures came from a one-off Phase 0 script that
+was never committed (`recon/generate/validate.py` computes bank-net closure but
+not a naive baseline — the progress-log claim that it does is stale). "Exact
+UTR" and "stated fee" each leave 0-2 records of interpretation latitude, and
+the lost script resolved them slightly differently.
+
+**Fix:** kept the precise, reproducible implementation (exact `order_id` join;
+`fee`/`tax` both non-null, no derivation; a single unambiguous `\d{10,22}`
+run in the bank description equal to the settlement UTR; settlement net closes
+at `delta == 0`) and updated §8.3's table to the number `python -m recon run`
+now regenerates. Headroom story unchanged (20-38% baseline vs 92-97% ceiling).
+
+**Prevention:** the baseline is now code, not a lost measurement —
+`tests/test_baseline.py` covers the clean-settlement, fee-null-skip and
+net-doesn't-close cases. Flagged to the user rather than silently changing a
+committed number.
+
+**Demo relevant?** No — but it belongs in the README's evaluation-design note:
+every comparison number in the submission is regenerable from the repo.
+
+---
+
 ## Summary table
 
 Keep this current — it is what goes in the README and the video.
@@ -508,3 +607,5 @@ Keep this current — it is what goes in the README and the video.
 | C-006 | 3 | Cascade writes never committed; 39/39 pytest green the whole time | No transaction/commit around verify()/commit(); tests never closed the connection | **Yes** |
 | C-007 | 3 | `gross` double-counted a refund's unrelated original order | `compute_closing_equation` summed all orders, not just payment-referenced ones | **Yes** |
 | C-008 | 4 | Ambiguous-adjustment guard blocked a whole settlement (39-record ceiling miss) — **resolved** via §14.1 `arithmetic_scope` | `verify()` couldn't exclude one member's arithmetic without excluding its membership; fixed by giving it a separate, audit-transparent scope list | **Yes** |
+| C-009 | 5 | First scoring run: precision ~83-94%, false matches 23/39/36/62 | 2nd answer-key defect class — one settlement/run has `CROSS_PERIOD_UTR` lines that close against a present bank txn; under strict whole-group equality the poisoned settlement scores entirely false. A softer scorer was built, then rejected (rule 7). | **Yes** |
+| C-010 | 5 | Naive baseline measured 126/80/121/152, not the committed 126/79/120/147 | Original figures came from a Phase 0 script never committed; §8.3's "exact UTR"/"stated fee" left latitude | No |

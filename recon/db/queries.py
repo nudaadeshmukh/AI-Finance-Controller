@@ -211,6 +211,48 @@ SELECT group_id, proof_json FROM match_groups WHERE closes = 1
 
 SELECT_EXCEPTION_RECORD_KEYS = "SELECT record_key FROM exceptions"
 
+# report/ — Phase 5. `report/` is a reader of every table (§7.1); it writes
+# nothing. These back scoring, the naive baseline, and results.json assembly.
+SELECT_ALL_ORDERS = "SELECT record_key, order_id, amount FROM orders"
+SELECT_ALL_RECON_LINES_FULL = "SELECT * FROM recon_lines"
+SELECT_ALL_BANK_TXNS_FULL = """
+SELECT record_key, description, credit, debit FROM bank_txns
+"""
+SELECT_ALL_MATCH_GROUPS = """
+SELECT group_id, pass_name, origin, proof_json, closes FROM match_groups
+"""
+SELECT_ALL_GROUP_MEMBERS = "SELECT group_id, record_key FROM group_members"
+SELECT_ALL_EXCEPTIONS = """
+SELECT record_key, reason_code, reason_text, passes_tried, candidates FROM exceptions
+"""
+SELECT_EXCEPTION_RECON_KEYS = "SELECT record_key FROM exceptions WHERE record_key LIKE 'recon:%'"
+SELECT_NOT_A_SETTLEMENT_COUNT = """
+SELECT COUNT(*) AS n FROM exceptions WHERE reason_code = 'NOT_A_SETTLEMENT'
+"""
+SELECT_NOT_A_SETTLEMENT_KEYS = """
+SELECT record_key FROM exceptions WHERE reason_code = 'NOT_A_SETTLEMENT'
+"""
+SELECT_ORDERS_GROSS = "SELECT COALESCE(SUM(amount), 0) AS n FROM orders"
+SELECT_RECON_NET = """
+SELECT COALESCE(SUM(credit), 0) - COALESCE(SUM(debit), 0) AS n FROM recon_lines
+"""
+SELECT_BANK_CREDITED = "SELECT COALESCE(SUM(credit), 0) AS n FROM bank_txns"
+SELECT_LEDGER_REVENUE = """
+SELECT COALESCE(SUM(credit), 0) AS n FROM ledger_entries WHERE account = 'revenue'
+"""
+SELECT_MAX_RECON_CREATED_AT = "SELECT COALESCE(MAX(created_at), 0) AS n FROM recon_lines"
+# Recon lines resolved per pass — the persistent truth (match_groups.pass_name),
+# not the transient per-invocation cascade counter, so a re-run or `report`
+# against an already-matched db still reports which pass owns each record
+# (§18 `passes[].matched`, §23.3's "filterable by resolving pass").
+SELECT_RECON_MEMBERS_BY_PASS = """
+SELECT mg.pass_name AS pass_name, COUNT(*) AS n
+FROM group_members gm
+JOIN match_groups mg ON mg.group_id = gm.group_id
+WHERE gm.record_key LIKE 'recon:%'
+GROUP BY mg.pass_name
+"""
+
 SELECT_AUDIT_TRAIL = """
 SELECT seq, ts, stage, record_key, action, detail_json
 FROM audit_log
