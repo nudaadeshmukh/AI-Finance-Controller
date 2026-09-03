@@ -22,6 +22,10 @@ credentials.json
 *.db-shm
 data/*/run.db
 data/*/report.html
+# Internal sidecar written by `recon run` so `recon report` can re-emit without
+# re-running the cascade (learned fee slabs + per-pass timings). Regenerable;
+# carries wall-clock ms, so not a committed artifact. results.json IS committed.
+data/*/cascade.json
 
 # ---------------------------------------------------------------------------
 # Python
