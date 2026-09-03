@@ -25,8 +25,8 @@ code is actually working.
 
 | | |
 |---|---|
-| **Current phase** | Phase 7 complete |
-| **Next phase** | Phase 8 — README, error analysis, scaling |
+| **Current phase** | Phase 8 complete — **all 8 phases done** |
+| **Next phase** | — (submission) |
 | **Deadline** | 5 September 2026 |
 | **Pipeline runs?** | `run` does acquire+ingest+cascade(6 passes)+classify_residual+**hypothesise (LLM)**+verify+score+results.json(+HTML) for real; `report` re-emits from an existing run.db; `inject` runs the three §24 failure scenarios. `--no-llm` / no `GROQ_API_KEY` skips the LLM stage and the run still completes. LLM default model is **`openai/gpt-oss-20b`** (C-013 — original pin `llama-3.3-70b-versatile` retired by Groq mid-build; layer still degrades cleanly if a model vanishes). |
 | **Latest match rate (scored, `--no-llm`, strict whole-group equality, post-C-011)** | clean-august **91.75%** (367/400, precision **94.10%**), heavy-refunds **71.75%** (287/400, precision **88.04%**), holiday-skew **86.5%** (346/400, precision **90.58%**), high-ambiguity **76.75%** (307/400, precision **83.20%**). False matches **23/39/36/62** — 6/3/6/13 answer-key-poisoned records (§13.8 + C-009) dragging 17/36/30/49 resolvable settlement-mates under strict scoring. Unresolved **10/74/18/31**, all with a specific reason (`CROSS_PERIOD_UTR` or `AMBIGUOUS_DUPLICATE`) — **`NO_CANDIDATE` is 0 in every run** after C-011. |
@@ -41,7 +41,7 @@ code is actually working.
 | 5 — Scoring + results.json | ✅ complete |
 | 6 — LLM layer + injection | ✅ complete |
 | 7 — Frontend | ✅ complete |
-| 8 — README + scaling | ⬜ not started |
+| 8 — README + scaling | ✅ complete |
 
 ---
 
@@ -1351,6 +1351,116 @@ cut under time pressure.
 - Added URL-hash routing (`#/<run>/<tab>/<record_key>`) — not in the guide;
   makes every view a shareable link, gives back/forward, and made the headless
   visual verification possible.
+
+---
+
+## Phase 8 — README, Scaling Analysis, Submission Checklist
+
+**Status:** complete
+
+**Completed features:**
+- `README.md` (new) — opens with the §1.2 pitch; the philosophy; run
+  instructions (zero-env fresh clone); the §17.1 metric definitions verbatim;
+  the four-comparison results table (baseline / cascade / +LLM / ceiling, all
+  four datasets); **the LLM's exact contribution published as 0/400** with the
+  C-014 rejection story; the honest exception list; the two answer-key defect
+  classes (§13.8 + C-009) explaining the entire false-match count; the three
+  tolerance constants with justifications; "Why not the JVM?"; "Why no auth?"
+  (§26 sentence); the synthetic-data + invented-fee-schedule disclosure; and
+  the Razorpay test-mode VERIFY status (endpoint authenticates, returns empty
+  collection, adapter ships as a documented stub) plus the C-013 model-churn
+  note.
+- `reference/master_specification.md` §29.1 — **scaling analysis, measured**
+  (not estimated): per-pass mean ms and cascade share from 120 in-memory runs
+  (`time.perf_counter`), full-cascade throughput ~9,800–10,900 rec/s
+  single-thread, which passes partition cleanly, where it breaks first
+  (candidate-set search becomes subset-sum without the UTR join — combinatorial
+  in settlement size, mean 6.7 / max 32 lines here, intractable at a monthly
+  window), and the fix (block on the UTR index, then shard settlements).
+- `recon/match/__init__.py` — **C-015**: cascade per-pass timing switched from
+  `time.monotonic()` (15 ms-granular on Windows → 0/15/16/31 ms noise) to
+  `time.perf_counter()`. `results.json` stays all-integer; a sub-ms pass now
+  honestly reads 0. All four `results.json` regenerated — timing fields only.
+- `docs/challenges-log.md` — C-015 full entry + summary-table row.
+
+**Files modified / added:**
+```
+README.md                          (new)
+reference/master_specification.md  (§29.1)
+recon/match/__init__.py            (perf_counter timing — C-015)
+data/{clean-august,heavy-refunds,holiday-skew,high-ambiguity}/results.json  (timing fields)
+docs/project-progress.md, docs/challenges-log.md
+```
+
+**Tests:**
+- pytest: 88 passed
+- ruff: clean
+
+**Measured results (scaling — mean of 120 in-memory cascade runs, perf_counter):**
+
+| Pass | mean ms / 400 rec | share |
+|---|---|---|
+| utr | 0.05 | <1% |
+| exact | 5.4 | ~14% |
+| aggregate | 4.3 | ~11% |
+| fee_reversal | 18.5 | ~47% |
+| timing | 5.9 | ~15% |
+| tolerance | 0.6 | ~2% |
+| **full cascade** | **38–41 ms** | **9,800–10,900 rec/s** single-thread |
+
+Match rate / precision / false / unresolved unchanged from Phase 5–6
+(367/287/346/307, 94.10/88.04/90.58/83.20%, false 23/39/36/62, unresolved
+10/74/18/31). The §29.1 first-break analysis: max settlement 32 lines
+(holiday-skew), mean 6.7, ~60 settlements/run; 73/350 orders in high-ambiguity
+share an amount (the subset-sum blow-up surface if the UTR join were removed).
+
+**§30.2 final checklist — verified:**
+- [x] `pytest` green (88), `ruff` clean
+- [x] Fresh clone runs with **zero env configuration** — verified by moving
+  `.env` aside and running `--dataset all --no-llm` in an empty environment
+  (`env -i`): all four score correctly, exit 0. `run` without `--no-llm` and no
+  key prints "GROQ_API_KEY absent; skipping LLM stage" and completes.
+- [x] All four `results.json` committed
+- [x] No secrets in the repo; `.env` gitignored — `git log --all -- .env` is
+  empty; `git grep` for key patterns across tracked non-doc files is clean
+- [x] Commit history incremental with real messages
+- [x] `docs/challenges-log.md` has real entries (C-001…C-015), written as they
+  happened
+- [ ] **Someone else clones it cold and runs it** — the one item that can only
+  be done by a second person; everything it depends on (zero-env run, pinned
+  deps, committed data) is verified above
+- [ ] **Video** — a separate deliverable (problem → why existing systems fail →
+  detection → bounded action → injected failure → recovery → measurable
+  results + audit trail). The `inject` scenarios and C-014 are the recovery
+  beats; §17.2 table + the audit trail in the record drawer are the evidence
+  beats. C-012's data note: demo the injection via `recon inject`, not by
+  expecting a plain run to show it.
+
+**Remaining work:**
+None in the build. Outstanding non-code items: the cold-clone check by a
+second person, and the video.
+
+**Known issues / TODOs:**
+- The `frontend/` static build is not deployed anywhere yet (§28: Vercel /
+  Netlify free tier). `npm run build` produces a working `dist/`; deployment
+  is a one-time manual step the submission may or may not need.
+- `results.json` per-pass `runtime_ms` and `summary.runtime_ms_cascade` are now
+  meaningful (post-C-015) but still wall-clock — they vary run to run within a
+  few ms and are the only fields not byte-identical across re-runs. Documented
+  in `report/results.py`.
+- §29.1's throughput was measured in-memory (`:memory:` SQLite). A run against
+  a real `data/<run>/run.db` file on disk is a little slower (cold-process
+  first run ~50 ms vs the 40 ms warm-loop mean) — the README cites the
+  9,800–10,900 rec/s warm-loop figure and says so.
+
+**Deviations from the implementation guide:**
+- C-015's timer fix (`monotonic` → `perf_counter`) touches Phase 3/4 code in
+  Phase 8. It is a measurement-tooling fix with no behavioural effect — the
+  pipeline never depended on the timer — and it was necessary to produce §29.1
+  honestly. Flagged, not silent.
+- §29.1 was written into `master_specification.md` (as the spec instructs) and
+  summarised in the README; the guide's phrasing could be read as wanting it
+  only in the README.
 
 ---
 

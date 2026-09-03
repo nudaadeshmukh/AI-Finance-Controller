@@ -843,6 +843,43 @@ proposals is model-/network-dependent; every one fails to close.
 
 ---
 
+## C-015 — per-pass `runtime_ms` was 15 ms-quantised noise on Windows
+
+**Phase:** 8
+**What broke:** starting §29.1's scaling measurement, the per-pass timings in
+`results.json` (`passes[].runtime_ms`) were nonsense — every pass read as
+`0`, `15`, `16`, `31` or `47` ms, in a different combination each run, for
+work that clearly takes well under a millisecond at 400 records.
+
+**Root cause:** `match/__init__.py` timed each pass with `time.monotonic()`.
+On this Windows box `time.monotonic()` has ~15.6 ms granularity (the classic
+Windows timer tick), so any duration below 15 ms rounds to `0` or jumps a
+whole tick. `time.perf_counter()` is the clock Python's own docs point at for
+measuring short durations — it is monotonic *and* high-resolution (~100 ns
+here).
+
+**Fix:** swapped the two `time.monotonic()` calls in the cascade loop for
+`time.perf_counter()` (kept `int(...*1000)`, so `results.json` stays
+all-integer — a sub-ms pass now honestly reads `0` rather than a random
+`15`). Regenerated all four `results.json`; only the timing fields changed
+(they are already documented as the non-deterministic ones). `hypothesize/`
+still uses `monotonic` — LLM calls are seconds-scale, so it doesn't matter
+there.
+
+**Measured after the fix** (mean of 120 in-memory cascade runs): full cascade
+~38–41 ms / 400 records ≈ **9,800–10,900 rec/s**; `fee_reversal` is ~47% of
+that (change-point scan over every stated fee), `utr` is 0.05 ms. Full table
+in `reference/master_specification.md` §29.1.
+
+**Prevention:** none needed as a test — it is a measurement-tooling bug, not a
+correctness bug (the pipeline's behaviour never depended on the timer). Noted
+here because "the first number I tried to report was garbage and here's why"
+is exactly what this log is for.
+
+**Demo relevant?** No — but the throughput number it unblocked is.
+
+---
+
 ## Summary table
 
 Keep this current — it is what goes in the README and the video.
@@ -863,3 +900,4 @@ Keep this current — it is what goes in the README and the video.
 | C-012 | 6 | §24/§25 say the injected record "goes to exceptions"; in the frozen data it is genuinely resolvable and the cascade matches it | Payload is a global attack on the LLM prompt, planted on an arbitrary order without making its settlement unresolvable. Reframed `inject`/`test_injection` around the real §15.6 invariant (no `origin='llm'` match without a closing proof); data and scorer untouched. | **Yes** |
 | C-013 | 6 | Locked model `llama-3.3-70b-versatile` returns 404 — retired by Groq mid-build | Provider churn since Phase 0. Fix: default switched to `openai/gpt-oss-20b` everywhere; layer already degrades to `HYPOTHESIS_LAYER_UNAVAILABLE` if any model vanishes. Lesson: pin the `ChatModel` interface, not a model's identity — the fix was one env var, no code. | **Yes** (brief) |
 | C-014 | 6 | Live `openai/gpt-oss-20b` proposed 3 confident wrong groupings on a real heavy-refunds run | Model pattern-matched "shared UTR + payments + refunds" into a settlement claim with an invented closing figure, naming no bank txn (none exists — cross-period). Verifier recomputed from source: delta = −1,459,600 / −322,594 / −969,700 paise; all rejected, 0 committed. Not a bug — the core thesis firing unprompted on real input. | **Yes** (primary) |
+| C-015 | 8 | Per-pass `runtime_ms` was 0/15/16/31 ms noise | `match/__init__.py` timed passes with `time.monotonic()` (~15.6 ms granularity on Windows). Swapped to `time.perf_counter()`; regenerated `results.json` (timing fields only). Real numbers: full cascade ~40 ms / 400 rec ≈ 10k rec/s, `fee_reversal` ~47%. | No |

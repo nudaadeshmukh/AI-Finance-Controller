@@ -1857,27 +1857,27 @@
     {
       "matched": 30,
       "name": "exact",
-      "runtime_ms": 0
+      "runtime_ms": 3
     },
     {
       "matched": 50,
       "name": "aggregate",
-      "runtime_ms": 15
+      "runtime_ms": 7
     },
     {
       "matched": 236,
       "name": "fee_reversal",
-      "runtime_ms": 31
+      "runtime_ms": 17
     },
     {
       "matched": 0,
       "name": "timing",
-      "runtime_ms": 15
+      "runtime_ms": 5
     },
     {
       "matched": 10,
       "name": "tolerance",
-      "runtime_ms": 0
+      "runtime_ms": 1
     },
     {
       "matched": 0,
@@ -19508,9 +19508,9 @@
     "match_rate": 0.7175,
     "matched": 287,
     "records_processed": 400,
-    "runtime_ms_cascade": 61,
+    "runtime_ms_cascade": 33,
     "runtime_ms_llm": 0,
-    "throughput_per_sec_cascade": 6557.38,
+    "throughput_per_sec_cascade": 12121.21,
     "unresolved": 74
   },
   "tolerance_constants": {
