@@ -29,7 +29,7 @@ code is actually working.
 | **Next phase** | Phase 6 — LLM layer + failure injection |
 | **Deadline** | 5 September 2026 |
 | **Pipeline runs?** | `run` does acquire+ingest+cascade(6 passes)+classify_residual+score+results.json(+HTML) for real; `report` re-emits from an existing run.db. Only the LLM stage is stubbed. |
-| **Latest match rate (scored, `--no-llm`, strict whole-group equality)** | clean-august **91.75%** (367/400, precision 94.1%), heavy-refunds **68.25%** (273/400, 87.5%), holiday-skew **85.25%** (341/400, 90.5%), high-ambiguity **76.0%** (304/400, 83.1%). False matches 23/39/36/62 — 6/3/6/13 answer-key-poisoned records (§13.8 + C-009) dragging 17/36/30/49 resolvable settlement-mates with them under strict scoring. |
+| **Latest match rate (scored, `--no-llm`, strict whole-group equality, post-C-011)** | clean-august **91.75%** (367/400, precision **94.10%**), heavy-refunds **71.75%** (287/400, precision **88.04%**), holiday-skew **86.5%** (346/400, precision **90.58%**), high-ambiguity **76.75%** (307/400, precision **83.20%**). False matches **23/39/36/62** — 6/3/6/13 answer-key-poisoned records (§13.8 + C-009) dragging 17/36/30/49 resolvable settlement-mates under strict scoring. Unresolved **10/74/18/31**, all with a specific reason (`CROSS_PERIOD_UTR` or `AMBIGUOUS_DUPLICATE`) — **`NO_CANDIDATE` is 0 in every run** after C-011. |
 
 | Phase | Status |
 |---|---|
@@ -807,31 +807,40 @@ session, not yet formally scored against the key).
 recon/report/{scoring,baseline,results,html}.py
 recon/report/templates/report.html.j2
 recon/match/__init__.py            (CascadeResult.run_id, .derived)
+recon/match/fee_reversal.py        (C-011: _extend_outer_edges_to_window; 3rd commit)
 recon/db/queries.py                (report/ read queries; SELECT_RECON_MEMBERS_BY_PASS)
 recon/cli.py                       (run: +scoring/results/html; report: implemented)
 .gitignore                         (data/*/cascade.json)
 reference/master_specification.md  (§8.3, §8.3.1, §13.8 addendum, §20.4)
-tests/{test_scoring,test_baseline,test_results}.py
+tests/{test_scoring,test_baseline,test_results}.py + test_fee_reversal.py (C-011, 3rd commit)
 docs/project-progress.md, docs/challenges-log.md
 data/{clean-august,heavy-refunds,holiday-skew,high-ambiguity}/results.json  (committed)
 ```
 
+Committed in two parts: `d709e37` (scoring/baseline/results/HTML, strict
+whole-group equality — the resolvable-only reading was built and rejected
+before this commit, never committed), then a third repo commit for C-011's
+`infer_slabs` fix + regenerated `results.json`.
+
 **Tests:**
-- pytest: 73 passed (was 64; +9)
+- pytest: 76 passed (was 64; +9 Phase 5, +3 C-011)
 - ruff: clean
 
 **Measured results (scored against the sealed key, `--dataset all --no-llm`,
-strict whole-group equality):**
+strict whole-group equality, post-C-011):**
 
 | Dataset | Match rate | Precision | False matches | Unresolved | Baseline | Ceiling (base) |
 |---|---|---|---|---|---|---|
 | clean-august | 367/400 (91.75%) | 94.10% | 23 | 10 | 126 (31.5%) | 389 |
-| heavy-refunds | 273/400 (68.25%) | 87.50% | 39 | 88 | 80 (20.0%) | 389 |
-| holiday-skew | 341/400 (85.25%) | 90.45% | 36 | 23 | 121 (30.25%) | 389 |
-| high-ambiguity | 304/400 (76.0%) | 83.06% | 62 | 34 | 152 (38.0%) | 368 |
+| heavy-refunds | 287/400 (71.75%) | 88.04% | 39 | 74 | 80 (20.0%) | 389 |
+| holiday-skew | 346/400 (86.5%) | 90.58% | 36 | 18 | 121 (30.25%) | 389 |
+| high-ambiguity | 307/400 (76.75%) | 83.20% | 62 | 31 | 152 (38.0%) | 368 |
 
 `matched + false + unresolved = 400` per run. Excluded (NOT_A_SETTLEMENT) = 5
-per run, in neither numerator nor denominator.
+per run, in neither numerator nor denominator. C-011 (fee-slab window-edge
+bug) moved these from 367/**273**/**341**/**304** — its +14/+5/+3 are all
+verified-correct new matches, 0 new false matches (see below). Every unresolved
+record now has a specific reason code; **`NO_CANDIDATE` = 0 in all four runs**.
 
 **Error analysis — which classes fail, and why (matched / total per `true_class`,
 where "matched" = committed into a group, before the strict-equality poison
@@ -839,11 +848,11 @@ check):**
 
 | Class | clean | heavy | holiday | high-amb | Why the misses |
 |---|---|---|---|---|---|
-| `exact` | 138/138 | 35/36 | 107/111 | 74/76 | The 1-4 "misses" are members of the one C-009 `CROSS_PERIOD_UTR` settlement — committed, then scored false because the group is poisoned. |
-| `fee_derived` | 41/41 | 30/39 | 37/40 | 36/38 | heavy-refunds' 9: fee-null payments in genuine cross-period settlements (no bank record) — correctly unresolved, not a fee-inference failure. Slab inference itself: 0 failures, all 4 runs. |
-| `timing_skew` | 53/53 | 40/47 | 70/71 | 50/50 | heavy-refunds' 7: timing-skewed *and* in a genuine cross-period settlement. Calendar inference: >=95% confidence, all 4 runs. |
+| `exact` | 138/138 | 35/36 | 111/111 | 76/76 | heavy's 1: a member of its one C-009 `CROSS_PERIOD_UTR` settlement — committed, then scored false because the group is poisoned. clean/holiday/high-amb: 100%. |
+| `fee_derived` | 41/41 | 33/39 | 38/40 | 37/38 | heavy's 6 / holiday's 2 / high-amb's 1: fee-null payments in genuine cross-period settlements (no bank record) — correctly unresolved. Slab inference itself: 0 failures, all 4 runs (post-C-011). |
+| `timing_skew` | 53/53 | 40/47 | 70/71 | 50/50 | heavy's 7: timing-skewed *and* in a genuine cross-period settlement. Calendar inference: >=95% confidence, all 4 runs. |
 | `tolerance` | 19/19 | 7/7 | 20/20 | 7/7 | **Zero misses.** Derived-fee tolerance budget was available but never needed to close anything measured. |
-| `many_to_one` | 133/138 | 197/260 | 137/147 | 186/197 | The dominant unresolved bucket. Almost entirely genuine `CROSS_PERIOD_UTR` (settlement outside the export window, bank record truly absent) + `AMBIGUOUS_DUPLICATE` (dashboard refund, no order ref). heavy-refunds is 63/88 unresolved here by design — a cycle where a large fraction of settlements spill across the export boundary. |
+| `many_to_one` | 133/138 | 208/260 | 137/147 | 186/197 | The dominant unresolved bucket. Almost entirely genuine `CROSS_PERIOD_UTR` (settlement outside the export window, bank record truly absent) + `AMBIGUOUS_DUPLICATE` (dashboard refund, no order ref). heavy-refunds is 52/74 unresolved here by design — a cycle where a large fraction of settlements spill across the export boundary. |
 | `ambiguous` | 6/11 | 3/11 | 6/11 | 13/32 | "matched" here = the poisoned records that closed. Under strict scoring these plus their settlement-mates are all false. The rest are correctly held unresolved with both candidates listed. |
 
 **The two answer-key defect classes, and what strict scoring does with them
@@ -869,15 +878,58 @@ check):**
   entirely answer-key-defect drag amplified by whole-group scoring, not matcher
   error.
 
+**heavy-refunds — investigated before Phase 6 (was the low match rate design, or a hidden defect class?), and C-011 fixed as a result.**
+Checked every unresolved record the way C-009 was found — does any have a bank
+txn actually present in the statement that the answer key calls absent?
+
+- **No new answer-key defect.** All `CROSS_PERIOD_UTR` unresolved records have
+  genuinely **no** bank txn in the statement — the key's "absent" claim is
+  correct for every one. The `AMBIGUOUS_DUPLICATE` records are genuine
+  dashboard-refund ambiguity, both candidates listed. The C-009 signature
+  (bank present, key says absent) does **not** recur at volume.
+- **But 14 records (then marked `NO_CANDIDATE`) were a real cascade bug —
+  C-011.** Two settlements (`utr=790205592763`, `utr=201562670970`) had their
+  bank txn in the statement, were marked fully resolvable by the key, closed at
+  `delta == 0`, and still got `NO_CANDIDATE`. Root cause: `infer_slabs` bounded
+  each method's outer slab edge to first/last *observed* stated fee, not the
+  data-window edge; a fee-null card payment dated before the first stated card
+  fee (2026-06-11) could not be derived, and `build_settlement_proposal`'s
+  all-or-nothing fee-null guard then bailed on the whole settlement.
+- **Fixed** (`_extend_outer_edges_to_window` in `match/fee_reversal.py`, 3rd
+  repo commit). Outer slab edges extend to `min`/`max(created_at)` across all
+  ingested lines; inner change-point gaps untouched; each widened slab
+  re-validated. **Scope turned out wider than first characterised** — the first
+  pass said "heavy-refunds / card only" because only card was checked. The fix
+  also cleared `wallet` / `netbanking` window-edge cases in holiday-skew (+5)
+  and high-ambiguity (+3). 3 of 4 datasets, 22 records.
+- **Verified after the fix:**
+  - clean-august: **byte-identical** results (its slabs already reached the
+    window edges) — genuinely unchanged, not just "expected unchanged".
+  - heavy-refunds 273 → 287, holiday-skew 341 → 346, high-ambiguity 304 → 307.
+  - **0 new false matches.** Every one of the 22 newly-matched records:
+    `resolvable: true` in the key, proof `delta == 0`, `closes == true`. The
+    poisoned-group count (3/3/3/7) and false-match count (23/39/36/62) are
+    unchanged.
+  - **`NO_CANDIDATE` = 0 in all four runs.** Every unresolved record now
+    carries `CROSS_PERIOD_UTR` or `AMBIGUOUS_DUPLICATE` — no catch-all left.
+- **So the residual is now fully explained:** heavy-refunds' 74 unresolved =
+  69 genuine `CROSS_PERIOD_UTR` (bank record truly absent, §8.2 design — a
+  cycle where many settlements spill past the export window) + 5 genuine
+  `AMBIGUOUS_DUPLICATE`. Not a hidden defect class; the 14 that looked
+  suspicious were a real, now-fixed cascade bug.
+
 **Bridge:** closes to the paise in all four runs (verified:
 `gross − fees − tax − refunds − settled_next + prior_spillover == bank_credited`).
 
 **Remaining work:**
 Phases 6-8. Phase 6 (LLM layer + failure injection) is next — the residual it
-runs on is 10 / 88 / 23 / 34 records, most of which are *genuinely* unresolvable
-(cross-period with no bank record, or true duplicates), so the honest
-expectation per §15.5 is that the LLM resolves a small single-digit number, if
-any. That small number is the point.
+runs on is **10 / 74 / 18 / 31** records, now **entirely** genuine
+`CROSS_PERIOD_UTR` (settlement outside the export window, bank record truly
+absent) and `AMBIGUOUS_DUPLICATE` (no distinguishing reference). None of these
+are resolvable from the data by any means — so the honest expectation per §15.5
+is that the LLM resolves **~0** of them, and the value of the LLM layer will be
+shown through failure injection (§24) — that it cannot fabricate a match —
+rather than through a contribution count. That is itself the point.
 
 **Known issues / TODOs:**
 - **A softer scoring reading was built, measured, and rejected — kept visible on
@@ -889,9 +941,15 @@ any. That small number is the point.
   attractive *after* the strict number was known — the exact failure mode
   CLAUDE.md rule 7 guards against, even for a scoring-method choice rather than a
   tolerance constant. "Was the scoring method chosen after seeing the results?"
-  must answer *no*. The strict number (367/273/341/304, precision ~83-94%) is
-  the headline. `report/scoring.py`'s docstring, §13.8 and `docs/challenges-log.md`
-  C-009 all record the rejected reading and why, so the reasoning is not erased.
+  must answer *no*. At the decision point (pre-C-011) that was strict
+  367/273/341/304 vs resolvable-only 384/309/371/353; strict is the headline
+  (post-C-011: 367/287/346/307, precision ~83-94%). `report/scoring.py`'s
+  docstring, §13.8 and `docs/challenges-log.md` C-009 all record the rejected
+  reading and why, so the reasoning is not erased.
+- **C-011 was fixed in a 3rd repo commit** (`infer_slabs` outer-slab-edge
+  extension) — see the heavy-refunds investigation above and
+  `docs/challenges-log.md` C-011. Not an open issue; noted here because it
+  shifted the Phase 5 headline numbers after `d709e37` was already pushed.
 - **`seed` read from `manifest.json`** for `results.json` provenance — §8.3.1
   originally allowed only `run_id` + `label`. Amended §8.3.1 to permit `seed`
   (provenance only, no logic depends on it). Flag for review.

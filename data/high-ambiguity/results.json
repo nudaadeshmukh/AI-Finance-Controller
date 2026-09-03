@@ -363,7 +363,7 @@
       "sign": "+"
     },
     {
-      "amount": 1805054,
+      "amount": 1820276,
       "label": "Processing fees",
       "record_keys": [
         "recon:pay_06hIA8fQH3fby9",
@@ -448,6 +448,7 @@
         "recon:pay_VCrEokYpO4QBod",
         "recon:pay_VJtIB7rNEyMwuG",
         "recon:pay_W7ihyFiqshVhHe",
+        "recon:pay_WdutNHrDPYTXm6",
         "recon:pay_WfeCFDaN2TXLdu",
         "recon:pay_XLx9OgxGlDVnqS",
         "recon:pay_XV9RIT2P2ZvxJ6",
@@ -528,7 +529,7 @@
       "sign": "-"
     },
     {
-      "amount": 324920,
+      "amount": 327660,
       "label": "GST on fees",
       "record_keys": [
         "recon:pay_06hIA8fQH3fby9",
@@ -613,6 +614,7 @@
         "recon:pay_VCrEokYpO4QBod",
         "recon:pay_VJtIB7rNEyMwuG",
         "recon:pay_W7ihyFiqshVhHe",
+        "recon:pay_WdutNHrDPYTXm6",
         "recon:pay_WfeCFDaN2TXLdu",
         "recon:pay_XLx9OgxGlDVnqS",
         "recon:pay_XV9RIT2P2ZvxJ6",
@@ -756,7 +758,7 @@
       "sign": "-"
     },
     {
-      "amount": 2676609,
+      "amount": 2694571,
       "label": "Prior cycle spillover",
       "record_keys": [],
       "sign": "+"
@@ -840,7 +842,7 @@
     {
       "inferred_bps": 190,
       "method": "card",
-      "period_end": "2026-08-26",
+      "period_end": "2026-08-29",
       "period_start": "2026-07-19",
       "reproduces_all_stated": true,
       "sample_size": 23
@@ -857,7 +859,7 @@
       "inferred_bps": 175,
       "method": "netbanking",
       "period_end": "2026-08-29",
-      "period_start": "2026-06-03",
+      "period_start": "2026-06-01",
       "reproduces_all_stated": true,
       "sample_size": 34
     },
@@ -871,20 +873,6 @@
     }
   ],
   "exceptions": [
-    {
-      "candidates": [],
-      "passes_tried": [
-        "utr",
-        "exact",
-        "aggregate",
-        "fee_reversal",
-        "timing",
-        "tolerance"
-      ],
-      "reason_code": "NO_CANDIDATE",
-      "reason_text": "Cascade and LLM exhausted",
-      "record_key": "recon:pay_3FLNOFRAGEBLCq"
-    },
     {
       "candidates": [],
       "passes_tried": [
@@ -979,20 +967,6 @@
         "timing",
         "tolerance"
       ],
-      "reason_code": "NO_CANDIDATE",
-      "reason_text": "Cascade and LLM exhausted",
-      "record_key": "recon:pay_WdutNHrDPYTXm6"
-    },
-    {
-      "candidates": [],
-      "passes_tried": [
-        "utr",
-        "exact",
-        "aggregate",
-        "fee_reversal",
-        "timing",
-        "tolerance"
-      ],
       "reason_code": "CROSS_PERIOD_UTR",
       "reason_text": "Settlement outside export window",
       "record_key": "recon:pay_XV9RIT2P2ZvxJ6"
@@ -1010,20 +984,6 @@
       "reason_code": "CROSS_PERIOD_UTR",
       "reason_text": "Settlement outside export window",
       "record_key": "recon:pay_ZfkWy7DxkSXf1Q"
-    },
-    {
-      "candidates": [],
-      "passes_tried": [
-        "utr",
-        "exact",
-        "aggregate",
-        "fee_reversal",
-        "timing",
-        "tolerance"
-      ],
-      "reason_code": "NO_CANDIDATE",
-      "reason_text": "Cascade and LLM exhausted",
-      "record_key": "recon:pay_rIF31V5rVh7tpj"
     },
     {
       "candidates": [],
@@ -1417,12 +1377,12 @@
     {
       "matched": 93,
       "name": "aggregate",
-      "runtime_ms": 0
+      "runtime_ms": 16
     },
     {
-      "matched": 211,
+      "matched": 214,
       "name": "fee_reversal",
-      "runtime_ms": 47
+      "runtime_ms": 30
     },
     {
       "matched": 0,
@@ -2176,19 +2136,37 @@
     {
       "audit": [
         {
-          "action": "classified",
-          "detail": "NO_CANDIDATE",
-          "stage": "match.classify"
+          "action": "matched",
+          "detail": "group grp_Mgext2DQ",
+          "stage": "verify"
         }
       ],
       "display_amount": 139900,
-      "group_id": null,
-      "member_keys": [],
-      "pass_name": null,
-      "proof": null,
+      "group_id": "grp_Mgext2DQ",
+      "member_keys": [
+        "bank:TXN202606050002",
+        "order:order_1qmG9aLZGj3BmJ",
+        "order:order_HdYQ563Fx8Ga7s",
+        "order:order_pJ5tOB2vlvWwpF",
+        "recon:pay_3FLNOFRAGEBLCq",
+        "recon:pay_WdutNHrDPYTXm6",
+        "recon:pay_rIF31V5rVh7tpj"
+      ],
+      "pass_name": "fee_reversal",
+      "proof": {
+        "closes": true,
+        "delta": 0,
+        "expected_net": 1348649,
+        "fees": 17670,
+        "gross": 1369500,
+        "observed_net": 1348649,
+        "refunds": 0,
+        "tax": 3181,
+        "tolerance_applied": 0
+      },
       "record_key": "recon:pay_3FLNOFRAGEBLCq",
       "source": "recon",
-      "status": "exception"
+      "status": "matched"
     },
     {
       "audit": [
@@ -10029,19 +10007,37 @@
     {
       "audit": [
         {
-          "action": "classified",
-          "detail": "NO_CANDIDATE",
-          "stage": "match.classify"
+          "action": "matched",
+          "detail": "group grp_Mgext2DQ",
+          "stage": "verify"
         }
       ],
       "display_amount": 869800,
-      "group_id": null,
-      "member_keys": [],
-      "pass_name": null,
-      "proof": null,
+      "group_id": "grp_Mgext2DQ",
+      "member_keys": [
+        "bank:TXN202606050002",
+        "order:order_1qmG9aLZGj3BmJ",
+        "order:order_HdYQ563Fx8Ga7s",
+        "order:order_pJ5tOB2vlvWwpF",
+        "recon:pay_3FLNOFRAGEBLCq",
+        "recon:pay_WdutNHrDPYTXm6",
+        "recon:pay_rIF31V5rVh7tpj"
+      ],
+      "pass_name": "fee_reversal",
+      "proof": {
+        "closes": true,
+        "delta": 0,
+        "expected_net": 1348649,
+        "fees": 17670,
+        "gross": 1369500,
+        "observed_net": 1348649,
+        "refunds": 0,
+        "tax": 3181,
+        "tolerance_applied": 0
+      },
       "record_key": "recon:pay_WdutNHrDPYTXm6",
       "source": "recon",
-      "status": "exception"
+      "status": "matched"
     },
     {
       "audit": [
@@ -16026,19 +16022,37 @@
     {
       "audit": [
         {
-          "action": "classified",
-          "detail": "NO_CANDIDATE",
-          "stage": "match.classify"
+          "action": "matched",
+          "detail": "group grp_Mgext2DQ",
+          "stage": "verify"
         }
       ],
       "display_amount": 359800,
-      "group_id": null,
-      "member_keys": [],
-      "pass_name": null,
-      "proof": null,
+      "group_id": "grp_Mgext2DQ",
+      "member_keys": [
+        "bank:TXN202606050002",
+        "order:order_1qmG9aLZGj3BmJ",
+        "order:order_HdYQ563Fx8Ga7s",
+        "order:order_pJ5tOB2vlvWwpF",
+        "recon:pay_3FLNOFRAGEBLCq",
+        "recon:pay_WdutNHrDPYTXm6",
+        "recon:pay_rIF31V5rVh7tpj"
+      ],
+      "pass_name": "fee_reversal",
+      "proof": {
+        "closes": true,
+        "delta": 0,
+        "expected_net": 1348649,
+        "fees": 17670,
+        "gross": 1369500,
+        "observed_net": 1348649,
+        "refunds": 0,
+        "tax": 3181,
+        "tolerance_applied": 0
+      },
       "record_key": "recon:pay_rIF31V5rVh7tpj",
       "source": "recon",
-      "status": "exception"
+      "status": "matched"
     },
     {
       "audit": [
@@ -20190,14 +20204,14 @@
   "summary": {
     "excluded": 5,
     "false_matches": 62,
-    "match_precision": 0.8306,
-    "match_rate": 0.76,
-    "matched": 304,
+    "match_precision": 0.832,
+    "match_rate": 0.7675,
+    "matched": 307,
     "records_processed": 400,
-    "runtime_ms_cascade": 77,
+    "runtime_ms_cascade": 76,
     "runtime_ms_llm": 0,
-    "throughput_per_sec_cascade": 5194.81,
-    "unresolved": 34
+    "throughput_per_sec_cascade": 5263.16,
+    "unresolved": 31
   },
   "tolerance_constants": {
     "amount_delta_paise_per_derived_line": 2,

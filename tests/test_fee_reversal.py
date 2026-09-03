@@ -159,6 +159,101 @@ def test_refund_and_adjustment_lines_never_pollute_the_bps_observations() -> Non
     assert slabs[0].inferred_bps == 175  # unaffected by the refund's fee=0
 
 
+_DAY = 86_400
+_BASE = 1_780_000_000  # arbitrary; only relative days matter
+
+
+def _d(epoch: int) -> datetime.date:
+    """UTC calendar date — matches `fee_reversal._to_date`."""
+    return datetime.datetime.fromtimestamp(epoch, tz=datetime.UTC).date()
+
+
+def _fee_null_payment(entity_id: str, amount: int, method: str, created_at: int) -> ReconLine:
+    line = _payment(entity_id, amount, 0, 0, method, created_at)
+    return line.model_copy(update={"fee": None, "tax": None, "credit": amount})
+
+
+def test_c011_earliest_slab_extends_back_to_the_data_window_start() -> None:
+    """C-011: the earliest stated fee for a method sits well inside the
+    ingest window (sparse evidence). The slab's period_start must extend to
+    the window edge, not stop at first-observed — otherwise a fee-null line
+    dated before the first stated fee can never be derived.
+    """
+    lines: list[ReconLine] = []
+    # A fee-null card line on window day 0 — the record C-011 was about.
+    lines.append(_fee_null_payment("pay_c011null", 1_699_800, "card", _BASE + 0 * _DAY))
+    # Stated card fees only from day 10 onward — one unchanging rate.
+    for i in range(8):
+        amount = 200000 + i * 1000
+        fee, tax = _bps_to_fee_tax(amount, 200)
+        ts = _BASE + (10 + i) * _DAY
+        lines.append(_payment(f"pay_c011s{i:02d}", amount, fee, tax, "card", ts))
+
+    slabs = infer_slabs(lines)
+    card = [s for s in slabs if s.method == "card"]
+    assert len(card) == 1
+    assert card[0].inferred_bps == 200
+    assert card[0].reproduces_all_stated is True
+    # Extended back to the window edge (day 0), not clamped to day 10.
+    assert card[0].period_start == _d(_BASE)
+    # The fee-null line is now inside the slab's period.
+    assert card[0].period_start <= _d(_BASE) <= card[0].period_end
+
+
+def test_c011_only_outer_edges_move_inner_ambiguous_gap_is_preserved() -> None:
+    """The gap between two slabs of the same method (an unannounced rate
+    change) is genuinely ambiguous for the day or two between the last
+    observation of one rate and the first of the next — it must NOT be
+    filled by the window-edge extension.
+    """
+    lines: list[ReconLine] = []
+    for i in range(8):  # 200 bps, days 5..12
+        amount = 200000 + i * 1000
+        fee, tax = _bps_to_fee_tax(amount, 200)
+        ts = _BASE + (5 + i) * _DAY
+        lines.append(_payment(f"pay_gapA{i:02d}", amount, fee, tax, "card", ts))
+    for i in range(8):  # 190 bps, days 20..27
+        amount = 200000 + i * 1000
+        fee, tax = _bps_to_fee_tax(amount, 190)
+        ts = _BASE + (20 + i) * _DAY
+        lines.append(_payment(f"pay_gapB{i:02d}", amount, fee, tax, "card", ts))
+    # Window-defining lines at day 0 and day 40.
+    lines.append(_fee_null_payment("pay_edge0", 100000, "upi", _BASE + 0 * _DAY))
+    lines.append(_fee_null_payment("pay_edge40", 100000, "upi", _BASE + 40 * _DAY))
+
+    card = sorted(
+        (s for s in infer_slabs(lines) if s.method == "card"), key=lambda s: s.period_start
+    )
+    assert len(card) == 2
+    # Outer edges reached the window; inner gap between day 12 and day 20 stayed open.
+    assert card[0].period_start == _d(_BASE)
+    assert card[1].period_end == _d(_BASE + 40 * _DAY)
+    assert card[0].period_end < card[1].period_start
+    gap_days = (card[1].period_start - card[0].period_end).days
+    assert gap_days >= 1  # the change-point gap is not papered over
+
+
+def test_c011_widened_slab_still_passes_reproduces_all_stated() -> None:
+    """Widening the period never changes `inferred_bps`, so validation still
+    holds — but the gate is real: the widened slab is the one returned, and
+    it reproduces every stated line."""
+    lines = []
+    for i in range(6):
+        amount = 300000 + i * 1000
+        fee, tax = _bps_to_fee_tax(amount, 175)
+        ts = _BASE + (12 + i) * _DAY
+        lines.append(_payment(f"pay_w{i:02d}", amount, fee, tax, "netbanking", ts))
+    lines.append(_fee_null_payment("pay_wnull", 250000, "netbanking", _BASE + 0 * _DAY))
+
+    nb = [s for s in infer_slabs(lines) if s.method == "netbanking"]
+    assert len(nb) == 1
+    assert nb[0].reproduces_all_stated is True
+    assert nb[0].period_start == _d(_BASE)
+    assert nb[0].inferred_bps == 175
+    fee, tax = derive_fee(250000, nb[0])
+    assert (fee, tax) == _bps_to_fee_tax(250000, 175)  # the pre-slab line derives at the real rate
+
+
 def test_derive_fee_matches_the_synthetic_formula() -> None:
     slab = FeeSlab(
         method="card",

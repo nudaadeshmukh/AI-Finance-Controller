@@ -66,18 +66,67 @@ def _validate_slab(
     return slab
 
 
+def _extend_outer_edges_to_window(
+    pairs: list[tuple[FeeSlab, list[ReconLine]]],
+    window_start: date | None,
+    window_end: date | None,
+) -> list[FeeSlab]:
+    """C-011. A slab's `period_start` / `period_end` is bounded by the dates
+    of the *stated* fees it was derived from. When a method's earliest (or
+    latest) slab has no change-point neighbour on its outer side, that bound
+    is an artefact of sparse evidence, not a real rate boundary — extend it
+    to the observed data-window edge, so a fee-null line dated before the
+    first stated fee of its method still resolves.
+
+    Only the OUTER edges move. The gap between two consecutive slabs of the
+    same method (an unannounced rate change, e.g. card 2.00% -> 1.90%) is
+    genuinely ambiguous for the day or two between the last observation of
+    one rate and the first of the next, and stays exactly as inferred.
+
+    Each widened slab is re-run through `_validate_slab` against its own
+    observations; a widening that somehow fails validation is discarded and
+    the original (already-validated) slab is kept. `inferred_bps` never
+    changes, so in practice this always passes — but the gate is real, not
+    decorative, and would catch a future change where the period affects
+    derivation.
+    """
+    if not pairs:
+        return []
+    pairs = sorted(pairs, key=lambda p: p[0].period_start)
+    out: list[FeeSlab] = []
+    for idx, (slab, obs) in enumerate(pairs):
+        start, end = slab.period_start, slab.period_end
+        if idx == 0 and window_start is not None and window_start < start:
+            start = window_start
+        if idx == len(pairs) - 1 and window_end is not None and window_end > end:
+            end = window_end
+        if (start, end) == (slab.period_start, slab.period_end):
+            out.append(slab)
+            continue
+        widened = _validate_slab(slab.method, slab.inferred_bps, start, end, obs)
+        out.append(widened if widened is not None else slab)
+    return out
+
+
 def infer_slabs(lines: list[ReconLine]) -> list[FeeSlab]:
     """§13.4, §20.4. Filters to `type == "payment" AND fee IS NOT NULL`
     itself — refunds/adjustments carry `fee = 0` with `amount > 0` and would
     inject spurious 0-bps observations that destroy the change-point scan.
+
+    After inference, each method's outer slab edges are extended to the
+    observed data-window (min/max `created_at` across every line) — see
+    `_extend_outer_edges_to_window` and `docs/challenges-log.md` C-011.
     """
     stated = [line for line in lines if line.type == "payment" and line.fee is not None]
+
+    window_start = min((_to_date(line.created_at) for line in lines), default=None)
+    window_end = max((_to_date(line.created_at) for line in lines), default=None)
 
     by_method: dict[str, list[ReconLine]] = {}
     for line in stated:
         by_method.setdefault(line.method, []).append(line)
 
-    slabs: list[FeeSlab] = []
+    slab_obs: list[tuple[FeeSlab, list[ReconLine]]] = []
     for method, obs in by_method.items():
         if len(obs) < _MIN_BUCKET_OBSERVATIONS:
             continue  # no slab derived, no rate guessed - falls through to timing/tolerance
@@ -88,7 +137,7 @@ def infer_slabs(lines: list[ReconLine]) -> list[FeeSlab]:
             dates = [_to_date(line.created_at) for line in obs]
             slab = _validate_slab(method, mode_value, min(dates), max(dates), obs)
             if slab is not None:
-                slabs.append(slab)
+                slab_obs.append((slab, obs))
             continue
 
         # Step 2 — change-point scan. Sort by created_at; a candidate split
@@ -123,13 +172,20 @@ def infer_slabs(lines: list[ReconLine]) -> list[FeeSlab]:
 
         left_slab = _validate_slab(method, left_mode, min(left_dates), max(left_dates), left_obs)
         if left_slab is not None:
-            slabs.append(left_slab)
+            slab_obs.append((left_slab, left_obs))
         right_slab = _validate_slab(
             method, right_mode, min(right_dates), max(right_dates), right_obs
         )
         if right_slab is not None:
-            slabs.append(right_slab)
+            slab_obs.append((right_slab, right_obs))
 
+    by_method_pairs: dict[str, list[tuple[FeeSlab, list[ReconLine]]]] = {}
+    for slab, obs in slab_obs:
+        by_method_pairs.setdefault(slab.method, []).append((slab, obs))
+
+    slabs: list[FeeSlab] = []
+    for pairs in by_method_pairs.values():
+        slabs.extend(_extend_outer_edges_to_window(pairs, window_start, window_end))
     return slabs
 
 
