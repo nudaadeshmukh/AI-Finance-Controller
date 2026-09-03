@@ -28,10 +28,10 @@ colors:
   accent-rose-bg: "#fbeae8"
   accent-blue: "#1d5fbf"
   accent-blue-bg: "#e8f0fc"
-  accent-amber: "#b8860b"
+  accent-amber: "#96690a"
   accent-amber-bg: "#faf3dc"
   success: "#1a8a4a"
-  warning: "#b8860b"
+  warning: "#96690a"
   error: "#c0392b"
 
 typography:
@@ -515,9 +515,13 @@ Kept strictly separate from the brand yellow so status always reads unambiguousl
   #e8f5ec): Matched, closes, verified.
 - **Rose** (`{colors.accent-rose}` #c0392b / bg `{colors.accent-rose-bg}` #fbeae8):
   Exception, false match, delta ≠ 0, negative money.
-- **Amber** (`{colors.accent-amber}` #b8860b / bg `{colors.accent-amber-bg}` #faf3dc):
+- **Amber** (`{colors.accent-amber}` #96690a / bg `{colors.accent-amber-bg}` #faf3dc):
   "Requires human review" — distinct from a hard exception; this is the ambiguous-record
-  badge per §23.4.
+  badge per §23.4. Darkened from an earlier #b8860b (Phase 7): on `#faf3dc` the old value
+  read as an afterthought next to the rose exception badge, and this badge marks the
+  records carrying the project's strongest honesty claim (both candidates named, neither
+  picked). #96690a on #faf3dc is ~4.4:1 — still visibly calmer than rose, no longer the
+  weakest element on the screen.
 - **Blue** (`{colors.accent-blue}` #1d5fbf): Informational text links only — never a
   status.
 

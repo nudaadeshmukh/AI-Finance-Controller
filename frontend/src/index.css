@@ -30,7 +30,7 @@
   --accent-rose: #c0392b;
   --accent-rose-bg: #fbeae8;
   --accent-blue: #1d5fbf;
-  --accent-amber: #b8860b;
+  --accent-amber: #96690a; /* darkened from design.md's #b8860b — see Phase 7 progress note */
   --accent-amber-bg: #faf3dc;
 
   /* radii */
