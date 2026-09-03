@@ -1,6 +1,8 @@
 """Groq wrapper, timeout, retry — §15, §15.1.
 
-`llama-3.3-70b-versatile`, 20s default timeout. The provider is swappable in
+`openai/gpt-oss-20b` (see C-013 — the original `llama-3.3-70b-versatile` was
+retired from Groq's catalogue between Phase 0 and Phase 6), 20s default
+timeout. The provider is swappable in
 exactly one place: everything downstream depends on the tiny `ChatModel`
 protocol below (`complete(system, user, timeout_s) -> str`), never on the Groq
 SDK directly. That is also what lets the failure-injection scenarios (§24)

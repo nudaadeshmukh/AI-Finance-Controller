@@ -134,7 +134,7 @@ def propose(
     facts: DerivedFacts,
     client: object,
     *,
-    model: str = "llama-3.3-70b-versatile",
+    model: str = "openai/gpt-oss-20b",
     timeout_s: int = 20,
 ) -> list[MatchProposal]:
     """§20.4. Cluster the residual, ask the model once per cluster, and return
@@ -198,7 +198,7 @@ def run_hypothesis_stage(
     state: CascadeState,
     client: object,
     *,
-    model: str = "llama-3.3-70b-versatile",
+    model: str = "openai/gpt-oss-20b",
     timeout_s: int = 20,
 ) -> LLMStageResult:
     """Run `propose()` and route every proposal through `verify()`/`commit()`

@@ -150,7 +150,7 @@ Full folder structure: `reference/master_specification.md` §3.2.
 ## Tech stack (locked)
 
 Python 3.11+ · SQLite (stdlib) · Pydantic v2 · Typer + Rich · Groq SDK
-(`llama-3.3-70b-versatile`) · Jinja2 · httpx · pytest + ruff · Vite + React (static)
+(`openai/gpt-oss-20b`) · Jinja2 · httpx · pytest + ruff · Vite + React (static)
 
 **Five runtime dependencies. Do not add more without asking.** Every dependency is
 something a reviewer must trust without reading. Four reads as deliberate; thirty reads as

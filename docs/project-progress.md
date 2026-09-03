@@ -28,7 +28,7 @@ code is actually working.
 | **Current phase** | Phase 6 complete |
 | **Next phase** | Phase 7 — Frontend |
 | **Deadline** | 5 September 2026 |
-| **Pipeline runs?** | `run` does acquire+ingest+cascade(6 passes)+classify_residual+**hypothesise (LLM)**+verify+score+results.json(+HTML) for real; `report` re-emits from an existing run.db; `inject` runs the three §24 failure scenarios. `--no-llm` / no `GROQ_API_KEY` skips the LLM stage and the run still completes. **C-013: the pinned model `llama-3.3-70b-versatile` is decommissioned by Groq** — the layer degrades to `HYPOTHESIS_LAYER_UNAVAILABLE`; verified working with `openai/gpt-oss-20b`. |
+| **Pipeline runs?** | `run` does acquire+ingest+cascade(6 passes)+classify_residual+**hypothesise (LLM)**+verify+score+results.json(+HTML) for real; `report` re-emits from an existing run.db; `inject` runs the three §24 failure scenarios. `--no-llm` / no `GROQ_API_KEY` skips the LLM stage and the run still completes. LLM default model is **`openai/gpt-oss-20b`** (C-013 — original pin `llama-3.3-70b-versatile` retired by Groq mid-build; layer still degrades cleanly if a model vanishes). |
 | **Latest match rate (scored, `--no-llm`, strict whole-group equality, post-C-011)** | clean-august **91.75%** (367/400, precision **94.10%**), heavy-refunds **71.75%** (287/400, precision **88.04%**), holiday-skew **86.5%** (346/400, precision **90.58%**), high-ambiguity **76.75%** (307/400, precision **83.20%**). False matches **23/39/36/62** — 6/3/6/13 answer-key-poisoned records (§13.8 + C-009) dragging 17/36/30/49 resolvable settlement-mates under strict scoring. Unresolved **10/74/18/31**, all with a specific reason (`CROSS_PERIOD_UTR` or `AMBIGUOUS_DUPLICATE`) — **`NO_CANDIDATE` is 0 in every run** after C-011. |
 
 | Phase | Status |
@@ -1052,24 +1052,42 @@ docs/project-progress.md, docs/challenges-log.md
   `test_hypothesize` 5)
 - ruff: clean
 
-**Measured results (real, `--dataset all`):**
+**Measured results — cascade-only vs cascade+LLM (§17.2), real live
+`openai/gpt-oss-20b` calls, `--dataset all`:**
 
-| Dataset | Residual into LLM | Clusters | LLM resolved | Rejected by verifier |
-|---|---|---|---|---|
-| clean-august | 10 | 4 | **0** | 0 (model proposed 0) |
-| heavy-refunds | 74 | ~30 | **0** (not re-measured live — see below) | — |
-| holiday-skew | 18 | ~8 | **0** | — |
-| high-ambiguity | 31 | ~12 | **0** | — |
+| Dataset | Cascade-only (match / false / unresolved) | Clusters sent to LLM | LLM calls | LLM proposed | Verifier rejected | LLM resolved | Cascade+LLM |
+|---|---|---|---|---|---|---|---|
+| clean-august | 367 / 23 / 10 | 4 | all OK (4.2s) | 0 | 0 | **0** | **367 / 23 / 10** (identical) |
+| heavy-refunds | 287 / 39 / 74 | 18 | partial* | **1–3** (varies) | **all** | **0** | **287 / 39 / 74** (identical) |
+| holiday-skew | 346 / 36 / 18 | 7 | all OK (94s) | 0 | 0 | **0** | **346 / 36 / 18** (identical) |
+| high-ambiguity | 307 / 62 / 31 | 16 | partial* | 0 | 0 | **0** | **307 / 62 / 31** (identical) |
 
-Measured against `openai/gpt-oss-20b` (the pinned `llama-3.3-70b-versatile` is
-404 — C-013). For clean-august: 4 clusters, all calls succeeded, the model
-proposed **zero** groupings — the honest §15.5 outcome. The residual is
-entirely genuine `CROSS_PERIOD_UTR` (bank record truly absent) and
-`AMBIGUOUS_DUPLICATE` (no distinguishing reference); **nothing in the source
-data lets any model resolve them**, so LLM contribution is **0 records**, and
-that is the point — it is evidence *for* the architecture (§15.5). Match rate,
-precision, false matches and unresolved counts are **unchanged from Phase 5**
-(91.75/71.75/86.5/76.75%).
+`*` "partial": on the free tier some cluster calls returned transient errors
+-> those runs logged `HYPOTHESIS_LAYER_UNAVAILABLE` (the flag trips if *any*
+cluster call fails) but still completed with the full deterministic result.
+clean-august and holiday-skew completed every call cleanly.
+
+**LLM contribution: 0 records, all four datasets, confirmed with real live
+model calls — not inferred.** The residual is entirely genuine
+`CROSS_PERIOD_UTR` (bank record truly absent from the statement) and
+`AMBIGUOUS_DUPLICATE` (a dashboard refund with no order reference); nothing in
+the source data lets any model resolve them. **heavy-refunds is the load-bearing
+data point and now has its own challenges-log entry, C-014:** on real runs the
+model returns 1–3 confident groupings (count varies with the model / transient
+API state), each asserting the group closes while naming no bank transaction
+(none exists — cross-period), and the verifier rejects every one with a delta
+equal to the whole settlement net (−₹14,596.00 / −₹3,225.94 / −₹9,697.00 in the
+2026-09-04 run). This is the core thesis — *the LLM proposes, the arithmetic
+disposes* — firing **unprompted on real input**, distinct from the staged
+`inject` scenarios. Match rate / precision / false matches / unresolved are
+**byte-identical to Phase 5's `--no-llm` numbers** (91.75 / 71.75 / 86.5 /
+76.75%); the committed `results.json` files are unchanged (they are the
+`--no-llm` artifacts by the Phase 5 decision).
+
+This is the §15.5 outcome stated honestly: **a bounded AI layer that resolves
+0 of 400 on this data is evidence *for* the architecture** — the deterministic
+cascade already found everything the data supports, and the model was given no
+opening to fabricate.
 
 **Failure injection (§24) — all three scenarios demonstrated via
 `python -m recon inject`:**
@@ -1091,21 +1109,41 @@ precision, false matches and unresolved counts are **unchanged from Phase 5**
 Phases 7-8. Phase 7 (Frontend) is next.
 
 **Known issues / TODOs:**
-- **C-013 — `llama-3.3-70b-versatile` is decommissioned by Groq** (404
-  `model_not_found`). The layer degrades cleanly to
-  `HYPOTHESIS_LAYER_UNAVAILABLE` and every run still completes, but the "with
-  LLM" comparison (§17.2) currently can't be produced with the pinned default.
-  **Recommendation for review:** change the default in `PROJECT_RULES.md` tech stack,
-  §15.1, §22, `.env.example`, and `recon/config.py` from
-  `llama-3.3-70b-versatile` to **`openai/gpt-oss-20b`** (verified reachable and
-  correct end-to-end this phase; `openai/gpt-oss-120b` also available). Not
-  done unilaterally — it spans four "locked" documents.
-- **C-012 — the §24/§25 "planted record -> exceptions" wording doesn't match
-  the frozen data.** The injected order is genuinely resolvable and the
-  cascade matches it. `inject` and `test_injection.py` are built around the
-  substantive §15.6 invariant instead (no unverified LLM match). Data and
-  scorer untouched (rule 5, rule 13). README (Phase 8) should tell the honest
-  version.
+- **C-013 — RESOLVED (user-approved).** `llama-3.3-70b-versatile` was retired
+  from Groq's catalogue between Phase 0 and Phase 6 (404 `model_not_found`).
+  Default switched to **`openai/gpt-oss-20b`** everywhere the pin appeared
+  (`PROJECT_RULES.md`, §3.4, §15.1 + note, §20.4, §22, `.env.example`, `config.py`,
+  `hypothesize/__init__.py`, `implementation_guide.md`). Decisions-log row
+  appended (history not rewritten). See `docs/challenges-log.md` C-013 for the
+  "what we learned about pinning a hosted-model version" write-up and the
+  re-measured contribution numbers below.
+- **C-012 — RESOLVED / CONFIRMED, and it has a Phase 8 consequence.** The
+  injected order in **all four** datasets is `resolvable: true` in the answer
+  key and the deterministic cascade matches its payment on a `delta == 0`
+  proof (clean-august `fee_reversal`, heavy-refunds `aggregate`, holiday-skew
+  `fee_reversal`, high-ambiguity `fee_reversal`) — **before `hypothesize/`
+  runs**. `_records_for_cluster` only builds prompts from *residual* recon
+  lines and their orders, so a matched order is never in a cluster.
+  **Therefore: in a normal `recon run` (any dataset, `--dataset all`
+  included), the injection payload text never reaches the LLM at all.** The
+  vulnerable code path (untrusted free text -> prompt -> model) is not
+  exercised by the natural pipeline flow on the frozen data.
+  - What this means for correctness: nothing bad — the injection defence
+    (§15.6) is proven at the verifier level and by `test_injection.py`, and
+    the payload never even getting to the model is arguably a *stronger*
+    outcome.
+  - **What this means for Phase 8's video:** the `llm-hallucination` and
+    `prompt-injection` demo moments **must** be shown via
+    `python -m recon inject --scenario ...`, which deliberately forces a
+    doctored model over the residual cluster. Do **not** plan a demo beat
+    that expects a plain `recon run` to visibly show the injected record
+    being rejected by the LLM path — that never happens with this data. The
+    honest story on camera: "the payload sits on a record the arithmetic
+    already reconciles, so the model never sees it; and when we *force* it in
+    front of the model with `inject`, the verifier throws the proposal out."
+  - Data and scorer untouched (rule 5, rule 13). `inject/__init__.py`,
+    `test_injection.py` docstrings, and §24-adjacent notes carry the wording
+    deviation.
 - **`propose()` carries the model's `reasoning` in a process-local
   `_REASONING_CACHE`**, not on `MatchProposal` (rule 12 — no invented model
   fields). Reset at the top of every `propose()` call; read by
@@ -1138,9 +1176,12 @@ Phases 7-8. Phase 7 (Frontend) is next.
 - `inject`/`test_injection` reframed around §15.6 rather than §25's literal
   "never appears in a match group" — see C-012. This is a deviation forced by
   the frozen data, flagged, not silently absorbed.
-- The pinned LLM model is unreachable (C-013); measured the layer with
-  `openai/gpt-oss-20b` via `RECON_LLM_MODEL`. Locked constant unchanged pending
-  review.
+- The original pinned LLM model became unreachable mid-build (C-013);
+  user-approved switch of the default to `openai/gpt-oss-20b` across
+  `PROJECT_RULES.md`, §3.4, §15.1, §20.4, §22, `.env.example`, `config.py`,
+  `hypothesize/__init__.py`, `implementation_guide.md`; decisions-log row
+  appended. The layer measured live against the new default (contribution 0,
+  see above).
 
 ---
 
@@ -1157,6 +1198,7 @@ Locked decisions and why. Append here when a decision changes; never rewrite his
 | No auth, no RBAC | No multi-user surface. Auth would be theatre, and bad auth in a fintech repo is worse than none |
 | No ML model | No prediction task exists. Reconciliation is constraint satisfaction over arithmetic |
 | Groq, `llama-3.3-70b-versatile` | Task is narrow and structured; the verifier, not the model, establishes truth. Groq inference speed keeps the hypothesis stage cheap. |
+| **Phase 6: Groq default model changed to `openai/gpt-oss-20b`** | C-013 — Groq retired `llama-3.3-70b-versatile` from its catalogue between Phase 0 and Phase 6 (live call returns 404). **This was forced by external deprecation, not a reconsideration of the model choice** — the two LLM rows in this table are one unchanged decision, re-pinned because the world moved. The rationale above still holds in full (small, fast, structured task, verifier owns truth); only the specific snapshot changed. The real decision this reinforces: depend on the `ChatModel` interface, never a model's identity — swap is one env var, and the deterministic pipeline needs none of it. |
 | Scoring (Phase 5) before LLM (Phase 6) | Must know the deterministic match rate before adding AI |
 | `high-ambiguity` designed to score worse | Four flattering runs would invite the suspicion the track bar warns about |
 

@@ -261,7 +261,7 @@ No upward imports. No cycles.
 | Money | Integer paise, no floats |
 | Data manipulation | Plain Python — **no pandas** |
 | CLI | Typer + Rich |
-| LLM | Groq SDK, `llama-3.3-70b-versatile` |
+| LLM | Groq SDK, `openai/gpt-oss-20b` (§15.1, C-013 — original pin retired by Groq mid-build) |
 | Templating | Jinja2 |
 | HTTP | httpx |
 | Tests | pytest; lint: ruff |
@@ -1230,7 +1230,7 @@ cross-referenced by `audit_log`).
 
 ```python
 def propose(residual: list[RecordKey], db: Connection, facts: DerivedFacts,
-            client: Groq | None, *, model: str = "llama-3.3-70b-versatile",
+            client: Groq | None, *, model: str = "openai/gpt-oss-20b",
             timeout_s: int = 20) -> list[MatchProposal]
 ```
 
@@ -1245,6 +1245,21 @@ establishes truth.** Groq's inference speed keeps the hypothesis stage from domi
 runtime, and the OpenAI-compatible client means the provider is swappable in one place.
 We chose the smallest capable model; escalation is a config change, decided by
 measurement, not assumption.
+
+**Model:** `openai/gpt-oss-20b` (served by Groq). The original pin was
+`llama-3.3-70b-versatile`; Groq retired it from their catalogue somewhere
+between Phase 0 (spec freeze) and Phase 6, and a live call now returns
+`404 model_not_found` (`docs/challenges-log.md` C-013). That is itself a small,
+honest data point worth stating in the README and video: **pinning a specific
+hosted-model version is a dependency on a third-party catalogue that churns on
+its own schedule, not ours.** The mitigation is architectural, not a better
+guess at which model lasts — the LLM sits behind a one-method `ChatModel`
+protocol, `RECON_LLM_MODEL` overrides the default with no code change, and the
+deterministic pipeline neither imports nor needs it. When the pinned model
+disappears, `--no-llm`-equivalent behaviour is automatic
+(`HYPOTHESIS_LAYER_UNAVAILABLE`, the run still completes) and swapping to a
+live model is one environment variable. The lesson generalises: depend on the
+*interface* a hosted model presents, never on the identity of one snapshot.
 
 ### 15.2 Prompt contract
 
@@ -1701,7 +1716,7 @@ exceptions — they are `Exception_` *records* written to the database.
 | Variable | Required | Purpose |
 |---|---|---|
 | `GROQ_API_KEY` | No | Absent → LLM stage skipped, run completes |
-| `RECON_LLM_MODEL` | No | Default `llama-3.3-70b-versatile` |
+| `RECON_LLM_MODEL` | No | Default `openai/gpt-oss-20b` (§15.1, C-013) |
 | `RECON_LLM_TIMEOUT_S` | No | Default 20 |
 | `RAZORPAY_KEY_ID` | No | Only for `--source razorpay` |
 | `RAZORPAY_KEY_SECRET` | No | Only for `--source razorpay` |
