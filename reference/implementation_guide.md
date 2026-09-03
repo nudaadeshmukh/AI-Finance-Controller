@@ -295,7 +295,8 @@ Commit them.
 The narrow, bounded AI layer — and the demonstration that it cannot do damage.
 
 ## Implement
-- `hypothesize/client.py` — Groq wrapper, `llama-3.3-70b-versatile`, 20s timeout
+- `hypothesize/client.py` — Groq wrapper, `openai/gpt-oss-20b` (C-013: original
+  `llama-3.3-70b-versatile` retired by Groq mid-build), 20s timeout
 - `hypothesize/prompt.py` — system block + `<untrusted_source_data>` fence (§15.2).
   **Free text is never interpolated into the instruction section.**
 - `hypothesize/parse.py` — strict JSON → `Hypothesis`. Prose is a parse failure.

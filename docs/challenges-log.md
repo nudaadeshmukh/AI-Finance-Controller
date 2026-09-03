@@ -724,25 +724,122 @@ do not have access to it`. Groq's current catalogue for this account is
 `groq/compound`.
 
 **Root cause:** external provider churn between spec-freeze (Phase 0) and Phase
-6. Nothing in the repo is wrong; the world moved.
+6. Nothing in the repo is wrong; the world moved. `llama-3.3-70b-versatile`
+was a real, current Groq model when the spec was frozen; Groq has since retired
+it. Groq's catalogue for this account is now `openai/gpt-oss-20b`,
+`openai/gpt-oss-120b`, `qwen/qwen3.8-27b`, `groq/compound`.
 
-**Fix / decision:** the LLM layer already degrades correctly — with the pinned
-default a live run logs `HYPOTHESIS_LAYER_UNAVAILABLE` and the pipeline
-completes with the full deterministic result, which is exactly the designed
-behaviour (§15.4) and is covered by `test_no_llm.py` / `test_injection.py`.
-Verified the real end-to-end path (prompt -> Groq -> parse -> verify) works by
-running `RECON_LLM_MODEL=openai/gpt-oss-20b python -m recon run`: 4 clusters,
-calls succeed, model proposes 0 groups — the honest §15.5 result, since the
-residual is genuinely unresolvable. **Did not change the locked constant** —
-that spans four "locked" documents and is the user's call. Flagged in
-`.env.example` with a `VERIFY (C-013)` note and in the Phase 6 progress entry
-with a recommendation (switch the default to `openai/gpt-oss-20b`).
+**Fix / decision (user-approved):** switched the default to
+**`openai/gpt-oss-20b`** everywhere the old pin appeared — `CLAUDE.md` tech
+stack, §15.1 (with a full note), §3.4, §22, §20.4's `propose` signature,
+`.env.example`, `recon/config.py`, `recon/hypothesize/__init__.py`,
+`reference/implementation_guide.md`. Added a new row to the progress-log
+decisions table (never rewrite history — the original `llama-3.3-70b-versatile`
+row stays). The LLM layer already degrades correctly regardless: with *any*
+missing model a live run logs `HYPOTHESIS_LAYER_UNAVAILABLE` and completes with
+the full deterministic result (§15.4), covered by `test_no_llm.py` /
+`test_injection.py`.
 
-**Prevention:** the `ChatModel` protocol means the swap is a one-line config
-change, not a code change; injection scenarios don't touch the network.
+**What we learned about pinning a specific hosted-model version** (this is the
+part for the README / video, not just "switched"):
 
-**Demo relevant?** Partly — "the deterministic pipeline doesn't care if the
-LLM provider vanishes" is a genuine robustness point, but don't lean on it.
+- A pinned model id like `llama-3.3-70b-versatile` is not a stable dependency
+  the way `pydantic==2.13.5` is. It is a pointer into a third-party catalogue
+  that the provider re-curates on *their* schedule — models are added,
+  renamed, and retired without a deprecation window you control. Between our
+  Phase 0 and Phase 6 (days apart in build time, but a real calendar gap) the
+  exact model we named stopped existing.
+- The lesson is **not** "pick a model that will last longer" — that is the
+  same bet, just hoping harder. It is to make the model's *identity*
+  irrelevant to correctness:
+  - the LLM sits behind a one-method `ChatModel` protocol (`complete(system,
+    user, timeout_s) -> str`); swapping providers or models is a config
+    change, never a code change;
+  - `RECON_LLM_MODEL` overrides the default with zero edits;
+  - the deterministic pipeline neither imports nor needs the model — a fresh
+    clone with a dead pin still produces every committed number;
+  - "model unavailable" is a *designed, tested* state (`HYPOTHESIS_LAYER_
+    UNAVAILABLE`), not an error path.
+- Concretely: the fix for a 404 model was one environment variable plus a
+  docs sweep. No code changed. That is the property to design for, because
+  the next catalogue change is not an *if*.
+
+**Measured after the switch (live `openai/gpt-oss-20b` calls, `--dataset all`,
+2026-09-04):** cascade-only and cascade+LLM are identical on every dataset —
+367/287/346/307 matched, unchanged. LLM contribution **0 records**. On
+heavy-refunds the model proposed groupings that the verifier rejected — see
+C-014, that is its own entry. Full table in the Phase 6 progress entry.
+
+**Prevention:** `test_no_llm.py` (no client -> `propose()` returns `[]`, stage
+is a no-op) and `test_injection.py::test_an_unavailable_api_completes_the_run`
+lock in that a missing/failing model never blocks a run. The `ChatModel`
+protocol is the structural guarantee.
+
+**Demo relevant?** Yes, briefly — "we pinned a model, the provider retired it
+mid-build, and the fix was one env var because the architecture never
+depended on the model's identity" is a tight, honest illustration of the
+whole restraint thesis. Don't over-dwell; it's a supporting point.
+
+---
+
+## C-014 — the verifier caught a live, unscripted LLM hallucination
+
+**Phase:** 6
+**Not a failure — a designed control firing on real input.** Logged here
+because "what broke and what you did about it" includes "the AI proposed
+something false and the arithmetic layer rejected it, with no human and no
+test in the loop." This is the project's core thesis
+(*the LLM proposes, the arithmetic disposes*) observed in the wild, and it
+needs to survive in the repo independently of any chat log.
+
+**What happened.** On a real `python -m recon run --dataset heavy-refunds`
+(2026-09-04, live `openai/gpt-oss-20b`, `GROQ_API_KEY` set, no injection, no
+scripted model), the hypothesis stage sent heavy-refunds' 74-record residual
+to the model as 18 clusters. The model returned **3 confident groupings**. The
+verifier recomputed the closing equation from source for each and **rejected
+all 3** — none reached `match_groups`. Zero records resolved. (An earlier run
+the same day produced 1 proposal, also rejected; the exact count varies with
+the model and transient API state — the rejection does not.)
+
+**The three proposals and the verifier's actual numbers** (all paise;
+`delta = expected_net − observed_net`, `observed_net = 0` because the model
+named no `bank:` key — there is no bank txn for these cross-period
+settlements):
+
+| group | model's claimed reasoning | members | gross | refunds | expected_net | observed_net | delta | closes |
+|---|---|---|---|---|---|---|---|---|
+| `grp_llm002` | "Payments of 359800 and refunds of 1819400 net to 359800, matching the total order amount of 2179200 minus refunds, confirming a single settlement." | 2 payments, 3 refunds, 5 orders | 359,800 | 1,819,400 | −1,459,600 | 0 | **−1,459,600** (−₹14,596.00) | False |
+| `grp_llm006` | "All recon lines share the same UTR and the arithmetic of orders, fees, taxes and refund matches the bank credit." | 2 payments, 1 refund, 3 orders | 259,800 | 579,800 | −322,594 | 0 | **−322,594** (−₹3,225.94) | False |
+| `grp_llm010` | "All records share the same settlement UTR and the amounts reconcile to a net of −969700, matching the bank's net credit/debit for this settlement." | 1 payment, 2 refunds, 3 orders | 799,900 | 1,769,600 | −969,700 | 0 | **−969,700** (−₹9,697.00) | False |
+
+**What the model got wrong, precisely.** In all three it asserted the group
+closes ("matching the total order amount", "matches the bank credit",
+"reconcile to a net… matching the bank's net credit/debit") while its own
+proposed member set contained **no bank transaction at all** — because none
+exists in the export window for these settlements (they are genuine
+`CROSS_PERIOD_UTR`). It pattern-matched "shared UTR + some payments + some
+refunds" into a confident settlement claim and invented a closing figure to
+match. The verifier does not read the model's `claimed_arithmetic` or its
+prose; it re-summed `Σ(order.amount) − Σ(fee) − Σ(tax) − Σ(refund.debit)`
+against `Σ(bank.credit) = 0` and got a delta equal to the whole settlement
+net, every time.
+
+**Why this is stronger evidence than the `inject` scenarios.** `recon inject
+--scenario llm-hallucination` *stages* a wrong proposal with a scripted model
+to make the rejection filmable on demand. C-014 is the same mechanism
+happening **unprompted**, from a real hosted model, on real residual data,
+during an ordinary run — the control was not being tested, it was just doing
+its job. Both belong in the video; this one is the "and here it is actually
+happening" beat.
+
+**Reproduce:** `GROQ_API_KEY` set, then
+`python -m recon run --dataset heavy-refunds --fresh`; inspect
+`audit_log` where `stage='hypothesize' AND action='proposed'` (the model's
+groups + reasoning) and `stage='verify' AND action='rejected'` with
+`detail_json` `origin='llm'` (the full proof, including `delta`). Count of
+proposals is model-/network-dependent; every one fails to close.
+
+**Demo relevant?** **Yes — this is a primary beat**, not a supporting one.
 
 ---
 
@@ -764,4 +861,5 @@ Keep this current — it is what goes in the README and the video.
 | C-010 | 5 | Naive baseline measured 126/80/121/152, not the committed 126/79/120/147 | Original figures came from a Phase 0 script never committed; §8.3's "exact UTR"/"stated fee" left latitude | No |
 | C-011 | 5 | 22 resolvable records (3 datasets) marked NO_CANDIDATE despite a present, closing bank txn | `infer_slabs` clamped each method's outer slab edges to first/last observed stated fee, not the data-window; pre-slab fee-null payments bailed their whole settlements. Fixed: extend outer edges to the window, inner change-point gaps untouched. NO_CANDIDATE now 0 everywhere. | **Yes** |
 | C-012 | 6 | §24/§25 say the injected record "goes to exceptions"; in the frozen data it is genuinely resolvable and the cascade matches it | Payload is a global attack on the LLM prompt, planted on an arbitrary order without making its settlement unresolvable. Reframed `inject`/`test_injection` around the real §15.6 invariant (no `origin='llm'` match without a closing proof); data and scorer untouched. | **Yes** |
-| C-013 | 6 | Locked model `llama-3.3-70b-versatile` returns 404 — decommissioned by Groq | Provider churn since Phase 0. LLM layer degrades to `HYPOTHESIS_LAYER_UNAVAILABLE` and the run completes; verified the real path works with `openai/gpt-oss-20b`. Locked constant left for user review; flagged in `.env.example`. | No |
+| C-013 | 6 | Locked model `llama-3.3-70b-versatile` returns 404 — retired by Groq mid-build | Provider churn since Phase 0. Fix: default switched to `openai/gpt-oss-20b` everywhere; layer already degrades to `HYPOTHESIS_LAYER_UNAVAILABLE` if any model vanishes. Lesson: pin the `ChatModel` interface, not a model's identity — the fix was one env var, no code. | **Yes** (brief) |
+| C-014 | 6 | Live `openai/gpt-oss-20b` proposed 3 confident wrong groupings on a real heavy-refunds run | Model pattern-matched "shared UTR + payments + refunds" into a settlement claim with an invented closing figure, naming no bank txn (none exists — cross-period). Verifier recomputed from source: delta = −1,459,600 / −322,594 / −969,700 paise; all rejected, 0 committed. Not a bug — the core thesis firing unprompted on real input. | **Yes** (primary) |

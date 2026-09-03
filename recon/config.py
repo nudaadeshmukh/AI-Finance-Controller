@@ -57,7 +57,7 @@ def load_config() -> Config:
     _load_dotenv_once()
     return Config(
         groq_api_key=os.environ.get("GROQ_API_KEY") or None,
-        recon_llm_model=os.environ.get("RECON_LLM_MODEL", "llama-3.3-70b-versatile"),
+        recon_llm_model=os.environ.get("RECON_LLM_MODEL", "openai/gpt-oss-20b"),
         recon_llm_timeout_s=int(os.environ.get("RECON_LLM_TIMEOUT_S", "20")),
         razorpay_key_id=os.environ.get("RAZORPAY_KEY_ID") or None,
         razorpay_key_secret=os.environ.get("RAZORPAY_KEY_SECRET") or None,
