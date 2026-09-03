@@ -1309,6 +1309,32 @@ cut under time pressure.
   four-day budget and the cut order (frontend polish first to go), a Vitest
   setup was judged not worth it.
 
+**Visual verification (headless Chrome + live a live browser walkthrough):**
+- All four screens + both drawer states screenshotted across all four datasets
+  at 1440px and (headless) 900px. Live walkthrough confirmed: dataset dropdown
+  switches all four runs, bridge-band click filters the Match Explorer
+  ("Showing 40 records behind Refunds"), pass-filter chips toggle, matched
+  drawer shows the emerald `0.00 · closes` delta pill, `AMBIGUOUS_DUPLICATE`
+  drawer shows both candidates and picks neither.
+- **Amber "Requires review" badge darkened `#b8860b` → `#96690a`** (in
+  `index.css` and `reference/design.md` — both the token and the §"Status
+  semantics" prose). On `#faf3dc` the original read as an afterthought next to
+  the rose exception badge; this is the badge for the records carrying the
+  project's strongest honesty claim (both candidates named, neither picked), so
+  it shouldn't be the weakest element on the screen. `#96690a` on `#faf3dc` is
+  ~4.4:1 (up from ~3.3:1) — still visibly calmer than the rose exception badge
+  (~4.7:1), just no longer washed out. Re-verified side-by-side.
+- **The Reconciliation Bridge is a horizontal bar chart, not a stepped
+  waterfall — a deliberate call, not an oversight.** Each band shows its own
+  magnitude as a bar rather than starting where the previous band ended. It
+  closes to the paise on every dataset (verified: `gross − fees − tax − refunds
+  − settled_next + prior_spillover = bank_credited`), the band-click filter
+  works, and it reads clearly at 1440px and compact ≤1024px (bars drop, label +
+  amount remain). A true cumulative-descent waterfall was judged not worth the
+  build time for this submission — the persuasive point (every rupee accounted
+  for, lands exactly on the bank credit) is already carried by the numbers and
+  the yellow total band. If asked in Q&A: known, chosen, not a bug.
+
 **Deviations from the implementation guide:**
 - Built all four screens, not just 1 and 4. The guide says "screens 1 and 4
   first … if time runs short, ship those two" — time allowed all four, and 2
@@ -1319,6 +1345,12 @@ cut under time pressure.
 - `sync-results.mjs` + `predev`/`prebuild` hooks are not named in the guide;
   they are the mechanism for a static app to read committed JSON that lives
   outside `frontend/` without a bundler import or a server.
+- `reference/design.md`'s `accent-amber` / `warning` tokens changed from
+  `#b8860b` to `#96690a` — a deliberate design-system tweak (see Visual
+  verification above), kept in sync between `design.md` and `index.css`.
+- Added URL-hash routing (`#/<run>/<tab>/<record_key>`) — not in the guide;
+  makes every view a shareable link, gives back/forward, and made the headless
+  visual verification possible.
 
 ---
 
