@@ -287,7 +287,9 @@ def _build_exceptions(db: sqlite3.Connection) -> list[dict]:
     return out
 
 
-def _build_passes(db: sqlite3.Connection, cascade_passes: list) -> list[dict]:
+def _build_passes(
+    db: sqlite3.Connection, cascade_passes: list, llm_runtime_ms: int = 0
+) -> list[dict]:
     """`matched` from the persistent `match_groups.pass_name` (survives a
     re-run / `report`); `runtime_ms` from this invocation's `CascadeResult`
     (transient by nature — a re-run against a matched db legitimately spends
@@ -308,7 +310,7 @@ def _build_passes(db: sqlite3.Connection, cascade_passes: list) -> list[dict]:
         {
             "name": _LLM_PASS_NAME,
             "matched": matched_by_name.get(_LLM_PASS_NAME, 0),
-            "runtime_ms": 0,
+            "runtime_ms": llm_runtime_ms,
         }
     )
     return rows
@@ -324,11 +326,15 @@ def assemble_results(
     run_id: str,
     label: str,
     seed: int,
+    llm: object = None,
 ) -> ResultsDocument:
     """Build the full §18 document. `score` is `None` only when the answer
-    key is absent (§12.6: metrics omitted, run still emits)."""
+    key is absent (§12.6: metrics omitted, run still emits). `llm` is an
+    optional `LLMStageResult` (Phase 6) — `None` on a `--no-llm` run, in
+    which case `llm_contribution.enabled` is `False`."""
     generated_at = _scalar(db, queries.SELECT_MAX_RECON_CREATED_AT)
     runtime_ms_cascade = cascade.runtime_ms
+    llm_runtime_ms = int(getattr(llm, "runtime_ms", 0) or 0)
     throughput = round(400 / (runtime_ms_cascade / 1000), 2) if runtime_ms_cascade else 0.0
 
     if score is not None:
@@ -341,7 +347,7 @@ def assemble_results(
             "unresolved": score.unresolved,
             "excluded": score.excluded,
             "runtime_ms_cascade": runtime_ms_cascade,
-            "runtime_ms_llm": 0,
+            "runtime_ms_llm": llm_runtime_ms,
             "throughput_per_sec_cascade": throughput,
         }
         ceiling = {"resolvable": score.ceiling_resolvable, "rate": score.ceiling_rate}
@@ -356,7 +362,7 @@ def assemble_results(
             "unresolved": unresolved,
             "excluded": _scalar(db, queries.SELECT_NOT_A_SETTLEMENT_COUNT),
             "runtime_ms_cascade": runtime_ms_cascade,
-            "runtime_ms_llm": 0,
+            "runtime_ms_llm": llm_runtime_ms,
             "throughput_per_sec_cascade": throughput,
         }
         ceiling = {"resolvable": None, "rate": None}
@@ -394,14 +400,16 @@ def assemble_results(
         },
         ceiling=ceiling,
         llm_contribution={
-            "enabled": False,  # Phase 6 wires this to `not --no-llm`
-            "records_resolved": 0,
-            "hypotheses_proposed": 0,
-            "hypotheses_rejected_by_verifier": 0,
+            "enabled": bool(getattr(llm, "enabled", False)),
+            "records_resolved": int(getattr(llm, "records_resolved", 0) or 0),
+            "hypotheses_proposed": int(getattr(llm, "hypotheses_proposed", 0) or 0),
+            "hypotheses_rejected_by_verifier": int(
+                getattr(llm, "hypotheses_rejected_by_verifier", 0) or 0
+            ),
         },
         source_totals=source_totals,
         bridge=_build_bridge(db, facts),
-        passes=_build_passes(db, cascade.passes),
+        passes=_build_passes(db, cascade.passes, llm_runtime_ms),
         records=_build_records(db),
         exceptions=_build_exceptions(db),
         derived_fee_slabs=derived_fee_slabs,
@@ -424,11 +432,13 @@ def emit_results(
     run_id: str,
     label: str,
     seed: int,
+    llm: object = None,
 ) -> None:
     """§20.4 (extended signature — see module docstring). Assemble and write
     `results.json`."""
     doc = assemble_results(
-        db, score, baseline, cascade, facts, run_id=run_id, label=label, seed=seed
+        db, score, baseline, cascade, facts,
+        run_id=run_id, label=label, seed=seed, llm=llm,
     )
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(

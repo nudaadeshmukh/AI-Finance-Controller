@@ -23,7 +23,10 @@ from recon.adapters import get_adapter
 from recon.config import db_path_for, load_config, out_path_for
 from recon.db.connection import connect
 from recon.errors import ConfigurationError, ScoringError, SourceUnavailable
+from recon.hypothesize import LLMStageResult, run_hypothesis_stage
+from recon.hypothesize.client import build_chat_model
 from recon.ingest import ingest
+from recon.inject import InjectionReport, run_injection
 from recon.match import CascadeResult, run_cascade
 from recon.report.baseline import compute_baseline
 from recon.report.html import emit_html
@@ -72,6 +75,52 @@ def _cascade_json_path(run_id: str, config) -> Path:
     return db_path_for(run_id, config).parent / "cascade.json"
 
 
+def _residual_state(conn, run_id: str, cascade_result: CascadeResult):
+    """Rebuild the post-cascade residual as a CascadeState for the LLM stage —
+    `run_cascade` returns counts, not the leftover keys."""
+    from recon.db import queries
+    from recon.models.pipeline import CascadeState
+
+    return CascadeState(
+        run_id=run_id,
+        unmatched_recon=[
+            r["record_key"] for r in conn.execute(queries.SELECT_UNMATCHED_RECON_KEYS)
+        ],
+        unmatched_bank=[],
+        unmatched_ledger=[],
+        derived=cascade_result.derived,
+    )
+
+
+def _run_llm_stage(
+    conn, run_id: str, cascade_result: CascadeResult, config, *, no_llm: bool
+) -> LLMStageResult | None:
+    """§12.4. Skipped entirely for `--no-llm` or when no GROQ_API_KEY is set —
+    in both cases the deterministic run is already complete."""
+    if no_llm:
+        return None
+    chat = build_chat_model(config.groq_api_key, config.recon_llm_model)
+    if chat is None:
+        console.print("[yellow]GROQ_API_KEY absent; skipping LLM stage.[/yellow]")
+        return None
+    state = _residual_state(conn, run_id, cascade_result)
+    result = run_hypothesis_stage(
+        conn, state, chat,
+        model=config.recon_llm_model, timeout_s=config.recon_llm_timeout_s,
+    )
+    if result.layer_unavailable:
+        err_console.print(
+            "[yellow]LLM layer unavailable; pipeline completed "
+            "(HYPOTHESIS_LAYER_UNAVAILABLE).[/yellow]"
+        )
+    console.print(
+        f"LLM: {result.records_resolved} resolved / {result.hypotheses_proposed} proposed / "
+        f"{result.hypotheses_rejected_by_verifier} rejected by verifier "
+        f"({result.clusters} clusters, {result.runtime_ms}ms)"
+    )
+    return result
+
+
 _DATASET_HELP = "clean-august | heavy-refunds | holiday-skew | high-ambiguity | all"
 _FRESH_HELP = "Discard any existing database for this run first."
 _NO_LLM_HELP = "Skip the LLM hypothesis stage entirely."
@@ -86,6 +135,7 @@ def _emit_artifacts(
     *,
     out_override: str | None,
     html: bool,
+    llm: LLMStageResult | None = None,
 ) -> dict:
     """Shared by `run` and `report`: scope-only gate -> score -> baseline ->
     results.json (+ optional HTML). Returns the summary dict written."""
@@ -109,6 +159,7 @@ def _emit_artifacts(
         run_id=run_id,
         label=run_meta["label"],
         seed=run_meta["seed"],
+        llm=llm,
     )
     if html:
         emit_html(out_path, out_path.parent / "report.html")
@@ -145,13 +196,13 @@ def run(
             try:
                 report = ingest(adapter, conn)
                 cascade_result = run_cascade(conn, run_id)
-                if not no_llm:
-                    console.print("[yellow]LLM stage lands in Phase 6; continuing.[/yellow]")
+                llm_result = _run_llm_stage(conn, run_id, cascade_result, config, no_llm=no_llm)
                 _cascade_json_path(run_id, config).write_text(
                     cascade_result.model_dump_json(indent=2), encoding="utf-8"
                 )
                 summary = _emit_artifacts(
-                    conn, run_meta, cascade_result, config, out_override=out, html=html
+                    conn, run_meta, cascade_result, config,
+                    out_override=out, html=html, llm=llm_result,
                 )
             finally:
                 conn.close()
@@ -217,9 +268,36 @@ _SCENARIO_HELP = "llm-hallucination | llm-unavailable | prompt-injection"
 @app.command()
 def inject(
     scenario: Annotated[str, typer.Option(help=_SCENARIO_HELP)],
+    dataset: Annotated[str, typer.Option(help="Dataset to run the scenario on.")] = "clean-august",
 ) -> None:
-    """Run a failure-injection scenario - section 24."""
-    console.print(f"STUB inject: scenario={scenario!r} -- not implemented until Phase 6")
+    """Run a failure-injection scenario - section 24.
+
+    Runs the real pipeline (ingest -> cascade) then a doctored hypothesis
+    stage, and reports what the system did about the injected failure. The
+    invariant across all three scenarios: no LLM-origin match is committed
+    without arithmetic that closes against source (S15.6).
+    """
+    try:
+        report: InjectionReport = run_injection(scenario, dataset=dataset)
+    except ConfigurationError as exc:
+        err_console.print(f"[red]ConfigurationError:[/red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    console.print(f"[bold]inject: {report.scenario} ({report.dataset})[/bold]")
+    for line in report.observations:
+        console.print(f"  - {line}")
+    console.print(
+        f"  planted order {report.planted_order_id}: "
+        f"matched_by={report.planted_matched_origin or 'none'} "
+        f"reason_code={report.planted_reason_code or '-'}"
+    )
+    console.print(
+        f"  unverified LLM matches committed: {report.unverified_llm_matches} "
+        "(must be 0)"
+    )
+    if report.unverified_llm_matches != 0:  # structurally impossible; guard anyway
+        err_console.print("[red]INVARIANT VIOLATED: an LLM match closed without a proof[/red]")
+        raise typer.Exit(code=3)
     raise typer.Exit(code=0)
 
 

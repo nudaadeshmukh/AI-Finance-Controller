@@ -1621,6 +1621,13 @@ def commit(proposal, proof, db) -> None
 # hypothesize/
 def propose(residual, db, facts, client, *, model, timeout_s) -> list[MatchProposal]
 def cluster_residual(residual: list[RecordKey], db: Connection) -> list[list[RecordKey]]
+def run_hypothesis_stage(db, state, client, *, model, timeout_s) -> LLMStageResult  # Phase 6:
+    # glue - runs propose() then routes every proposal through the SAME
+    # verify()/commit() the cascade uses (rule 3), updates state, and returns
+    # the honest §15.5 contribution counts for results.json. `client` is a Groq
+    # instance or any object with `.complete(system, user, timeout_s) -> str`
+    # (the ChatModel protocol) - the latter is how §24's injection scenarios
+    # swap in a scripted model without touching propose().
 
 # report/
 def score(db: Connection, answer_key: Path) -> ScoreReport
@@ -1654,6 +1661,14 @@ other argument. `emit_html()` is unchanged — it reads the emitted
 `report/results.py`) is the assembled §18 document; `sealed_key_for(run_id)`
 lets non-`report/scoring` callers ask "is there a key, and where?" without
 naming the sealed file (`tests/test_answer_key_seal.py`).
+
+**Phase 6 note.** `assemble_results` / `emit_results` gained a trailing
+keyword-only `llm: LLMStageResult | None = None`. `None` (a `--no-llm` run, or
+no `GROQ_API_KEY`) leaves `llm_contribution.enabled = false` and the
+`llm_verified` pass at `matched: 0, runtime_ms: 0`; a real stage result fills
+in the §18 `llm_contribution` block and `summary.runtime_ms_llm`. `recon
+report` re-emits with `llm=None` (it has no LLM state to replay) — the
+committed `results.json` files are the `--no-llm` artifacts.
 
 ---
 
