@@ -126,6 +126,26 @@ ON CONFLICT(group_id, record_key) DO NOTHING
 
 DELETE_EXCEPTION_BY_KEY = "DELETE FROM exceptions WHERE record_key = :record_key"
 
+# hypothesize/ — before the LLM stage overwrites a record's reason code with a
+# HYPOTHESIS_* / PROOF_DOES_NOT_CLOSE verdict, it checks whether the cascade
+# already classified it more specifically (§15.4, §13.7).
+SELECT_EXCEPTION_REASON_BY_KEY = (
+    "SELECT reason_code FROM exceptions WHERE record_key = :record_key"
+)
+
+# inject/ — §24 failure-injection scenario inspection.
+SELECT_RECON_KEYS_BY_ORDER_ID = (
+    "SELECT record_key FROM recon_lines WHERE order_id = :order_id"
+)
+SELECT_MATCH_ORIGIN_BY_KEY = """
+SELECT mg.origin AS origin
+FROM group_members gm JOIN match_groups mg ON mg.group_id = gm.group_id
+WHERE gm.record_key = :record_key
+"""
+SELECT_UNVERIFIED_LLM_GROUP_COUNT = (
+    "SELECT COUNT(*) AS n FROM match_groups WHERE origin = 'llm' AND closes = 0"
+)
+
 # match/ — cascade residual construction and settlement grouping.
 SELECT_UNMATCHED_RECON_KEYS = """
 SELECT record_key FROM recon_lines
