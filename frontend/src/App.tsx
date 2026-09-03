@@ -26,13 +26,49 @@ export interface ExplorerFilter {
   pass?: string;
 }
 
+const TAB_IDS = TABS.map((t) => t.id);
+const RUN_IDS = RUNS.map((r) => r.id) as string[];
+
+/** URL hash <-> view state, so a run + screen + open record is a shareable
+    link and the browser back button works:
+    `#/<run>/<tab>` or `#/<run>/<tab>/<record_key>`. */
+function readHash(): { runId: RunId; tab: Tab; recordKey: string | null } {
+  const raw = window.location.hash.replace(/^#\/?/, "");
+  const parts = raw.split("/").filter(Boolean);
+  const runId = (RUN_IDS.includes(parts[0]) ? parts.shift()! : RUNS[0].id) as RunId;
+  const tab = (TAB_IDS as string[]).includes(parts[0]) ? (parts.shift() as Tab) : "overview";
+  const recordKey = parts.length ? decodeURIComponent(parts.join("/")) : null;
+  return { runId, tab, recordKey };
+}
+
 export default function App() {
-  const [runId, setRunId] = useState<RunId>(RUNS[0].id);
-  const [tab, setTab] = useState<Tab>("overview");
+  const initial = readHash();
+  const [runId, setRunId] = useState<RunId>(initial.runId);
+  const [tab, setTab] = useState<Tab>(initial.tab);
   const [doc, setDoc] = useState<ResultsDocument | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [selectedKey, setSelectedKey] = useState<string | null>(initial.recordKey);
   const [filter, setFilter] = useState<ExplorerFilter | null>(null);
+
+  // hash -> state (back/forward, external links)
+  useEffect(() => {
+    const onHash = () => {
+      const h = readHash();
+      setRunId(h.runId);
+      setTab(h.tab);
+      setSelectedKey(h.recordKey);
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+
+  // state -> hash
+  useEffect(() => {
+    const want = `#/${runId}/${tab}${selectedKey ? `/${encodeURIComponent(selectedKey)}` : ""}`;
+    if (window.location.hash !== want) {
+      window.history.replaceState(null, "", want);
+    }
+  }, [runId, tab, selectedKey]);
 
   useEffect(() => {
     let live = true;
