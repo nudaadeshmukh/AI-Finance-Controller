@@ -1910,6 +1910,42 @@ Must contain:
 Naming your own bottleneck precisely is the senior move. Claiming you do not have one is
 the junior move.
 
+### 29.1 Scaling analysis (measured)
+
+Measured on the four frozen 400-record datasets, in-memory SQLite, `--no-llm`,
+mean of 120 cascade runs (`time.perf_counter`; Windows `monotonic` is
+15 ms-granular and was replaced for this measurement):
+
+| Pass | mean ms / 400 rec | share of cascade | what it does |
+|---|---|---|---|
+| `utr` | 0.05 | <1% | one regex + dict insert per bank row |
+| `exact` | 5.4 | ~14% | per-settlement join + stated-fee equation |
+| `aggregate` | 4.3 | ~11% | same, for settlements with refunds/adjustments |
+| `fee_reversal` | 18.5 | **~47%** | change-point scan over every stated fee, then re-derive |
+| `timing` | 5.9 | ~15% | business-day / holiday inference from settled_at gaps |
+| `tolerance` | 0.6 | ~2% | truncated-UTR prefix match |
+
+Full cascade: **~38–41 ms / 400 records ≈ 9,800–10,900 records/sec**, single
+core, single thread.
+
+**Partitioning.** `exact`, `aggregate` and `tolerance` are embarrassingly
+parallel by settlement cycle — each settlement's closing equation is
+independent. `fee_reversal` and `timing` need the whole population once to
+learn the fee slabs and the holiday calendar, then partition the same way.
+
+**Where it breaks first.** Not the arithmetic — the candidate search. Every
+pass here keys on `settlement_utr` first, so matching a settlement is *linear*
+in its line count (mean 6.7, max 32 — one T+2 daily window). Remove the UTR
+join and the same problem becomes subset-sum: "which of these N recon lines
+sum to this bank credit", combinatorial in settlement size, and worse when
+many orders share an amount (73 of 350 in `high-ambiguity`). At a monthly
+window (~1,300 lines/settlement) that is intractable.
+
+**The fix.** Block on the UTR index before doing anything else — it is what
+keeps the whole cascade linear — then shard settlements across workers. The
+`utr` pass exists to be that barrier, not because UTR extraction is expensive
+(it is 0.05 ms).
+
 ---
 
 ## 30. README & Submission Checklist

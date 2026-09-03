@@ -136,7 +136,10 @@ def run_cascade(
     pass_stats: list[PassStat] = []
 
     for one_pass in passes:
-        start = time.monotonic()
+        # perf_counter, not monotonic: monotonic's ~15ms granularity on Windows
+        # quantised sub-15ms pass times to a random 0/15/16ms. perf_counter is
+        # the right clock for short durations (Phase 8 measurement).
+        start = time.perf_counter()
         in_count = len(state.unmatched_recon)
         matched_count = 0
         try:
@@ -150,7 +153,7 @@ def run_cascade(
         except Exception:  # noqa: BLE001 - a pass failure must not crash the cascade (§12.3)
             matched_count = 0
             state = _rebuild_residual(db, state)
-        runtime_ms = int((time.monotonic() - start) * 1000)
+        runtime_ms = int((time.perf_counter() - start) * 1000)
         pass_stats.append(
             PassStat(
                 name=one_pass.name,
