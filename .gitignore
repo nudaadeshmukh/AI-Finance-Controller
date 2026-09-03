@@ -58,6 +58,7 @@ node_modules/
 frontend/dist/
 frontend/.vite/
 frontend/public/data/
+frontend/*.tsbuildinfo
 npm-debug.log*
 yarn-error.log*
 pnpm-debug.log*

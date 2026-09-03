@@ -25,8 +25,8 @@ code is actually working.
 
 | | |
 |---|---|
-| **Current phase** | Phase 6 complete |
-| **Next phase** | Phase 7 — Frontend |
+| **Current phase** | Phase 7 complete |
+| **Next phase** | Phase 8 — README, error analysis, scaling |
 | **Deadline** | 5 September 2026 |
 | **Pipeline runs?** | `run` does acquire+ingest+cascade(6 passes)+classify_residual+**hypothesise (LLM)**+verify+score+results.json(+HTML) for real; `report` re-emits from an existing run.db; `inject` runs the three §24 failure scenarios. `--no-llm` / no `GROQ_API_KEY` skips the LLM stage and the run still completes. LLM default model is **`openai/gpt-oss-20b`** (C-013 — original pin `llama-3.3-70b-versatile` retired by Groq mid-build; layer still degrades cleanly if a model vanishes). |
 | **Latest match rate (scored, `--no-llm`, strict whole-group equality, post-C-011)** | clean-august **91.75%** (367/400, precision **94.10%**), heavy-refunds **71.75%** (287/400, precision **88.04%**), holiday-skew **86.5%** (346/400, precision **90.58%**), high-ambiguity **76.75%** (307/400, precision **83.20%**). False matches **23/39/36/62** — 6/3/6/13 answer-key-poisoned records (§13.8 + C-009) dragging 17/36/30/49 resolvable settlement-mates under strict scoring. Unresolved **10/74/18/31**, all with a specific reason (`CROSS_PERIOD_UTR` or `AMBIGUOUS_DUPLICATE`) — **`NO_CANDIDATE` is 0 in every run** after C-011. |
@@ -40,7 +40,7 @@ code is actually working.
 | 4 — Passes 4–6 | ✅ complete |
 | 5 — Scoring + results.json | ✅ complete |
 | 6 — LLM layer + injection | ✅ complete |
-| 7 — Frontend | ⬜ not started |
+| 7 — Frontend | ✅ complete |
 | 8 — README + scaling | ⬜ not started |
 
 ---
@@ -1182,6 +1182,143 @@ Phases 7-8. Phase 7 (Frontend) is next.
   `hypothesize/__init__.py`, `implementation_guide.md`; decisions-log row
   appended. The layer measured live against the new default (contribution 0,
   see above).
+
+---
+
+## Phase 7 — Frontend
+
+**Status:** complete
+
+**Completed features:**
+- Static Vite + React (React 18, TypeScript), no server / API / upload / auth
+  (§23). `frontend/` skeleton fleshed out — no project regeneration.
+- `frontend/scripts/sync-results.mjs` — Node-builtins-only copy of each
+  committed `data/<run>/results.json` into `frontend/public/data/<run>/`, wired
+  as `predev` / `prebuild` npm hooks. `public/data/` stays git-ignored (build
+  artifact; source of truth is the repo's top-level `data/`). This is how the
+  static app gets the four runs without a bundler JSON import or a server.
+- `src/lib/types.ts` — the full §18 `ResultsDocument` shape + `assertSchema()`
+  (hard-fails on `schema_version !== 1`, §23.6) + the `RUNS` list.
+- `src/lib/format.ts` — **the only place paise become rupees on the frontend**
+  (rule 1, §23.6): `rupees()` / `rupeesPlain()` (Indian digit grouping via
+  `Intl.NumberFormat("en-IN")`), `percent()`, `asOfDate()`, `ms()`. Nothing
+  else in `src/` divides by 100 or writes a ₹.
+- `src/lib/data.ts` — `loadRun(runId)` fetches `${BASE_URL}data/<run>/results.json`.
+- `src/App.tsx` — top nav + dataset `<select>` (switches the four runs) + four
+  screen tabs + the shared record drawer. Cross-screen filtering: a bridge
+  band click sets an `ExplorerFilter` and jumps to the Match Explorer.
+- **Screen 1 — Run Overview** (`screens/RunOverview.tsx`): headline metric
+  strip (match rate / precision / unresolved / cascade runtime), four source
+  cards with totals, the §1.2 one-liner, the §17.2 comparison table (naive
+  baseline / cascade / cascade+LLM / resolvable ceiling), the
+  `tolerance_constants` panel (§23.6), and the §24 `HYPOTHESIS_LAYER_UNAVAILABLE`
+  banner when a run hit that.
+- **Screen 4 — Exception List** (`screens/ExceptionList.tsx`): every unresolved
+  record with its specific `reason_code` + `reason_text`, candidates listed
+  where present (never one picked), amber "Requires review" badge for
+  `AMBIGUOUS_DUPLICATE` (per design.md — distinct from a hard exception),
+  per-code tally, and the footer line *"These N were not resolved. No guess was
+  recorded."*
+- **Screen 2 — Reconciliation Bridge** (`screens/ReconciliationBridge.tsx`):
+  the `bridge[]` waterfall gross → bank credit as bordered `div` bands (no
+  charting library, §23.6), each clickable to filter Screen 3, the "Bank
+  credited" band the one yellow bar on the screen.
+- **Screen 3 — Match Explorer** (`screens/MatchExplorer.tsx`): all 400 records,
+  per-pass filter chips (multi-select, with counts), status badges, and the
+  `pass-tag-cascade` / `pass-tag-llm` distinction on every matched row so the
+  "deterministic dominates, LLM is a sliver" story reads without narration.
+  Accepts the incoming bridge-band filter.
+- **Record drawer** (`components/RecordDrawer.tsx`): the group's member keys
+  grouped by source (order / recon / bank / ledger), the `ArithmeticProof`
+  table (`components/ProofTable.tsx` — delta pill emerald at 0, rose otherwise:
+  the frame that carries the §24 rejection moment), and the full audit trail.
+  For an exception: the reason, `reason_text`, candidates, passes tried. Esc or
+  overlay-click closes.
+- `components/Bits.tsx` — `StatusBadge`, `PassTag`, `Money`, `Spinner`,
+  `ReasonPill`.
+- `src/index.css` — all design.md tokens transcribed once as CSS custom
+  properties; components reference the vars, never raw hex/px. Flat + bordered,
+  no shadows, Inter + JetBrains Mono (self-hosted via `@fontsource*`, no CDN),
+  one desktop / one compact breakpoint. Yellow appears on exactly: primary
+  action, `badge-yellow`, `pass-tag-llm` outline, the bridge total band.
+- `tsconfig.json` (standalone, `strict`, `noUnusedLocals/Parameters`),
+  `index.html` wired to `/src/main.tsx`, `package.json` build =
+  `tsc --noEmit && vite build`.
+
+**Files modified / added:**
+```
+frontend/package.json, package-lock.json, tsconfig.json, index.html
+frontend/scripts/sync-results.mjs
+frontend/src/main.tsx, App.tsx, index.css
+frontend/src/lib/{types,format,data}.ts
+frontend/src/components/{Bits,ProofTable,RecordDrawer}.tsx
+frontend/src/screens/{RunOverview,ReconciliationBridge,MatchExplorer,ExceptionList}.tsx
+frontend/src/{components,lib,screens}/.gitkeep   (deleted — dirs now have content)
+.gitignore                                        (+frontend/*.tsbuildinfo)
+docs/project-progress.md
+```
+
+**Tests / verification:**
+- `npm run build` clean (`tsc --noEmit` no errors; vite build 161 kB JS / 46 kB
+  CSS + self-hosted fonts).
+- `npm run dev` and `npm run preview` both serve; `/data/<run>/results.json`
+  resolves 200 for all four runs.
+- SSR smoke render (`react-dom/server`, throwaway script) of all four screens +
+  both drawer states against real `clean-august` data — all render without
+  error (Match Explorer = 400 rows, ~120 kB markup).
+- Backend `pytest` unaffected (no Python touched this phase) — 88 passing as of
+  the C-013 commit.
+
+**Remaining work:**
+Phase 8 — README (real numbers), §29.1 scaling analysis (after measuring
+per-pass throughput), final checklist. Optional frontend polish is the first
+cut under time pressure.
+
+**Known issues / TODOs:**
+- **§23.5 "all four source records side by side" is rendered at the key level,
+  not the field level.** `results.json` §18 carries a matched record's
+  `member_keys` + `proof` + `audit`, not the per-source row field values
+  (amount, dates, narration) of the order / bank / ledger members. The drawer
+  groups the member keys by source prefix and shows the proof; it does not show
+  each source row's own columns because that data isn't in the artifact. Adding
+  it would mean new `results.json` fields (rule 12) — flagged for a decision in
+  Phase 8 rather than done here. The proof + audit trail already carry the
+  "why this is a match" story.
+- **Dataset dropdown labels are hardcoded** in `types.ts` `RUNS` (they must
+  exist before any run is loaded); they match `manifest.json`. The screen
+  title uses the loaded `doc.label`. If a label changes in the manifest, update
+  `RUNS` too.
+- **`frontend/public/data/` is git-ignored and regenerated by `predev`/
+  `prebuild`.** A deploy (Vercel/Netlify) runs `npm run build`, whose
+  `prebuild` copies from the committed top-level `data/`. A reviewer running
+  `npm run dev` gets the same via `predev`. If someone runs `vite` directly
+  (bypassing the hook) with no prior sync, the app shows a clear "run
+  `npm run sync`" error rather than a blank screen.
+- **`@fontsource` adds frontend devDependencies** (`@fontsource-variable/inter`,
+  `@fontsource/jetbrains-mono`). This does not touch the "five runtime
+  dependencies" budget, which is the Python pipeline's; the frontend already
+  had its own React/Vite tree. Self-hosting the fonts (vs a Google Fonts CDN
+  link) keeps the deployed site with no third-party runtime dependency, per
+  §28's "still up in 2027" intent.
+- **`npm install` needed `npm approve-scripts esbuild`** (this npm version gates
+  install scripts). Recorded in `package.json`'s `allowScripts`. A fresh clone
+  on a permissive npm won't need it; on a gated npm the build fails with a
+  clear message until approved.
+- No automated frontend test suite (the submission's test discipline is on the
+  backend). The SSR smoke check is a one-shot, not committed. Given the
+  four-day budget and the cut order (frontend polish first to go), a Vitest
+  setup was judged not worth it.
+
+**Deviations from the implementation guide:**
+- Built all four screens, not just 1 and 4. The guide says "screens 1 and 4
+  first … if time runs short, ship those two" — time allowed all four, and 2
+  (the bridge) is called out in §23.2 as "the most persuasive screen", so
+  cutting it would have hurt the submission.
+- §23.5's source-record detail is key-level not field-level — see Known issues
+  (a `results.json` contract gap, not a frontend shortcut).
+- `sync-results.mjs` + `predev`/`prebuild` hooks are not named in the guide;
+  they are the mechanism for a static app to read committed JSON that lives
+  outside `frontend/` without a bundler import or a server.
 
 ---
 
