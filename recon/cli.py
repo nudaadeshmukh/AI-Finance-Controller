@@ -348,6 +348,21 @@ def report(
 def validate(
     dataset: Annotated[str, typer.Option(help="Run id, or 'all'")] = "all",
 ) -> None:
-    """Dataset invariant checks - wired into CI."""
-    console.print(f"STUB validate: dataset={dataset!r} -- not implemented yet")
+    """Dataset invariant checks - wired into CI (docs/challenges-log.md C-016)."""
+    from recon.report.validate import validate_datasets
+
+    results = validate_datasets(dataset)
+    total = 0
+    for run_id, problems in results.items():
+        if problems:
+            err_console.print(f"[red]{run_id}: FAILED ({len(problems)})[/red]")
+            for p in problems:
+                err_console.print(f"  - {p}")
+            total += len(problems)
+        else:
+            console.print(f"[bold]{run_id}[/bold]: OK")
+    if total:
+        err_console.print(f"\n{total} problem(s) found across {len(results)} dataset(s).")
+        raise typer.Exit(code=1)
+    console.print(f"\nAll {len(results)} dataset(s) valid.")
     raise typer.Exit(code=0)
