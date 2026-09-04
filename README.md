@@ -4,6 +4,8 @@
 > across all four, explains every rupee of the gap, and hands back the ones it could
 > not resolve — with reasons.
 
+![Reconciliation bridge — clean-august](docs/screenshots/bridge.jpg)
+
 A merchant's order system, Razorpay's settlement recon report, the bank statement, and
 the accounting ledger never agree, because fees, taxes, T+2 settlement delays, refunds
 and reversals distort the numbers at every step. Reconciliation is proving these four
@@ -12,46 +14,6 @@ business that takes online payments.
 
 Built for the **Razorpay AI Buildathon 2026, Track 04 — AI Finance Controller**,
 direction: multi-source reconciliation.
-
----
-
-## The philosophy
-
-**The LLM proposes. The arithmetic disposes.**
-
-Every match — whether the deterministic cascade found it or an LLM suggested it —
-becomes a match only when a single verifier recomputes the closing equation from source
-records and it balances. There is no confidence threshold, no "high confidence" bypass,
-no fast path. A record is either matched **with a closing arithmetic proof**, or it goes
-to the exception list **with a specific reason**. There is no third state, and no guess
-is ever recorded — a false match is worse than an unresolved record, because an
-unresolved record gets human attention and a false match never will.
-
----
-
-## Run it
-
-```bash
-pip install -r requirements.txt          # 6 packages, all pinned
-python -m recon run --dataset all --no-llm
-```
-
-A fresh clone runs the full deterministic pipeline over the four committed datasets with
-**zero environment configuration** — no API key, no `.env`, no network. Every environment
-variable is optional.
-
-```bash
-python -m recon run --dataset clean-august          # one dataset, with LLM if GROQ_API_KEY is set
-python -m recon run --dataset all --no-llm          # all four, deterministic only
-python -m recon report --dataset clean-august --html # re-emit results.json + static HTML
-python -m recon inject --scenario llm-hallucination  # failure-injection scenarios
-pytest                                              # 88 tests
-ruff check .
-
-cd frontend && npm install && npm run dev            # the dashboard (reads results.json)
-```
-
-`results.json` for all four datasets is committed under `data/<run>/`.
 
 ---
 
@@ -95,27 +57,83 @@ given run (`reference/master_specification.md` §8.2, `docs/challenges-log.md` C
 (mean of 120 runs; `fee_reversal` is ~47% of it). Scaling analysis, including where this
 breaks first and the fix, is in `reference/master_specification.md` §29.1.
 
-### The LLM's exact contribution: **0 records out of 400**, published
+---
+
+## The philosophy
+
+**The LLM proposes. The arithmetic disposes.**
+
+Every match — whether the deterministic cascade found it or an LLM suggested it —
+becomes a match only when a single verifier recomputes the closing equation from source
+records and it balances. There is no confidence threshold, no "high confidence" bypass,
+no fast path. A record is either matched **with a closing arithmetic proof**, or it goes
+to the exception list **with a specific reason**. There is no third state, and no guess
+is ever recorded — a false match is worse than an unresolved record, because an
+unresolved record gets human attention and a false match never will.
+
+```mermaid
+flowchart LR
+    A[acquire] --> B[ingest] --> C["cascade (6 passes)"] --> D["[hypothesize]"] --> E[verify] --> F[report]
+```
+
+*Pipeline stage flow, `reference/master_specification.md` §3.3 — hypothesize is optional
+and skipped entirely without an API key.*
+
+---
+
+## The LLM's exact contribution: **0 records out of 400**, published
 
 `--no-llm` and a live LLM run produce **identical** match rates on all four datasets. The
 residual the LLM runs on is entirely `CROSS_PERIOD_UTR` (the settlement is outside the
 export window — the bank record is genuinely absent) and `AMBIGUOUS_DUPLICATE` (a
 dashboard refund with no order reference). Nothing in the source data lets any model
-resolve these, and on a real run the model did not pretend otherwise — on `heavy-refunds`
-it proposed 1–3 groupings and the verifier rejected every one, each by a delta equal to
-the whole settlement's net (`docs/challenges-log.md` C-014).
+resolve these.
+
+The clearest evidence is a live, unscripted run, not a staged demo. On
+`heavy-refunds` (2026-09-04, live `openai/gpt-oss-20b`, no injection, no scripted model),
+of 18 residual clusters, **4 produced a confident proposal — and the verifier rejected
+all 4.** Every rejection, straight from `audit_log`:
+
+| group | model's claim | delta |
+|---|---|---|
+| `grp_llm005` | payment and order match exactly, closing the settlement | ₹1,299.00 |
+| `grp_llm006` | shared UTR, arithmetic balances match | -₹3,225.94 |
+| `grp_llm010` | shared UTR, amounts reconcile to a net of ₹7,999.00 | -₹9,697.00 |
+| `grp_llm016` | shared UTR, payment credits equal net of orders minus fees/tax/refunds | -₹6,930.40 |
+
+Every one named no bank transaction (`observed_net: 0`) — these are genuinely
+cross-period settlements, so there is none to name — and the verifier's delta lands
+exactly on the real settlement net every time. A separate live run on the same
+residual, minutes apart, produced proposals from a different subset of clusters (5
+instead of 4) — the model is called live and unscripted, so exactly which clusters
+produce a confident (wrong) grouping varies run to run. That variance is reported
+honestly, not smoothed over: in every run captured, the number resolved is 0. Full
+detail, including the other independent instance, in `docs/challenges-log.md` C-014
+and C-017.
 
 A bounded AI layer that resolves 0 of 400 is **evidence for the architecture**: the
 deterministic cascade already found everything the data supports, and the model was given
 no opening to fabricate. Hiding a small number invites exactly the suspicion this track
 screens for.
 
-### The honest exception list
+![Match explorer — cascade-only pass tags, llm tag at 0](docs/screenshots/explorer.jpg)
+![Record drawer — arithmetic proof, delta closes at 0.00](docs/screenshots/drawer-proof.jpg)
+
+---
+
+## The honest exception list
 
 Unresolved records per run: **10 / 74 / 18 / 31**. Every one carries a specific reason
 code — `NO_CANDIDATE` is 0 in every run. `AMBIGUOUS_DUPLICATE` records list **both**
 candidate orders and pick neither; naming the ambiguity precisely is the deliverable.
-Screen 4 of the dashboard is dedicated to them.
+
+For example, `clean-august`'s `recon:rfnd_1crrLyt09fdr2N` (₹499.00): reason
+`AMBIGUOUS_DUPLICATE`, candidates `order:order_kFBitTyFWhKRFQ` and
+`order:order_Wd9KHmWEG5bhQ7` — both listed, neither chosen. Screen 4 of the dashboard
+shows exactly this, with the footer line *"These 10 were not resolved. No guess was
+recorded."*
+
+![Exception list — an AMBIGUOUS_DUPLICATE record with both candidates named](docs/screenshots/exception-ambiguous.jpg)
 
 ### Known answer-key defects — reported, not fixed
 
@@ -149,6 +167,21 @@ Echoed into every `results.json` and shown in the dashboard, so no allowance is 
 | Amount delta per derived line | **2 paise** | A settlement whose payments all carry a *stated* fee must close at delta 0 exactly — a stated fee cannot drift. Only a fee **recovered** by `fee_reversal` can be off, by ≤1 paise on the fee and ≤1 on the tax (both round half-up independently). The budget scales with the number of derived member payments; it is not a flat per-settlement number, and it was never needed to close anything measured. |
 | UTR suffix truncation | **2 digits** | A bank formatting defect drops trailing UTR digits in some description strings; 2 covers the defect actually in the datasets (`manifest.json` `truncated_utr` = 2/run) without letting a short prefix guess a whole UTR. Requires a **unique** prefix match — a truncated UTR matching two settlements is ambiguity, not a match. |
 | Ledger posting lag | **1 day** | Accountants book same-day or next-day (~8% of entries are one day late). This only widens which ledger entry is *attached to* an already-resolved group for display — it never touches the closing equation or a recon-line match decision. |
+
+---
+
+## A recurring lesson
+
+`docs/challenges-log.md` C-005 through C-011, and C-017 four days later, were all found
+the same way: running a pass against the real frozen datasets and checking its output
+against an independently-computed expectation, not trusting that green tests meant the
+pipeline worked. The sharpest instance is C-006 — 39 of 39 tests passing while the
+cascade's writes never actually committed to disk, because every test used a single
+open connection that could read its own uncommitted transaction. The bug was invisible
+to the test suite by construction; it was only caught by running the CLI as a real
+process, letting it exit, and opening `run.db` fresh from a second connection. The
+pattern repeats deliberately, not accidentally: this project treats "the tests are
+green" and "the product works" as two different claims that both have to be checked.
 
 ---
 
@@ -190,10 +223,6 @@ data isn't in `results.json` and adding it would mean a new, undocumented schema
 
 Modular monolith, pipes-and-filters, single process, single-threaded. One SQLite file per
 run. Static frontend reading a committed JSON artifact.
-
-```
-acquire → ingest → cascade (6 passes) → [hypothesize] → verify → report
-```
 
 `match/`, `hypothesize/` and `verify/` **never** import from the data generator — if the
 matcher needs a fee slab or a holiday calendar, it derives it from observed data. That
@@ -251,6 +280,33 @@ behind a one-method interface so a swap is one environment variable
 
 ---
 
+## Run it
+
+```bash
+pip install -r requirements.txt          # 6 packages, all pinned
+python -m recon run --dataset all --no-llm
+```
+
+A fresh clone runs the full deterministic pipeline over the four committed datasets with
+**zero environment configuration** — no API key, no `.env`, no network. Every environment
+variable is optional.
+
+```bash
+python -m recon run --dataset clean-august          # one dataset, with LLM if GROQ_API_KEY is set
+python -m recon run --dataset all --no-llm          # all four, deterministic only
+python -m recon report --dataset clean-august --html # re-emit results.json + static HTML
+python -m recon inject --scenario llm-hallucination  # failure-injection scenarios
+python -m recon validate --dataset all               # dataset invariant checks
+pytest                                              # 93 tests
+ruff check .
+
+cd frontend && npm install && npm run dev            # the dashboard (reads results.json)
+```
+
+`results.json` for all four datasets is committed under `data/<run>/`.
+
+---
+
 ## Repository map
 
 | Path | What |
@@ -259,7 +315,7 @@ behind a one-method interface so a swap is one environment variable
 | `recon/generate/` | the synthetic data generator — imported by **nothing** |
 | `data/<run>/` | frozen sources + `answer_key.json` (sealed) + committed `results.json` |
 | `frontend/` | static Vite + React dashboard |
-| `tests/` | 88 tests; 8 protected tests that must never be skipped or weakened |
+| `tests/` | 93 tests; 8 protected tests that must never be skipped or weakened |
 | `reference/master_specification.md` | the single authoritative technical document |
 | `reference/design.md` | the frontend design system |
 | `docs/project-progress.md` | phase-by-phase build record |

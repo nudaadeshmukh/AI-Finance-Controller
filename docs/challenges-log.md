@@ -1060,16 +1060,36 @@ cluster 1 of 3 with `LLMUnavailable`, asserts only 1 call happens) — proving
 both halves of the fix, not just the new path.
 
 **Re-ran heavy-refunds fresh against the live API after the fix, not
-assumed.** Before: first attempt aborted with 0 clusters attempted past the
-break; a subsequent lucky run got 5 proposed / 5 rejected before hitting a
-`LLMUnavailable` partway through 18 clusters. After the fix: **no
-`layer_unavailable` audit row at all** — every one of the 18 clusters was
-genuinely attempted in a single run — with **4 proposed / 4 rejected by the
-verifier / 0 resolved**, 231s. One proposal (`grp_llm016`, cluster 16 of 18)
-came from a cluster that a `break`-on-first-failure run could never have
-reached at all, which is the fix's own evidence that it works, not an
-assumption. Deltas, all rejected, `observed_net: 0` on every one (no bank
-txn named — genuinely cross-period):
+assumed — and checked what the comparison actually shows before writing it
+up, since two runs' proposal counts differing is ambiguous on its own.**
+The real before/after evidence for the fix is attempts 1-2 (immediate
+`LLMUnavailable`, the yellow "layer unavailable" line printed, 0 clusters
+past the break) versus every run after the fix (that line never prints
+again — `hypothesize/__init__.py` only emits it when `result.
+layer_unavailable` is `True`, itself only set when the `break` path fires).
+
+**Correction to an initial misreading in this entry:** the pre-fix "5
+proposed / 5 rejected" run (see the C-014 addendum above) was checked
+against that same signal — its printed output also never showed the
+"layer unavailable" line, meaning it **also** traversed all 18 clusters
+without hitting the break, pre-fix code and all. So the 5-vs-4 proposal
+count difference between that run and the post-fix run below is **not**
+evidence of the fix's effect — both runs completed the same 18 clusters.
+It is ordinary run-to-run variance in the live model's own output: cluster
+boundaries are deterministic (pure clustering over the residual, no LLM
+involved), but the model's response to the *same* cluster content differed
+between the two separate live calls, sometimes returning a confident
+`proposed_group` and sometimes an empty one. `grp_llm016` being new in this
+run is not proof the fix reached a previously-unreachable cluster — a
+pre-fix run that got lucky (as the 5-proposal one did) could have proposed
+from cluster 16 too; it simply didn't, that call. The actual, load-bearing
+before/after is the earlier one: total failure with 0 clusters attempted,
+versus every clean run afterward attempting all 18.
+
+After the fix, one specific run: **4 proposed / 4 rejected by the verifier
+/ 0 resolved**, 18 clusters, 231s, no `layer_unavailable` audit row.
+Deltas, all rejected, `observed_net: 0` on every one (no bank txn named —
+genuinely cross-period):
 
 | group | delta (paise) | delta (rupees) |
 |---|---|---|
@@ -1113,4 +1133,4 @@ Keep this current — it is what goes in the README and the video.
 | C-014 | 6 | Live `openai/gpt-oss-20b` proposed 3 confident wrong groupings on a real heavy-refunds run | Model pattern-matched "shared UTR + payments + refunds" into a settlement claim with an invented closing figure, naming no bank txn (none exists — cross-period). Verifier recomputed from source: delta = −1,459,600 / −322,594 / −969,700 paise; all rejected, 0 committed. Not a bug — the core thesis firing unprompted on real input. | **Yes** (primary) |
 | C-015 | 8 | Per-pass `runtime_ms` was 0/15/16/31 ms noise | `match/__init__.py` timed passes with `time.monotonic()` (~15.6 ms granularity on Windows). Swapped to `time.perf_counter()`; regenerated `results.json` (timing fields only). Real numbers: full cascade ~40 ms / 400 rec ≈ 10k rec/s, `fee_reversal` ~47%. | No |
 | C-016 | 8 | `recon validate` was a silently-passing stub since Phase 1; CI's "validate frozen datasets" step had never actually checked anything | No phase ever claimed `validate` after its Phase 1 stub; a stub that exits 0 is indistinguishable from a passing real check. Found by a pre-submission sweep that ran it and read the output. Fixed: 4 real checks (key coverage, no floats, S6.2 arithmetic, S8.2 class counts/ceiling), split across `report/scoring.py` (the 2 that need the sealed key, rule 6) and `report/validate.py` (the 2 that don't); verified against deliberately broken fixtures before trusting the clean pass on real data. | **Yes** |
-| C-017 | 8 | A single call's failure aborted the entire hypothesis stage (0 clusters attempted past the first), against S15.3's per-cluster independence | `client.py` mapped a rate limit, a per-call 400 (Groq `json_validate_failed`), and a genuine dead connection to the same `LLMUnavailable`, so `propose()` broke the whole loop on any of them. Split into `LLMUnavailable` (connection/auth - stops the stage) and new `LLMCallFailed` (this call only - skips and continues). Re-ran heavy-refunds live after the fix: 0 layer_unavailable, all 18 clusters attempted, 4 proposed/4 rejected including one from a cluster a pre-fix run could never reach. Cascade numbers unchanged. | **Yes** |
+| C-017 | 8 | A single call's failure aborted the entire hypothesis stage (0 clusters attempted past the first), against S15.3's per-cluster independence | `client.py` mapped a rate limit, a per-call 400 (Groq `json_validate_failed`), and a genuine dead connection to the same `LLMUnavailable`, so `propose()` broke the whole loop on any of them. Split into `LLMUnavailable` (connection/auth - stops the stage) and new `LLMCallFailed` (this call only - skips and continues). Real before/after: attempts 1-2 (0 clusters attempted past the break) vs every clean run after (no break, all 18 attempted, e.g. 4 proposed/4 rejected). A pre-fix run that happened not to hit the bug that call (5 proposed/5 rejected) also attempted all 18 - so cluster-count differences between two live runs reflect LLM non-determinism, not the fix itself; corrected in this entry after checking rather than assuming. Cascade numbers unchanged. | **Yes** |
