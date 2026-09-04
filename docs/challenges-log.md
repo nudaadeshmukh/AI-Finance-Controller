@@ -841,6 +841,39 @@ proposals is model-/network-dependent; every one fails to close.
 
 **Demo relevant?** **Yes — this is a primary beat**, not a supporting one.
 
+**Reproduced again, independently, for the video (2026-09-04, later same
+day).** Re-ran `python -m recon run --dataset heavy-refunds --fresh` fresh
+against the live API. First attempt: the LLM stage failed outright with
+`HYPOTHESIS_LAYER_UNAVAILABLE` after 0 proposals — traced this before
+re-running rather than just retrying blind: a direct, isolated call to the
+same model succeeded immediately, and a manual per-cluster replay showed
+individual calls taking anywhere from 0.4s to 20.5s, with one outright API
+error (`json_validate_failed: max completion tokens reached before
+generating a valid document`). `propose()` breaks out entirely on the
+*first* `LLMUnavailable` (`hypothesize/__init__.py`) rather than skipping
+just the failed cluster, so one slow or malformed call early in the
+sequence silently zeroes out every cluster after it — a real latent
+fragility, not the C-014 story, worth a line of its own since it explains
+why a "fresh" reproduction can go both ways run to run. On retry, the
+sequence of live calls happened to get further: **5 proposed, 5 rejected,
+0 resolved**, 18 clusters, ~212s. Every rejection, from `audit_log`:
+
+| group | delta (paise) | delta (rupees) |
+|---|---|---|
+| `grp_llm005` | -1,624,450 | -₹16,244.50 |
+| `grp_llm006` | -322,594 | -₹3,225.94 |
+| `grp_llm008` | -769,800 | -₹7,698.00 |
+| `grp_llm010` | -969,700 | -₹9,697.00 |
+| `grp_llm011` | -617,639 | -₹6,176.39 |
+
+Same shape as the first instance in every case: `observed_net: 0` (the
+model named no bank transaction — none exists for these genuinely
+cross-period settlements), `closes: false`, and the verifier's delta lands
+exactly on the settlement's net every time. Confirms the finding is not a
+one-off: two independent live runs, different days, different specific
+proposals, same mechanism, same result — zero unverified matches either
+time.
+
 ---
 
 ## C-015 — per-pass `runtime_ms` was 15 ms-quantised noise on Windows
