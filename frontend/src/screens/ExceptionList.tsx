@@ -83,7 +83,7 @@ export function ExceptionList({
 
       <p className="t-body-sm muted" style={{ marginTop: 16 }}>
         These {doc.exceptions.length} were not resolved. No guess was recorded — a false
-        match is worse than an unresolved record (CLAUDE.md rule 4). The{" "}
+        match is worse than an unresolved record. The{" "}
         {doc.summary.excluded} unrelated bank debits per run are excluded, not counted here.
       </p>
     </>

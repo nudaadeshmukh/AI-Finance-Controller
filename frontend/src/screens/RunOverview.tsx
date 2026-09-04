@@ -117,7 +117,7 @@ export function RunOverview({ doc }: { doc: ResultsDocument }) {
       <div className="card">
         <h2 className="card__title t-title-lg">Tolerance constants</h2>
         <p className="t-body-sm muted">
-          Fixed before measurement, never widened after (CLAUDE.md rule 7). Echoed here so
+          Fixed before measurement, never widened after. Echoed here so
           every allowance is visible.
         </p>
         <div className="tol-list">
