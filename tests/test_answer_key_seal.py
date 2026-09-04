@@ -8,6 +8,12 @@ harmless. It isn't: it would invalidate the measured numbers with no way to
 tell from the outside. `recon/generate/` is exempt — it is the origin of the
 answer key and lives outside the pipeline's dependency graph entirely (§3.3),
 never imported by anything this test protects.
+
+Stated limitation (docs/challenges-log.md C-016): this is a textual grep for
+the literal string "answer_key", not an import-graph analysis — it verifies
+that no file *names* the sealed key, not that no code path could reach it
+some other way (e.g. via a passed-in path or a re-exported constant). A
+docstring merely mentioning the filename is enough to trip it.
 """
 
 from __future__ import annotations
