@@ -941,6 +941,16 @@ the clean pass on the real datasets.
 exit 0 — the actual data has been clean the whole time; it simply had never
 been checked by anything that could fail.
 
+**Confirmed on GitHub's actual infrastructure, not just locally.** This bug
+existed because a green CI checkmark had never meant what it looked like it
+meant — so the fix was only trustworthy once verified the same way: `ci.yml`
+was also missing `temp` from its push triggers (a separate, related gap —
+CI had never once executed on this branch's commits, on any workflow, ever).
+Added `temp` to the trigger list, pushed, and had the user check GitHub
+directly rather than take a local `pytest` pass as equivalent to CI passing.
+Run #8 on commit `cf7c4e6` went green in 37s on GitHub's own runners —
+independently confirmed, not asserted.
+
 **Prevention:** `tests/test_validate.py` runs the real checks against the
 actual committed datasets (not a synthetic fixture) and asserts a clean
 exit, plus a regression test with a deliberately broken fixture confirming
