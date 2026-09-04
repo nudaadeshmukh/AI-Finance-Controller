@@ -1441,6 +1441,14 @@ None in the build. Outstanding non-code items: the cold-clone check by a
 second person, and the video.
 
 **Known issues / TODOs:**
+- **§23.5's key-level-vs-field-level drawer question (flagged in Phase 7 for a
+  Phase 8 decision) is now resolved: accepted as final.** The drawer stays
+  key-level; field-level detail would need a new, undocumented `results.json`
+  field (rule 12), which is a real schema decision, not a Phase 8-sized fix.
+  Recorded in `reference/master_specification.md` §23.5 and the README so it
+  reads as a decision, not a dropped item. Found by a pre-submission sweep
+  that checked every open item against whether Phase 8 had actually decided
+  it, not just whether it had been mentioned.
 - The `frontend/` static build is not deployed anywhere yet (§28: Vercel /
   Netlify free tier). `npm run build` produces a working `dist/`; deployment
   is a one-time manual step the submission may or may not need.

@@ -880,6 +880,85 @@ is exactly what this log is for.
 
 ---
 
+## C-016 — `recon validate` was a silently-passing stub, three days before submission
+
+**Phase:** 8 (found during a pre-submission full-project sweep)
+
+**What broke:** Nothing crashed, and that was the problem. `python -m recon
+validate --dataset all` printed `STUB validate: dataset='all' -- not
+implemented yet` and exited **0**. CI's third step, `Validate frozen
+datasets`, calls exactly this command and had been going green on every run
+— not because the datasets were sound, but because the check never ran.
+`PROJECT_RULES.md`'s own Commands section documents it as if functional
+("dataset invariant checks (wire into CI)"). This had shipped, unnoticed,
+since Phase 1.
+
+**Root cause:** `validate` was stubbed in Phase 1 alongside every other CLI
+command (§19), and every later phase's "Known issues" review focused on
+whatever that phase had just built — `run`, `inject`, `report` all got
+implemented in their own phases; `validate` had no phase that claimed it, so
+it was never revisited. Nothing in `docs/project-progress.md` or this log
+flagged it as still open. A stub that exits 0 is indistinguishable from a
+passing real check unless someone actually reads its output.
+
+**Found by:** a full-project sweep explicitly asked to run `python -m recon
+validate --dataset all` and check its actual behaviour rather than trust
+that a green CI step meant something had been verified.
+
+**Fix:** replaced the stub with four real, independent checks, split across
+two files for PROJECT_RULES.md rule 6 reasons (below):
+
+- **(a) the sealed key covers every recon line** and **(d) §8.2's class
+  counts and resolvable-ceiling range are still consistent with what's on
+  disk** — `report/scoring.py::validate_key_and_ceiling()`. These need the
+  sealed key, and rule 6 says only `report/scoring.py` may open it. This is
+  a passive, read-only integrity check on the frozen dataset and the key
+  itself — never consulted by `match/`, `hypothesize/`, or `verify/`, never
+  wired into a match decision, and run independently of any completed
+  `run.db` — so it doesn't undermine what rule 6 actually protects against
+  (the matcher tuning itself to the key). Flagging this reasoning explicitly
+  rather than silently deciding it, per PROJECT_RULES.md rule 12's spirit.
+- **(b) no float appears anywhere in a source file** and **(c) §6.2's
+  arithmetic invariants hold on every payment/refund/adjustment line** —
+  `report/validate.py::validate_run()`. These never touch the sealed key,
+  so they're re-derived independently from the committed source JSON,
+  without importing `recon/generate/` (rule 2 firewall) — the same
+  don't-trust-the-other-implementation posture as `match/money.py`'s
+  deliberate duplication of `round_half_up`.
+- `cli.py`'s `validate` command now prints a per-dataset OK/FAILED line,
+  lists every specific problem to stderr, and exits 1 if any dataset fails
+  — matching the failure-reporting shape the rest of the CLI already uses.
+
+**Verified the checks actually detect something, not just pass trivially:**
+ran `validate` against a copy of `clean-august` with one payment's `credit`
+incremented by 1 paise — caught as `S6.2 payment invariant` violation,
+exit 1. Ran it again against a copy with one recon line deleted from the
+answer key — caught as `answer key is missing 1 recon line(s)`, exit 1.
+Both confirmed via direct CLI runs, not just the test suite, before trusting
+the clean pass on the real datasets.
+
+**Result on the real frozen datasets:** all four pass all four checks,
+exit 0 — the actual data has been clean the whole time; it simply had never
+been checked by anything that could fail.
+
+**Prevention:** `tests/test_validate.py` runs the real checks against the
+actual committed datasets (not a synthetic fixture) and asserts a clean
+exit, plus a regression test with a deliberately broken fixture confirming
+the check is load-bearing, not green-by-luck. `tests/test_answer_key_seal.py`
+and `tests/test_firewall.py` re-verified green after adding the two new
+files — `report/validate.py` initially failed the seal test because its
+*docstring* (not code) contained the literal string `answer_key.json`,
+worth noting because it shows the seal test is a blunt textual grep, not an
+import-graph check — one word in a comment is enough to trip it.
+
+**Demo relevant?** Yes — "we found our own validate command had been a
+silently-passing stub since Phase 1, three days before submission, while
+writing the honest challenges log" is exactly the kind of finding this file
+exists to surface, and it should be named plainly rather than quietly fixed
+and left out.
+
+---
+
 ## Summary table
 
 Keep this current — it is what goes in the README and the video.
@@ -901,3 +980,4 @@ Keep this current — it is what goes in the README and the video.
 | C-013 | 6 | Locked model `llama-3.3-70b-versatile` returns 404 — retired by Groq mid-build | Provider churn since Phase 0. Fix: default switched to `openai/gpt-oss-20b` everywhere; layer already degrades to `HYPOTHESIS_LAYER_UNAVAILABLE` if any model vanishes. Lesson: pin the `ChatModel` interface, not a model's identity — the fix was one env var, no code. | **Yes** (brief) |
 | C-014 | 6 | Live `openai/gpt-oss-20b` proposed 3 confident wrong groupings on a real heavy-refunds run | Model pattern-matched "shared UTR + payments + refunds" into a settlement claim with an invented closing figure, naming no bank txn (none exists — cross-period). Verifier recomputed from source: delta = −1,459,600 / −322,594 / −969,700 paise; all rejected, 0 committed. Not a bug — the core thesis firing unprompted on real input. | **Yes** (primary) |
 | C-015 | 8 | Per-pass `runtime_ms` was 0/15/16/31 ms noise | `match/__init__.py` timed passes with `time.monotonic()` (~15.6 ms granularity on Windows). Swapped to `time.perf_counter()`; regenerated `results.json` (timing fields only). Real numbers: full cascade ~40 ms / 400 rec ≈ 10k rec/s, `fee_reversal` ~47%. | No |
+| C-016 | 8 | `recon validate` was a silently-passing stub since Phase 1; CI's "validate frozen datasets" step had never actually checked anything | No phase ever claimed `validate` after its Phase 1 stub; a stub that exits 0 is indistinguishable from a passing real check. Found by a pre-submission sweep that ran it and read the output. Fixed: 4 real checks (key coverage, no floats, S6.2 arithmetic, S8.2 class counts/ceiling), split across `report/scoring.py` (the 2 that need the sealed key, rule 6) and `report/validate.py` (the 2 that don't); verified against deliberately broken fixtures before trusting the clean pass on real data. | **Yes** |

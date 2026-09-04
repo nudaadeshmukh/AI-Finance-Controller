@@ -64,6 +64,103 @@ def _is_recon(key: str) -> bool:
     return key.startswith(_RECON_PREFIX)
 
 
+# S8.2's measured difficulty distribution and resolvable-ceiling range, echoed
+# here (not re-derived from prose) so `validate_key_and_ceiling` can catch the
+# key drifting from the published table. Update both together if S8.2 changes.
+_SECTION_8_2_CLASS_COUNTS: dict[str, dict[str, int]] = {
+    "clean-august": {
+        "exact": 138, "many_to_one": 138, "timing_skew": 53,
+        "fee_derived": 41, "tolerance": 19, "ambiguous": 11,
+    },
+    "heavy-refunds": {
+        "exact": 36, "many_to_one": 260, "timing_skew": 47,
+        "fee_derived": 39, "tolerance": 7, "ambiguous": 11,
+    },
+    "holiday-skew": {
+        "exact": 111, "many_to_one": 147, "timing_skew": 71,
+        "fee_derived": 40, "tolerance": 20, "ambiguous": 11,
+    },
+    "high-ambiguity": {
+        "exact": 76, "many_to_one": 197, "timing_skew": 50,
+        "fee_derived": 38, "tolerance": 7, "ambiguous": 32,
+    },
+}
+_SECTION_8_2_CEILING_RANGE: dict[str, tuple[int, int]] = {
+    "clean-august": (389, 391),
+    "heavy-refunds": (389, 391),
+    "holiday-skew": (389, 391),
+    "high-ambiguity": (368, 374),
+}
+
+
+def validate_key_and_ceiling(run_id: str) -> list[str]:
+    """The two `recon validate` checks that need the sealed key (PROJECT_RULES.md
+    Commands, docs/challenges-log.md C-016): (a) the key covers every recon
+    line in the frozen source, and (d) S8.2's class counts and ceiling range
+    are still consistent with what is on disk.
+
+    This is a passive, read-only integrity check on the frozen dataset and
+    the key itself — it is never consulted by match/, hypothesize/, or
+    verify/, and never wired into a match decision, so it does not undermine
+    what rule 6's "only after matching completes" guards against (the
+    matcher tuning itself to the key). It runs independently of any
+    completed run.db on purpose: a corrupt frozen dataset should be
+    catchable before a run is ever attempted. Kept here, not in a new
+    module, because this file is the only one allowed to open
+    answer_key.json (rule 6, tests/test_answer_key_seal.py).
+    """
+    problems: list[str] = []
+    key_path = sealed_key_for(run_id)
+    if key_path is None:
+        return [f"{run_id}: no answer_key.json found"]
+    key_rows = json.loads(key_path.read_text(encoding="utf-8"))
+
+    recon_path = Path("data") / run_id / "sources" / "recon_lines.json"
+    if not recon_path.is_file():
+        return [f"{run_id}: missing sources/recon_lines.json"]
+    recon_rows = json.loads(recon_path.read_text(encoding="utf-8"))
+
+    # (a) coverage
+    key_recon = {row["record_key"] for row in key_rows if _is_recon(row["record_key"])}
+    recon_keys = {f"recon:{row['entity_id']}" for row in recon_rows}
+    missing = recon_keys - key_recon
+    extra = key_recon - recon_keys
+    if missing:
+        problems.append(
+            f"{run_id}: answer key is missing {len(missing)} recon line(s), "
+            f"e.g. {sorted(missing)[:3]}"
+        )
+    if extra:
+        problems.append(
+            f"{run_id}: answer key has {len(extra)} recon key(s) absent from source, "
+            f"e.g. {sorted(extra)[:3]}"
+        )
+
+    # (d) S8.2 class counts and ceiling range
+    class_counts: dict[str, int] = defaultdict(int)
+    for row in key_rows:
+        if _is_recon(row["record_key"]):
+            class_counts[row["true_class"]] += 1
+    expected_classes = _SECTION_8_2_CLASS_COUNTS.get(run_id, {})
+    for cls, expected_n in expected_classes.items():
+        actual_n = class_counts.get(cls, 0)
+        if actual_n != expected_n:
+            problems.append(
+                f"{run_id}: S8.2 class {cls!r} expected {expected_n}, key has {actual_n}"
+            )
+
+    resolvable = sum(
+        1 for row in key_rows if _is_recon(row["record_key"]) and row["resolvable"]
+    )
+    lo, hi = _SECTION_8_2_CEILING_RANGE.get(run_id, (0, 400))
+    if not (lo <= resolvable <= hi):
+        problems.append(
+            f"{run_id}: S8.2 ceiling {resolvable} outside expected range {lo}-{hi}"
+        )
+
+    return problems
+
+
 def sealed_key_for(run_id: str) -> Path | None:
     """The sealed key path for `run_id`, or `None` if it is not present
     (§12.6: a missing key omits metrics, it does not fail the run).

@@ -1766,6 +1766,15 @@ Most submissions hide their failures. This one has a screen dedicated to them.
 Click any row → all four source records side by side, plus the full audit trail. This is
 where the hallucination-rejection moment is visible.
 
+**Accepted as final for this submission: the drawer shows source records at the
+`record_key` level (grouped by source prefix), not per-field (amount/date/narration
+columns).** `results.json` carries a matched record's `member_keys`, `proof`, and
+`audit` trail, not each source row's own field values — showing those would mean new
+`results.json` fields, which PROJECT_RULES.md rule 12 reserves for a documented decision, not
+a frontend-side improvisation. This is a time-budget scope decision, not a forgotten
+gap (`docs/project-progress.md` Phase 7, `docs/challenges-log.md`); the proof and audit
+trail already carry the "why this is a match" story this screen exists for.
+
 ### 23.6 Rules
 - **All visual decisions — layout, typography, colour, spacing, component styling — come
   from `reference/design.md`. Read it before writing any frontend code.** This section

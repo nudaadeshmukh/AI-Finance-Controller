@@ -77,13 +77,19 @@ The denominator is always the 400 recon lines. The 5 unrelated bank debits per r
 
 | Dataset | Naive baseline | Cascade (no LLM) | Cascade + LLM | Resolvable ceiling |
 |---|---|---|---|---|
-| `clean-august` | 126 / 400 (31.5%) | **367 / 400 (91.75%)** · precision 94.10% | 367 (+0) | 389 (97.25%) |
-| `heavy-refunds` | 80 / 400 (20.0%) | **287 / 400 (71.75%)** · precision 88.04% | 287 (+0) | 389 (97.25%) |
-| `holiday-skew` | 121 / 400 (30.25%) | **346 / 400 (86.5%)** · precision 90.58% | 346 (+0) | 389 (97.25%) |
-| `high-ambiguity` | 152 / 400 (38.0%) | **307 / 400 (76.75%)** · precision 83.20% | 307 (+0) | 368 (92.0%) |
+| `clean-august` | 126 / 400 (31.5%) | **367 / 400 (91.75%)** · precision 94.10% | 367 (+0) | 389-391 (97.25-97.75%) |
+| `heavy-refunds` | 80 / 400 (20.0%) | **287 / 400 (71.75%)** · precision 88.04% | 287 (+0) | 389-391 (97.25-97.75%) |
+| `holiday-skew` | 121 / 400 (30.25%) | **346 / 400 (86.5%)** · precision 90.58% | 346 (+0) | 389-391 (97.25-97.75%) |
+| `high-ambiguity` | 152 / 400 (38.0%) | **307 / 400 (76.75%)** · precision 83.20% | 307 (+0) | 368-374 (92.0-93.5%) |
 
 Naive baseline = exact `order_id` + stated fee + exact UTR + net closes, with no
 requirement that the whole settlement close together.
+
+The ceiling is a range, not a flat number, because 0-2 of each run's `ambiguous` records
+(0-6 in `high-ambiguity`) are `CONTRADICTORY_LEDGER` — they close correctly against the
+closing equation (which never reads ledger data) even though the sealed key marks them
+unresolvable, so the honestly achievable ceiling depends on how many happen to close in a
+given run (`reference/master_specification.md` §8.2, `docs/challenges-log.md` C-008).
 
 **Cascade throughput: ~9,800–10,900 records/sec**, single core, single thread
 (mean of 120 runs; `fee_reversal` is ~47% of it). Scaling analysis, including where this
@@ -172,6 +178,14 @@ and backstopped by the verifier; idempotent re-runs; an append-only audit log wi
 per-record trail; and a documented least-privilege production posture (read-only merchant
 credential).
 
+### Scope decision: the record drawer is key-level, not field-level
+
+Clicking a record shows its source keys grouped by prefix plus the full proof and audit
+trail — not each source row's own field columns (amount/date/narration), since that
+data isn't in `results.json` and adding it would mean a new, undocumented schema field
+(rule 12). Accepted as final for this submission, not a forgotten gap
+(`reference/master_specification.md` §23.5).
+
 ### Architecture
 
 Modular monolith, pipes-and-filters, single process, single-threaded. One SQLite file per
@@ -184,6 +198,17 @@ acquire → ingest → cascade (6 passes) → [hypothesize] → verify → repor
 `match/`, `hypothesize/` and `verify/` **never** import from the data generator — if the
 matcher needs a fee slab or a holiday calendar, it derives it from observed data. That
 one import would silently void the entire result; `tests/test_firewall.py` enforces it.
+
+**How the holiday calendar is inferred (`match/timing.py`, §13.5):** every distinct
+`settled_at` date is treated as a business day; a weekday inside the window with **no
+settlement at all** is a candidate holiday — at ~6.6 recon lines per settlement day, an
+empty weekday is evidence, not noise. Each candidate is validated by checking that
+`add_business_days(capture_date, 2) == settled_date` still holds for the payments it
+would explain (T+2 settlement, with the capture date rolling forward a day for anything
+captured at or after 18:00 IST); a candidate that causes widespread mismatch is dropped.
+The calendar is accepted only if it explains ≥95% of payments with both timestamps —
+below that, the pass records low confidence and lets the affected records fall through
+to `tolerance` rather than force a bad calendar.
 
 Full architecture, schemas, and pass algorithms: `reference/master_specification.md`.
 
