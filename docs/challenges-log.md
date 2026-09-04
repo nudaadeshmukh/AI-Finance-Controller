@@ -1002,6 +1002,95 @@ and left out.
 
 ---
 
+## C-017 — one call's failure was aborting the entire hypothesis stage, against §15.3
+
+**Phase:** 8 (found while capturing a second live instance of C-014 for the
+video)
+
+**What broke:** Nothing crashed, but a fresh `python -m recon run --dataset
+heavy-refunds --fresh` first attempt returned `HYPOTHESIS_LAYER_UNAVAILABLE`
+with **0 clusters even attempted** past the first — no proposals, no
+rejections, no evidence for the video. A direct, isolated call to the same
+model succeeded immediately, which didn't fit "the API is down".
+
+**Root cause, traced before touching code.** A manual per-cluster replay
+showed individual live calls taking anywhere from 0.4s to 20.5s, and one
+outright API error: `json_validate_failed: max completion tokens reached
+before generating a valid document` — a Groq 400 specific to that one
+generation, unrelated to whether the *next* call would succeed.
+`client.py`'s `GroqChatModel.complete()` mapped that error, a plain rate
+limit, and a genuine dead connection to the **same** `LLMUnavailable`
+exception. `hypothesize/__init__.py`'s `propose()` then did the only thing
+it could with one undifferentiated signal: `break` out of the entire
+cluster loop on the first occurrence — correct for "the client is
+unreachable," wrong for "this one call failed." §15.3 states clustering is
+"one call per residual cluster" — clusters are meant to be independent —
+and §24's own `llm-unavailable` row names the detection signal as "Timeout
+/ connection error", not a single call's content-specific rejection. §15.4's
+one-line table entry ("API unavailable / 429 → Pipeline completes") is
+terse enough to have read either way in isolation, but read against §15.3's
+per-cluster independence and §24's more specific wording, conflating a
+single call's failure with genuine client death is the inconsistent
+reading, not the other way round. This was a real bug against the spec's
+own design intent, not a documented quirk.
+
+**Fix:** split the undifferentiated exception in two
+(`recon/hypothesize/client.py`):
+- `LLMUnavailable` — now only `groq.APIConnectionError` /
+  `groq.AuthenticationError`: a dead connection or bad credentials, where
+  every subsequent call is certain to fail identically. `propose()` still
+  `break`s the loop on this one, unchanged.
+- `LLMCallFailed` (new) — `groq.RateLimitError`, `groq.APIStatusError`,
+  `groq.APIError`, and any unexpected SDK exception: failures specific to
+  *this* call. `propose()` now catches this separately, counts it, and
+  `continue`s to the next cluster — the next call's prospects are
+  independent, per §15.3.
+
+No `results.json` field was added for the new counter (`_STATS["call_failed"]`
+stays internal/rule 12) — this is a control-flow fix, not new schema
+surface. `recon/inject/unavailable.py`'s docstring was tightened to say it
+simulates connection-level outage specifically, since it no longer overlaps
+with the rate-limit case.
+
+**Prevention:** `tests/test_hypothesize.py` — two new regression tests.
+`test_a_single_calls_failure_does_not_abort_remaining_clusters` (fails
+cluster 1 of 3 with `LLMCallFailed`, asserts all 3 are attempted) and
+`test_genuine_client_unavailability_still_stops_remaining_clusters` (fails
+cluster 1 of 3 with `LLMUnavailable`, asserts only 1 call happens) — proving
+both halves of the fix, not just the new path.
+
+**Re-ran heavy-refunds fresh against the live API after the fix, not
+assumed.** Before: first attempt aborted with 0 clusters attempted past the
+break; a subsequent lucky run got 5 proposed / 5 rejected before hitting a
+`LLMUnavailable` partway through 18 clusters. After the fix: **no
+`layer_unavailable` audit row at all** — every one of the 18 clusters was
+genuinely attempted in a single run — with **4 proposed / 4 rejected by the
+verifier / 0 resolved**, 231s. One proposal (`grp_llm016`, cluster 16 of 18)
+came from a cluster that a `break`-on-first-failure run could never have
+reached at all, which is the fix's own evidence that it works, not an
+assumption. Deltas, all rejected, `observed_net: 0` on every one (no bank
+txn named — genuinely cross-period):
+
+| group | delta (paise) | delta (rupees) |
+|---|---|---|
+| `grp_llm005` | 129,900 | ₹1,299.00 |
+| `grp_llm006` | -322,594 | -₹3,225.94 |
+| `grp_llm010` | -969,700 | -₹9,697.00 |
+| `grp_llm016` | -693,040 | -₹6,930.40 |
+
+The cascade numbers (287/400, 39 false, 74 unresolved) are unchanged — this
+fix only touches how many clusters the LLM stage *attempts*, never the
+deterministic result, and the outcome is the same either way: **0 records
+resolved by the LLM, every proposal rejected.** `data/heavy-refunds/
+results.json` was restored to its committed state afterward (only
+wall-clock/LLM-stage fields ever differ, C-015).
+
+**Demo relevant?** Yes — a genuine code fix, found and fixed while trying to
+capture *more* evidence for the video, is itself evidence: the architecture
+survived scrutiny of its own failure-handling, not just the model's.
+
+---
+
 ## Summary table
 
 Keep this current — it is what goes in the README and the video.
@@ -1024,3 +1113,4 @@ Keep this current — it is what goes in the README and the video.
 | C-014 | 6 | Live `openai/gpt-oss-20b` proposed 3 confident wrong groupings on a real heavy-refunds run | Model pattern-matched "shared UTR + payments + refunds" into a settlement claim with an invented closing figure, naming no bank txn (none exists — cross-period). Verifier recomputed from source: delta = −1,459,600 / −322,594 / −969,700 paise; all rejected, 0 committed. Not a bug — the core thesis firing unprompted on real input. | **Yes** (primary) |
 | C-015 | 8 | Per-pass `runtime_ms` was 0/15/16/31 ms noise | `match/__init__.py` timed passes with `time.monotonic()` (~15.6 ms granularity on Windows). Swapped to `time.perf_counter()`; regenerated `results.json` (timing fields only). Real numbers: full cascade ~40 ms / 400 rec ≈ 10k rec/s, `fee_reversal` ~47%. | No |
 | C-016 | 8 | `recon validate` was a silently-passing stub since Phase 1; CI's "validate frozen datasets" step had never actually checked anything | No phase ever claimed `validate` after its Phase 1 stub; a stub that exits 0 is indistinguishable from a passing real check. Found by a pre-submission sweep that ran it and read the output. Fixed: 4 real checks (key coverage, no floats, S6.2 arithmetic, S8.2 class counts/ceiling), split across `report/scoring.py` (the 2 that need the sealed key, rule 6) and `report/validate.py` (the 2 that don't); verified against deliberately broken fixtures before trusting the clean pass on real data. | **Yes** |
+| C-017 | 8 | A single call's failure aborted the entire hypothesis stage (0 clusters attempted past the first), against S15.3's per-cluster independence | `client.py` mapped a rate limit, a per-call 400 (Groq `json_validate_failed`), and a genuine dead connection to the same `LLMUnavailable`, so `propose()` broke the whole loop on any of them. Split into `LLMUnavailable` (connection/auth - stops the stage) and new `LLMCallFailed` (this call only - skips and continues). Re-ran heavy-refunds live after the fix: 0 layer_unavailable, all 18 clusters attempted, 4 proposed/4 rejected including one from a cluster a pre-fix run could never reach. Cascade numbers unchanged. | **Yes** |

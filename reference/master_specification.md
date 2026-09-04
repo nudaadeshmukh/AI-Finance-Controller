@@ -1301,6 +1301,20 @@ with no usable UTR cluster by `(customer_id, calendar date)`.
 | References unknown key | Reject | `PROOF_DOES_NOT_CLOSE` |
 | Proof does not close | Reject | `PROOF_DOES_NOT_CLOSE` |
 
+**Clarification (C-017): "API unavailable / 429" means the client itself, not
+one call.** §15.3 clusters independently ("one call per residual cluster");
+this row's "pipeline completes" outcome must not be read as licence to abort
+every remaining cluster on a single call's failure. A dead connection or bad
+credentials means every subsequent call is certain to fail identically —
+abort the stage. A rate limit or a single generation the API itself rejects
+(Groq's `json_validate_failed`, for instance) says nothing about the next
+cluster's call — skip only that cluster and continue. `client.py` raises
+`LLMUnavailable` for the former, `LLMCallFailed` for the latter;
+`propose()` breaks on the first, continues past the second. Neither
+introduces a new reason code — both still surface as
+`HYPOTHESIS_LAYER_UNAVAILABLE` (if the stage as a whole never got a
+resolution) or simply fewer clusters proposing, never a third state.
+
 ### 15.5 Publish the contribution honestly
 
 If the LLM resolves 4 records out of 400, **say 4.** A small number is evidence *for*

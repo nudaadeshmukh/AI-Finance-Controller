@@ -20,9 +20,23 @@ from typing import Protocol, runtime_checkable
 
 
 class LLMUnavailable(Exception):
-    """The model could not be reached: connection error, 429, 5xx, auth
-    failure, or no client configured. Maps to `HYPOTHESIS_LAYER_UNAVAILABLE`
-    (§15.4) — the pipeline still completes.
+    """The client itself cannot be reached at all: connection error, 5xx, bad
+    credentials, or no client configured. Every subsequent call is certain to
+    fail identically (docs/challenges-log.md C-017), so `propose()` stops
+    trying further clusters — HYPOTHESIS_LAYER_UNAVAILABLE (§15.4), the
+    pipeline still completes.
+    """
+
+
+class LLMCallFailed(Exception):
+    """This one call failed for a reason specific to it — a rate limit, or a
+    single generation the API itself rejected (e.g. Groq's
+    `json_validate_failed` when the model hits max completion tokens before
+    finishing valid JSON). Unlike `LLMUnavailable`, this says nothing about
+    whether the *next* cluster's call will succeed, so `propose()` skips only
+    this cluster and continues (docs/challenges-log.md C-017) — §15.3's "one
+    call per cluster" independence would otherwise be undermined by treating
+    a single call's failure as if the whole client were down.
     """
 
 
@@ -41,7 +55,9 @@ class ChatModel(Protocol):
 
     def complete(self, system: str, user: str, timeout_s: int) -> str:
         """Return the model's raw response text. Raise `LLMTimeout` on
-        timeout, `LLMUnavailable` on any other transport/API failure.
+        timeout, `LLMUnavailable` when the client itself cannot be reached
+        (stops the whole hypothesis stage), or `LLMCallFailed` for any other
+        single-call API failure (skips just this cluster).
         """
         ...
 
@@ -75,16 +91,16 @@ class GroqChatModel:
             )
         except groq.APITimeoutError as exc:
             raise LLMTimeout(str(exc)) from exc
-        except (
-            groq.APIConnectionError,
-            groq.RateLimitError,
-            groq.AuthenticationError,
-            groq.APIStatusError,
-            groq.APIError,
-        ) as exc:
+        except (groq.APIConnectionError, groq.AuthenticationError) as exc:
+            # Dead connection or bad credentials: every future call on this
+            # client fails identically. Genuinely "the client is unreachable".
             raise LLMUnavailable(str(exc)) from exc
-        except Exception as exc:  # noqa: BLE001 - any SDK surprise is "unavailable", never a crash
-            raise LLMUnavailable(f"unexpected LLM client error: {exc}") from exc
+        except (groq.RateLimitError, groq.APIStatusError, groq.APIError) as exc:
+            # This call, specifically — a 429, or the API rejecting this one
+            # generation. Says nothing about the next call's prospects.
+            raise LLMCallFailed(str(exc)) from exc
+        except Exception as exc:  # noqa: BLE001 - any SDK surprise, treated as this-call-only
+            raise LLMCallFailed(f"unexpected LLM client error: {exc}") from exc
 
         content = resp.choices[0].message.content
         return content or ""

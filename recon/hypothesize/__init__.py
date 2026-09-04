@@ -26,7 +26,13 @@ from dataclasses import dataclass, field
 from recon import audit
 from recon.db import queries
 from recon.db.connection import transaction
-from recon.hypothesize.client import ChatModel, GroqChatModel, LLMTimeout, LLMUnavailable
+from recon.hypothesize.client import (
+    ChatModel,
+    GroqChatModel,
+    LLMCallFailed,
+    LLMTimeout,
+    LLMUnavailable,
+)
 from recon.hypothesize.cluster import cluster_residual
 from recon.hypothesize.parse import Hypothesis, HypothesisParseError, parse_hypothesis
 from recon.hypothesize.prompt import REPAIR, SYSTEM, build_user_message
@@ -142,7 +148,7 @@ def propose(
     """
     del facts  # read-only context is available but the prompt is self-contained
     _REASONING_CACHE.clear()
-    _STATS.update(unavailable=False, timeouts=0, malformed=0)
+    _STATS.update(unavailable=False, timeouts=0, malformed=0, call_failed=0)
     chat = _as_chat_model(client, model)
     if chat is None or not residual:
         return []
@@ -160,13 +166,20 @@ def propose(
         try:
             hypothesis = _call_model(chat, build_user_message(records), timeout_s)
         except LLMUnavailable:
+            # Client itself is unreachable (C-017) - every remaining cluster
+            # would fail identically, so stop here; pipeline completes (§15.4).
             _STATS["unavailable"] = True
-            break  # no point trying further clusters; pipeline completes (§15.4)
+            break
         except LLMTimeout:
             _STATS["timeouts"] += 1
             continue
         except HypothesisParseError:
             _STATS["malformed"] += 1
+            continue
+        except LLMCallFailed:
+            # This call failed for a reason specific to it (C-017) - the next
+            # cluster's call is independent (§15.3), so skip and keep going.
+            _STATS["call_failed"] = int(_STATS["call_failed"]) + 1
             continue
         except Exception:  # noqa: BLE001
             continue
@@ -190,7 +203,9 @@ def propose(
 # rides alongside in this process-local cache and is written to `audit_log` by
 # the stage runner. Both are reset at the start of every `propose()` call.
 _REASONING_CACHE: dict[str, str] = {}
-_STATS: dict[str, object] = {"unavailable": False, "timeouts": 0, "malformed": 0}
+_STATS: dict[str, object] = {
+    "unavailable": False, "timeouts": 0, "malformed": 0, "call_failed": 0,
+}
 
 
 def run_hypothesis_stage(
