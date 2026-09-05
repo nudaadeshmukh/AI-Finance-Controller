@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { StatusBadge } from "../components/Bits";
+import { Money, StatusBadge } from "../components/Bits";
 import type { ResultsDocument } from "../lib/types";
 
 // §23.4 — every unresolved record with a specific reason and, where the failure
@@ -29,8 +29,8 @@ export function ExceptionList({
       <h1 className="screen-title t-display-md">Exception list</h1>
       <p className="screen-lede">
         {doc.exceptions.length} records the pipeline could not close. Each carries a
-        specific reason. Where two candidates were plausible, both are named — none was
-        picked.
+        specific reason. Where more than one candidate was plausible, all are named — none
+        was picked.
       </p>
 
       <div className="chip-row">
@@ -56,12 +56,12 @@ export function ExceptionList({
             {doc.exceptions.map((e) => (
               <tr key={e.record_key} onClick={() => onOpenRecord(e.record_key)}>
                 <td className="mono">{e.record_key}</td>
-                <td className="col-amount mono">
-                  {amountByKey[e.record_key] != null
-                    ? (amountByKey[e.record_key] / 100).toLocaleString("en-IN", {
-                        minimumFractionDigits: 2,
-                      })
-                    : "—"}
+                <td className="col-amount">
+                  {amountByKey[e.record_key] != null ? (
+                    <Money paise={amountByKey[e.record_key]} />
+                  ) : (
+                    "—"
+                  )}
                 </td>
                 <td className="mono">{e.reason_code}</td>
                 <td className="t-body-sm">

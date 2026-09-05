@@ -1111,6 +1111,107 @@ survived scrutiny of its own failure-handling, not just the model's.
 
 ---
 
+## C-018 — "unbackable settlements": the ceiling counted records that can never close
+
+**Phase:** post-submission independent audit (adversarial re-verification,
+explicitly not by the agent that built the pipeline)
+
+**What broke:** Nothing crashed, and the published numbers weren't wrong in
+the sense of contradicting the data — they were wrong in what they claimed
+to promise. `ceiling_resolvable` (§8.2's "Resolvable ceiling", `results.json
+ceiling.resolvable`) counts every answer-key record marked `resolvable:
+true`. That flag means *"a human, given unlimited context, could correctly
+attribute this record to its true settlement."* It does **not** mean the
+settlement has a bank transaction in the export window — and §13.1's
+closing equation requires exactly one (`= bank.credit`). A resolvable
+record whose settlement has zero bank transactions anywhere in the source
+data can never produce a closing proof, by the project's own definition of
+a match, regardless of how good the matcher is.
+
+**Root cause:** the ceiling was computed as "how many records could a human
+attribute" instead of "how many records can this architecture's own closing
+equation ever close." Those are different claims. Nothing upstream ever
+checked they were the same number.
+
+**Found by:** re-deriving, from source data only (`bank_statement.json`,
+never the generator, never assuming the pipeline's own classification was
+correct), whether every key-`resolvable` recon record's true settlement
+has a bank transaction at all — for every settlement, not just the ones
+already flagged unresolved.
+
+**Measured, independently, on all four datasets:**
+
+| dataset | true settlements | with a bank txn | without | key-resolvable recon records affected |
+|---|---|---|---|---|
+| clean-august | 61 | 60 | 1 | **5** |
+| heavy-refunds | 60 | 46 | **13** | **66** |
+| holiday-skew | 57 | 54 | 3 | **13** |
+| high-ambiguity | 60 | 55 | 4 | **12** |
+
+Worked example, `heavy-refunds`, key group `grp_ebWx2Iqq` (UTR
+`125191071678`): 5 recon records, all `resolvable: true`, `true_class:
+many_to_one` — but zero bank rows contain `125191071678` as an exact digit-
+run or as a substring anywhere in `bank_statement.json`. The matcher's own
+`classify_residual` already names these `CROSS_PERIOD_UTR` correctly (the
+pipeline was never wrong about *these specific records* — see the
+"Confirmed clean" note below); only the *ceiling* arithmetic, which reads
+nothing but `resolvable: true`, over-counted them as achievable headroom.
+
+**Verification the fix doesn't paper over a real gap:** independently
+(outside `report/scoring.py`, using only source data + `run.db`) checked
+whether the cascade actually produces a closing proof for every record
+that *does* have a bank txn to close against — the "achievable" set minus
+what's committed. Result on all four datasets: **0 missed** — 384/384,
+323/323, 376/376, 356/356. The gap between the new `ceiling_achievable`
+and the strict-scored `matched` figure is entirely the already-documented
+C-009 poisoning (a `CONTRADICTORY_LEDGER`/`CROSS_PERIOD_UTR` record dragging
+its resolvable settlement-mates into a false match under strict whole-group
+scoring) — not a second missed-match class. Confirmed by an independent
+from-scratch re-implementation of §13.1's closing equation and of strict
+whole-group scoring, matching the committed numbers exactly before this fix
+was written, so the "achievable" figure isn't computed by the same code
+being audited.
+
+**Consequence, corrected:** the honest reading of `heavy-refunds` was never
+"the matcher achieves 71.75% against a 97.25% ceiling" — it is **"the
+matcher achieves 100% of what the data makes achievable, and 80.75% of the
+data is achievable at all."** 89% of its 74 unresolved records have no bank
+record in the export window, a designed data characteristic (large refund
+volume pushes many settlements' bank credit outside the 90-day window), not
+a capability gap. This is a *stronger*, not weaker, number — it says
+plainly where the architecture's own limit is (arithmetic closure needs a
+bank transaction; that's not optional) rather than implying a fixable gap
+against the wrong denominator.
+
+**Fix:** `report/scoring.py` gains `_achievable_true_group_ids()` (which
+`true_group_id`s have a `bank:` member in the key) and `ScoreReport.
+ceiling_achievable` / `ceiling_achievable_rate`. `report/results.py`'s
+`ceiling` block in `results.json` gains `achievable` / `achievable_rate`
+alongside the existing `resolvable` / `rate` — additive, not a breaking
+schema change; `ceiling_resolvable` is untouched and still means exactly
+what §8.2 always said. Master spec §8.2/§8.3/§17.2/§18 and the README
+updated to carry both numbers and explain the difference. `git diff` on all
+four `results.json` after re-running confirms only the `ceiling` block and
+timing fields changed — `summary.matched/false_matches/unresolved` are
+byte-identical, since this is a ceiling-arithmetic fix, not a matching-logic
+change.
+
+**Prevention:** `tests/test_scoring.py` gains
+`test_ceiling_achievable_excludes_a_settlement_with_no_bank_record` (a
+resolvable record whose true group has no bank entry must count toward
+`ceiling_resolvable` but not `ceiling_achievable`) and an update to the
+existing ceiling test to exercise the achievable path directly.
+
+**Demo relevant?** Yes — "we found our own headline ceiling was measuring
+the wrong thing, three days after submission, by treating 'a human could
+attribute this' as 'this can arithmetically close,' and the corrected
+number makes heavy-refunds look *better*, not worse" is a strong,
+falsifiable failure-recovery story, and it was found by an adversarial
+re-audit explicitly instructed not to trust any prior "confirmed" claim in
+this file — which is exactly what caught it.
+
+---
+
 ## Summary table
 
 Keep this current — it is what goes in the README and the video.
@@ -1134,3 +1235,4 @@ Keep this current — it is what goes in the README and the video.
 | C-015 | 8 | Per-pass `runtime_ms` was 0/15/16/31 ms noise | `match/__init__.py` timed passes with `time.monotonic()` (~15.6 ms granularity on Windows). Swapped to `time.perf_counter()`; regenerated `results.json` (timing fields only). Real numbers: full cascade ~40 ms / 400 rec ≈ 10k rec/s, `fee_reversal` ~47%. | No |
 | C-016 | 8 | `recon validate` was a silently-passing stub since Phase 1; CI's "validate frozen datasets" step had never actually checked anything | No phase ever claimed `validate` after its Phase 1 stub; a stub that exits 0 is indistinguishable from a passing real check. Found by a pre-submission sweep that ran it and read the output. Fixed: 4 real checks (key coverage, no floats, S6.2 arithmetic, S8.2 class counts/ceiling), split across `report/scoring.py` (the 2 that need the sealed key, rule 6) and `report/validate.py` (the 2 that don't); verified against deliberately broken fixtures before trusting the clean pass on real data. | **Yes** |
 | C-017 | 8 | A single call's failure aborted the entire hypothesis stage (0 clusters attempted past the first), against S15.3's per-cluster independence | `client.py` mapped a rate limit, a per-call 400 (Groq `json_validate_failed`), and a genuine dead connection to the same `LLMUnavailable`, so `propose()` broke the whole loop on any of them. Split into `LLMUnavailable` (connection/auth - stops the stage) and new `LLMCallFailed` (this call only - skips and continues). Real before/after: attempts 1-2 (0 clusters attempted past the break) vs every clean run after (no break, all 18 attempted, e.g. 4 proposed/4 rejected). A pre-fix run that happened not to hit the bug that call (5 proposed/5 rejected) also attempted all 18 - so cluster-count differences between two live runs reflect LLM non-determinism, not the fix itself; corrected in this entry after checking rather than assuming. Cascade numbers unchanged. | **Yes** |
+| C-018 | post-submission audit | Ceiling counted `resolvable: true` records as achievable headroom even when their settlement has zero bank transactions in the export window | `resolvable: true` means "a human could attribute this," not "this can arithmetically close" (S13.1 needs exactly one bank txn). Found by an independent adversarial audit: 5/66/13/12 key-resolvable records per run belong to settlements with no bank record at all. `classify_residual` already names these `CROSS_PERIOD_UTR` correctly; only the ceiling arithmetic was wrong. Added `ceiling_achievable` (S8.2, `report/scoring.py`) alongside the unchanged `ceiling_resolvable`; independently confirmed the cascade closes 100% of the achievable set on all four datasets (384/323/376/356) — the matched-vs-achievable gap is entirely C-009's poisoning, not a second missed-match class. | **Yes** |

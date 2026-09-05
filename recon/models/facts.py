@@ -22,6 +22,7 @@ class FeeSlab(BaseModel):
     period_start: date
     period_end: date
     inferred_bps: int
+    gst_bps: int  # derived from observed (fee, tax) pairs, never hardcoded (C-018/R-1)
     sample_size: int
     reproduces_all_stated: bool  # False ⇒ slab MUST be rejected, never used
 

@@ -77,9 +77,9 @@
 
   <h2>Derived fee slabs</h2>
   <table>
-    <tr><th>Method</th><th>From</th><th>To</th><th class="num">bps</th><th class="num">n</th><th>Reproduces all stated?</th></tr>
+    <tr><th>Method</th><th>From</th><th>To</th><th class="num">bps</th><th class="num">GST bps</th><th class="num">n</th><th>Reproduces all stated?</th></tr>
     {% for s in doc.derived_fee_slabs %}
-    <tr><td>{{ s.method }}</td><td>{{ s.period_start }}</td><td>{{ s.period_end }}</td><td class="num">{{ s.inferred_bps }}</td><td class="num">{{ s.sample_size }}</td><td>{{ s.reproduces_all_stated }}</td></tr>
+    <tr><td>{{ s.method }}</td><td>{{ s.period_start }}</td><td>{{ s.period_end }}</td><td class="num">{{ s.inferred_bps }}</td><td class="num">{{ s.gst_bps }}</td><td class="num">{{ s.sample_size }}</td><td>{{ s.reproduces_all_stated }}</td></tr>
     {% endfor %}
   </table>
 

@@ -232,10 +232,10 @@ razorpay-recon/
 │   ├── index.html
 │   └── src/
 │       ├── App.tsx                 # run dropdown + routing
-│       ├── types.ts                # asserts schema_version === 1
+│       ├── lib/types.ts            # asserts schema_version === 1
 │       ├── lib/format.ts           # ONLY place paise become rupees
 │       ├── screens/{RunOverview,Bridge,MatchExplorer,ExceptionList}.tsx
-│       └── components/{RecordDrawer,ProofTable,MetricStrip}.tsx
+│       └── components/{RecordDrawer,ProofTable,Bits}.tsx
 │
 └── .github/workflows/ci.yml        # ruff + pytest + recon validate
 ```
@@ -637,6 +637,7 @@ sources, including bank closure.
 | `tolerance` | 19 | 7 | 20 | 7 |
 | **`ambiguous`** | **11** | **11** | **11** | **32** |
 | **Resolvable ceiling** | **389-391 (97.25-97.75%)** | **389-391 (97.25-97.75%)** | **389-391 (97.25-97.75%)** | **368-374 (92.0-93.5%)** |
+| **Achievable ceiling** | **384 (96.0%)** | **323 (80.75%)** | **376 (94.0%)** | **356 (89.0%)** |
 
 The ceiling is a range, not a flat number, for a reason already implicit in §13.8's accepted
 math rather than something new: 2 of each run's `ambiguous` records (6 in `high-ambiguity`)
@@ -654,6 +655,25 @@ observed outcome. A run scoring above the base ceiling (389 or 368) is therefore
 automatically a bug — it needs the same trace this session gave clean-august's 390/400
 (`docs/challenges-log.md` C-008), not an assumption either way.
 
+**A second, more consequential ceiling correction (`docs/challenges-log.md` C-018):**
+`resolvable: true` in the key means "a human, given unlimited context, could attribute this
+record to its true settlement." It does not mean the settlement has a bank transaction in
+the export window at all — §13.1's closing equation requires exactly one. On `heavy-refunds`
+specifically, **66 of 389 key-resolvable recon records belong to 13 settlements with zero
+bank transactions anywhere in the source data** (5/389 on `clean-august`, 13/389 on
+`holiday-skew`, 12/368 on `high-ambiguity`) — verified directly from `bank_statement.json`:
+no digit-run in any description matches their `settlement_utr`, exact or truncated. These
+records are correctly classified `CROSS_PERIOD_UTR` by `classify_residual` (the matcher
+already gets this right) and correctly counted false by nothing, since they're unresolved —
+but the *ceiling* arithmetic previously counted them as achievable headroom, which they can
+never be. The **achievable ceiling** row above is `ceiling_resolvable` minus exactly these —
+computed in `report/scoring.py`'s `_achievable_true_group_ids()` from which `true_group_id`s
+have a `bank:` member in the key, never inferred from generator internals. Confirmed by
+independent re-derivation (outside `report/scoring.py` entirely): on all four datasets, the
+cascade produces a closing arithmetic proof for **100% of the achievable set** — 384/384,
+323/323, 376/376, 356/356 — the gap between `matched` (§17.1's strict-scored figure) and
+`achievable` is entirely the already-documented C-009 poisoning, not a missed match.
+
 ### 8.3 Baseline headroom
 
 Naive matcher = exact `order_id` join **and** stated fee **and** exact UTR **and**
@@ -664,6 +684,15 @@ non-`CONTRADICTORY_LEDGER` resolvability), not the §8.2 range's upper bound. He
 statement about matching capability; the extra 0-2 (0-6) `CONTRADICTORY_LEDGER` matches an
 honest matcher may pick up are a documented false-match artifact (§13.8), not a capability
 this metric should credit.
+
+**C-018 note:** the base ceiling used below is `ceiling_resolvable`, not the tighter
+`ceiling_achievable` (§8.2) — deliberately unchanged from the original headroom figures
+rather than silently revised alongside the ceiling fix. `ceiling_resolvable` is still the
+right denominator for a *baseline-vs-cascade capability* comparison: both the naive matcher
+and the cascade are equally incapable of closing an unbackable settlement, so it doesn't
+distort the gap *between them*. `ceiling_achievable` is the number to use when the question
+is "how much of the data can any matcher possibly close" (§8.2, §17.2) — a different
+question from "how much better is this matcher than the naive one."
 
 | Run | Naive baseline | Ceiling | Headroom |
 |---|---|---|---|
@@ -700,7 +729,7 @@ fields are generation statistics; do not build logic on them.
 |---|---|---|
 | Blank order receipt | 14–16 | `orders.receipt = ""` |
 | Fee/tax dropped from export | 41 | `recon_lines.fee = null` |
-| Ledger entry with no source ref | 78–92 | `ledger_entries.source_ref = null` |
+| Ledger entry with no source ref | 77–96 | `ledger_entries.source_ref = null` |
 | Ledger ref pointing at wrong order | ~7 | transposition error |
 | Suspense entries | 2 (6 in high-amb) | contradictory amount + ref |
 | Truncated UTR in bank description | 2 | last 2 digits missing |
@@ -765,7 +794,9 @@ of the boundary. This is the single best demonstration of domain literacy in the
 | `CROSS_PERIOD_UTR` | 4 (11) | Settlement falls outside the export window; the bank record genuinely does not exist in the data. |
 | `CONTRADICTORY_LEDGER` | 2 (6) | Suspense entry whose amount and reference contradict the transaction. |
 
-`AMBIGUOUS_DUPLICATE` exceptions **must list both candidates.** Naming the ambiguity
+`AMBIGUOUS_DUPLICATE` exceptions **must list all candidates** (usually two; occasionally
+three where the data genuinely produces that many indistinguishable orders — see
+`high-ambiguity`, `docs/challenges-log.md` audit findings). Naming the ambiguity
 precisely is the deliverable; picking one is the failure.
 
 ### 9.5 `tolerance`
@@ -1006,7 +1037,7 @@ change was **discovered, not configured**.
 3. Validate: `add_business_days(capture_date, 2) == settled_date`, where `capture_date`
    rolls forward one day if captured at or after 18:00 IST. Iterate; drop candidates
    causing widespread mismatch
-4. Use the calendar to attach ledger entries with `source_ref = NULL` (78–92 per run)
+4. Use the calendar to attach ledger entries with `source_ref = NULL` (77–96 per run)
 
 Accept only if the calendar explains ≥95% of payments with both timestamps. Below that,
 record low confidence and let affected records fall through to tolerance.
@@ -1060,7 +1091,7 @@ def classify_residual(db: Connection, state: CascadeState) -> list[Exception_]
 | Unmatched recon line whose `settlement_utr` matches no bank transaction, after both `utr` and `tolerance` have run | `CROSS_PERIOD_UTR` |
 | Everything else still unresolved | `NO_CANDIDATE` |
 
-**Never pick one candidate.** Listing both is the deliverable.
+**Never pick one candidate.** Listing all of them is the deliverable.
 
 `CONTRADICTORY_LEDGER` is **not** detected here — see §13.8.
 
@@ -1183,7 +1214,7 @@ so every *other* record in that settlement has a legitimate, closing proof and w
 being held back by one ambiguous neighbour. `arithmetic_scope` lets the proposer include
 the ambiguous line in the sum (so the equation still closes) while excluding it from
 `member_keys` (so it is never marked matched) — it falls through to `classify_residual` and
-is correctly named `AMBIGUOUS_DUPLICATE`, with both candidates listed, instead of silently
+is correctly named `AMBIGUOUS_DUPLICATE`, with every candidate listed, instead of silently
 blocking every other record in the settlement. This is the resolution to
 `docs/challenges-log.md` C-008.
 
@@ -1369,7 +1400,11 @@ The denominator is always the 400 recon lines. Bank transactions marked
 3. **Cascade with LLM**
 4. **Resolvable ceiling** — 97.2% base on three runs, 92.0% on `high-ambiguity`; an actual
    run may land up to 2 records (6 on `high-ambiguity`) above this if a `CONTRADICTORY_LEDGER`
-   record closes, per §8.2's range and §13.8 — expected, not a bug
+   record closes, per §8.2's range and §13.8 — expected, not a bug. **Also report the
+   achievable ceiling** (§8.2, C-018) — `ceiling_resolvable` minus records whose true
+   settlement has no bank transaction in the export window at all (96.0% / 80.75% / 94.0% /
+   89.0%). The gap between the two is a data-availability fact, not a matcher weakness: the
+   cascade closes 100% of the achievable set on every dataset.
 
 ### 17.3 Error analysis
 
@@ -1404,9 +1439,14 @@ The pipeline's only output to the frontend. Static, self-contained, committed.
   },
 
   "baseline": { "name": "exact_id_and_amount", "matched": 0, "match_rate": 0.0 },
-  "ceiling":  { "resolvable": 389, "rate": 0.9725 }, // base ceiling (§8.2); an actual run's
-                                                       // "matched" may exceed this by up to 2
-                                                       // if a CONTRADICTORY_LEDGER record closes
+  "ceiling":  { "resolvable": 389, "rate": 0.9725,      // base ceiling (§8.2); an actual run's
+                "achievable": 384, "achievable_rate": 0.96 },
+                                                       // "matched" may exceed "resolvable" by up
+                                                       // to 2 if a CONTRADICTORY_LEDGER record
+                                                       // closes. "achievable" (C-018) is
+                                                       // "resolvable" minus records whose true
+                                                       // settlement has no bank txn at all —
+                                                       // the honest capability ceiling.
 
   "llm_contribution": {
     "enabled": true,
@@ -1771,7 +1811,7 @@ All 400 records, filterable by resolving pass, colour-coded. The visual point la
 without narration: **deterministic passes dominate, the LLM is a sliver.**
 
 ### 23.4 Screen 4 — Exception List
-Every unresolved record with a **specific** reason and both candidates listed. Badge:
+Every unresolved record with a **specific** reason and every candidate listed. Badge:
 `Requires human review`. Footer: *"These N were not resolved. No guess was recorded."*
 
 Most submissions hide their failures. This one has a screen dedicated to them.
@@ -1848,7 +1888,7 @@ Every phase ships with its tests passing. `pytest` green before a phase is compl
 will not converge, importing one constant from the generator will fix it and silently
 void the entire result. **The test exists because discipline will not hold at 2am.**
 
-`test_persistence_regression.py` exists because the other six protect against a
+`test_persistence_regression.py` exists because the other seven protect against a
 mistake someone would *notice* — a wrong number, an imported constant, a widened
 tolerance. This one protects against a mistake that produces **no wrong number at
 all**: 39/39 tests green, a plausible-looking CLI table, and an empty database the
@@ -2006,7 +2046,7 @@ Must contain:
 
 Frontend polish → LLM layer → extra datasets.
 
-**Never cut:** the verifier, the exception list, honest metrics, or the six protected
+**Never cut:** the verifier, the exception list, honest metrics, or the eight protected
 tests in §25.
 
 A deterministic pipeline with honest numbers and no LLM beats a flashy one with

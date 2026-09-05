@@ -44,8 +44,36 @@ def _mode_purity(bps_values: list[int]) -> tuple[int, float]:
     return mode_value, mode_count / len(bps_values)
 
 
+def _infer_gst_bps(stated: list[ReconLine]) -> int | None:
+    """S10: GST on the fee, derived from observed (fee, tax) pairs — never a
+    hardcoded constant (PROJECT_RULES.md rule 2, C-018/R-1: the pipeline previously
+    hardcoded 1800, the generator's own literal, which is exactly the shared-
+    constant firewall breach rule 2 exists to catch even without an import).
+
+    Unlike the per-method fee rate, GST is a single global rate (S10), so this
+    is derived once from every stated line with a nonzero fee — a zero-fee
+    line (UPI) carries no rate information; `tax = round_half_up(fee * bps,
+    10000)` can't be inverted from `0 = round_half_up(0 * bps, 10000)`.
+
+    Candidate values come from inverting the formula on each line, then the
+    same validate-before-use discipline as S13.4 Step 3: the accepted
+    candidate must reproduce `tax` EXACTLY on every one of these lines, not
+    just the line it came from. Returns `None` if no candidate does — never
+    a guessed rate.
+    """
+    priced = [line for line in stated if line.fee]
+    if not priced:
+        return None
+    candidates = Counter(round_half_up(line.tax * 10000, line.fee) for line in priced)
+    for bps, _ in candidates.most_common():
+        if all(round_half_up(line.fee * bps, 10000) == line.tax for line in priced):
+            return bps
+    return None
+
+
 def _validate_slab(
-    method: str, bps: int, period_start: date, period_end: date, obs: list[ReconLine]
+    method: str, bps: int, gst_bps: int, period_start: date, period_end: date,
+    obs: list[ReconLine],
 ) -> FeeSlab | None:
     """§13.4 Step 3. Accepted only if it reproduces `credit == amount - fee -
     tax` EXACTLY on 100% of the stated-fee lines it's derived from. Rejected
@@ -56,6 +84,7 @@ def _validate_slab(
         period_start=period_start,
         period_end=period_end,
         inferred_bps=bps,
+        gst_bps=gst_bps,
         sample_size=len(obs),
         reproduces_all_stated=True,
     )
@@ -103,7 +132,7 @@ def _extend_outer_edges_to_window(
         if (start, end) == (slab.period_start, slab.period_end):
             out.append(slab)
             continue
-        widened = _validate_slab(slab.method, slab.inferred_bps, start, end, obs)
+        widened = _validate_slab(slab.method, slab.inferred_bps, slab.gst_bps, start, end, obs)
         out.append(widened if widened is not None else slab)
     return out
 
@@ -118,6 +147,10 @@ def infer_slabs(lines: list[ReconLine]) -> list[FeeSlab]:
     `_extend_outer_edges_to_window` and `docs/challenges-log.md` C-011.
     """
     stated = [line for line in lines if line.type == "payment" and line.fee is not None]
+
+    gst_bps = _infer_gst_bps(stated)
+    if gst_bps is None:
+        return []  # no GST rate candidate reproduces every stated line - no slab can validate
 
     window_start = min((_to_date(line.created_at) for line in lines), default=None)
     window_end = max((_to_date(line.created_at) for line in lines), default=None)
@@ -135,7 +168,7 @@ def infer_slabs(lines: list[ReconLine]) -> list[FeeSlab]:
         mode_value, purity = _mode_purity(bps_values)
         if purity >= _SINGLE_SLAB_PURITY:
             dates = [_to_date(line.created_at) for line in obs]
-            slab = _validate_slab(method, mode_value, min(dates), max(dates), obs)
+            slab = _validate_slab(method, mode_value, gst_bps, min(dates), max(dates), obs)
             if slab is not None:
                 slab_obs.append((slab, obs))
             continue
@@ -170,11 +203,13 @@ def infer_slabs(lines: list[ReconLine]) -> list[FeeSlab]:
         left_dates = [_to_date(line.created_at) for line in left_obs]
         right_dates = [_to_date(line.created_at) for line in right_obs]
 
-        left_slab = _validate_slab(method, left_mode, min(left_dates), max(left_dates), left_obs)
+        left_slab = _validate_slab(
+            method, left_mode, gst_bps, min(left_dates), max(left_dates), left_obs
+        )
         if left_slab is not None:
             slab_obs.append((left_slab, left_obs))
         right_slab = _validate_slab(
-            method, right_mode, min(right_dates), max(right_dates), right_obs
+            method, right_mode, gst_bps, min(right_dates), max(right_dates), right_obs
         )
         if right_slab is not None:
             slab_obs.append((right_slab, right_obs))
@@ -191,11 +226,12 @@ def infer_slabs(lines: list[ReconLine]) -> list[FeeSlab]:
 
 def derive_fee(amount: Paise, slab: FeeSlab) -> tuple[Paise, Paise]:
     """§10, §20.4. `fee = round_half_up(amount * bps, 10000)`,
-    `tax = round_half_up(fee * 1800, 10000)` — the synthetic schedule's own
-    formula, derived here from observed data, never imported (PROJECT_RULES.md rule 2).
+    `tax = round_half_up(fee * gst_bps, 10000)` — the synthetic schedule's
+    own formula, with BOTH rates derived from observed data on this slab,
+    never a hardcoded literal (PROJECT_RULES.md rule 2, C-018/R-1).
     """
     fee = round_half_up(amount * slab.inferred_bps, 10000)
-    tax = round_half_up(fee * 1800, 10000)
+    tax = round_half_up(fee * slab.gst_bps, 10000)
     return fee, tax
 
 

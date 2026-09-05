@@ -349,7 +349,6 @@ no charting library, no dark mode, no animation beyond a spinner.
 # PHASE 8 — README, Error Analysis, Scaling
 
 **Read:** master spec §29 (scaling), §30 (README + checklist) · `reference/design.md`
-(if producing screenshots or any final styling pass) · `reference/design.md`
 (if producing screenshots or any final styling pass)
 
 ## README — write it last, with real numbers
@@ -370,5 +369,5 @@ combinatorial in settlement size**; the fix.
 
 Frontend polish → LLM layer → extra datasets.
 
-**Never cut:** the verifier, the exception list, honest metrics, or the six protected
+**Never cut:** the verifier, the exception list, honest metrics, or the eight protected
 tests in §25.

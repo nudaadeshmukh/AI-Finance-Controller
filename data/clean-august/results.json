@@ -834,11 +834,14 @@
     }
   ],
   "ceiling": {
+    "achievable": 384,
+    "achievable_rate": 0.96,
     "rate": 0.9725,
     "resolvable": 389
   },
   "derived_fee_slabs": [
     {
+      "gst_bps": 1800,
       "inferred_bps": 0,
       "method": "upi",
       "period_end": "2026-08-30",
@@ -847,6 +850,7 @@
       "sample_size": 196
     },
     {
+      "gst_bps": 1800,
       "inferred_bps": 175,
       "method": "netbanking",
       "period_end": "2026-08-30",
@@ -855,6 +859,7 @@
       "sample_size": 33
     },
     {
+      "gst_bps": 1800,
       "inferred_bps": 200,
       "method": "card",
       "period_end": "2026-07-16",
@@ -863,6 +868,7 @@
       "sample_size": 26
     },
     {
+      "gst_bps": 1800,
       "inferred_bps": 190,
       "method": "card",
       "period_end": "2026-08-30",
@@ -871,6 +877,7 @@
       "sample_size": 32
     },
     {
+      "gst_bps": 1800,
       "inferred_bps": 225,
       "method": "wallet",
       "period_end": "2026-08-30",
@@ -1048,32 +1055,32 @@
     {
       "matched": 0,
       "name": "utr",
-      "runtime_ms": 2
+      "runtime_ms": 1
     },
     {
       "matched": 88,
       "name": "exact",
-      "runtime_ms": 8
+      "runtime_ms": 13
     },
     {
       "matched": 38,
       "name": "aggregate",
-      "runtime_ms": 3
+      "runtime_ms": 7
     },
     {
       "matched": 244,
       "name": "fee_reversal",
-      "runtime_ms": 21
+      "runtime_ms": 36
     },
     {
       "matched": 0,
       "name": "timing",
-      "runtime_ms": 6
+      "runtime_ms": 14
     },
     {
       "matched": 20,
       "name": "tolerance",
-      "runtime_ms": 2
+      "runtime_ms": 3
     },
     {
       "matched": 0,
@@ -19836,9 +19843,9 @@
     "match_rate": 0.9175,
     "matched": 367,
     "records_processed": 400,
-    "runtime_ms_cascade": 42,
+    "runtime_ms_cascade": 74,
     "runtime_ms_llm": 0,
-    "throughput_per_sec_cascade": 9523.81,
+    "throughput_per_sec_cascade": 5405.41,
     "unresolved": 10
   },
   "tolerance_constants": {
