@@ -124,11 +124,37 @@ def test_ceiling_and_unresolved_counts(db: sqlite3.Connection, tmp_path: Path) -
         tmp_path,
         [
             _entry("recon:p1", "grp_TRUE", True),
+            _entry("bank:settled", "grp_TRUE", True),  # grp_TRUE has a bank txn -> achievable
             _entry("recon:p2", None, False, "AMBIGUOUS_DUPLICATE"),
             _entry("bank:x", None, False, "NOT_A_SETTLEMENT"),
         ],
     )
     report = score(db, key)
     assert report.ceiling_resolvable == 1  # only recon:p1 is resolvable
+    assert report.ceiling_achievable == 1  # its true group has a bank record to close against
     assert report.unresolved == 1  # recon:p2 (bank:x is excluded, not an exception)
     assert report.excluded == 1
+
+
+def test_ceiling_achievable_excludes_a_settlement_with_no_bank_record(
+    db: sqlite3.Connection, tmp_path: Path
+) -> None:
+    """C-018: `resolvable: true` means a human could attribute the record —
+    it does not mean the settlement has a bank transaction to close against
+    at all. S13.1's closing equation requires exactly one; a settlement with
+    none can never be matched, regardless of matcher capability. Such a
+    record still counts toward `ceiling_resolvable` (the key does mark it
+    resolvable) but must NOT count toward `ceiling_achievable`.
+    """
+    key = _write_key(
+        tmp_path,
+        [
+            _entry("recon:p1", "grp_TRUE", True),  # has a bank txn -> achievable
+            _entry("bank:settled", "grp_TRUE", True),
+            _entry("recon:p2", "grp_UNBACKED", True),  # NO bank txn anywhere -> not achievable
+        ],
+    )
+    report = score(db, key)
+    assert report.ceiling_resolvable == 2  # both p1 and p2 are key-resolvable
+    assert report.ceiling_achievable == 1  # only p1's settlement has a bank record
+    assert report.ceiling_achievable_rate < report.ceiling_rate

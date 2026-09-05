@@ -350,7 +350,12 @@ def assemble_results(
             "runtime_ms_llm": llm_runtime_ms,
             "throughput_per_sec_cascade": throughput,
         }
-        ceiling = {"resolvable": score.ceiling_resolvable, "rate": score.ceiling_rate}
+        ceiling = {
+            "resolvable": score.ceiling_resolvable,
+            "rate": score.ceiling_rate,
+            "achievable": score.ceiling_achievable,
+            "achievable_rate": score.ceiling_achievable_rate,
+        }
     else:
         unresolved = sum(1 for _ in db.execute(queries.SELECT_EXCEPTION_RECON_KEYS))
         summary = {
@@ -365,7 +370,7 @@ def assemble_results(
             "runtime_ms_llm": llm_runtime_ms,
             "throughput_per_sec_cascade": throughput,
         }
-        ceiling = {"resolvable": None, "rate": None}
+        ceiling = {"resolvable": None, "rate": None, "achievable": None, "achievable_rate": None}
 
     source_totals = {
         "orders_gross": _scalar(db, queries.SELECT_ORDERS_GROSS),
@@ -380,6 +385,7 @@ def assemble_results(
             "period_start": slab.period_start.isoformat(),
             "period_end": slab.period_end.isoformat(),
             "inferred_bps": slab.inferred_bps,
+            "gst_bps": slab.gst_bps,
             "sample_size": slab.sample_size,
             "reproduces_all_stated": slab.reproduces_all_stated,
         }

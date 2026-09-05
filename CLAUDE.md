@@ -77,7 +77,8 @@ certainly no. This project wins on **restraint**, not on AI surface area.
 
 8. **The 11 ambiguous records per run (32 in `high-ambiguity`) must stay unresolved.**
    They are the deliverable, not a failure. `AMBIGUOUS_DUPLICATE` exceptions must list
-   both candidates — naming the ambiguity precisely is the point; picking one is the
+   all candidates (two, in most cases; occasionally more where genuinely indistinguishable)
+   — naming the ambiguity precisely is the point; picking one is the
    failure. `tests/test_ambiguous.py` enforces this.
 
 9. **The 5 unrelated bank debits per run are `NOT_A_SETTLEMENT` — excluded, not

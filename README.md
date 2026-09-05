@@ -37,21 +37,40 @@ The denominator is always the 400 recon lines. The 5 unrelated bank debits per r
 
 ### The four comparisons, every run
 
-| Dataset | Naive baseline | Cascade (no LLM) | Cascade + LLM | Resolvable ceiling |
-|---|---|---|---|---|
-| `clean-august` | 126 / 400 (31.5%) | **367 / 400 (91.75%)** · precision 94.10% | 367 (+0) | 389-391 (97.25-97.75%) |
-| `heavy-refunds` | 80 / 400 (20.0%) | **287 / 400 (71.75%)** · precision 88.04% | 287 (+0) | 389-391 (97.25-97.75%) |
-| `holiday-skew` | 121 / 400 (30.25%) | **346 / 400 (86.5%)** · precision 90.58% | 346 (+0) | 389-391 (97.25-97.75%) |
-| `high-ambiguity` | 152 / 400 (38.0%) | **307 / 400 (76.75%)** · precision 83.20% | 307 (+0) | 368-374 (92.0-93.5%) |
+| Dataset | Naive baseline | Cascade (no LLM) | Cascade + LLM | Resolvable ceiling | Achievable ceiling |
+|---|---|---|---|---|---|
+| `clean-august` | 126 / 400 (31.5%) | **367 / 400 (91.75%)** · precision 94.10% | 367 (+0) | 389-391 (97.25-97.75%) | 384 (96.0%) |
+| `heavy-refunds` | 80 / 400 (20.0%) | **287 / 400 (71.75%)** · precision 88.04% | 287 (+0) | 389-391 (97.25-97.75%) | 323 (80.75%) |
+| `holiday-skew` | 121 / 400 (30.25%) | **346 / 400 (86.5%)** · precision 90.58% | 346 (+0) | 389-391 (97.25-97.75%) | 376 (94.0%) |
+| `high-ambiguity` | 152 / 400 (38.0%) | **307 / 400 (76.75%)** · precision 83.20% | 307 (+0) | 368-374 (92.0-93.5%) | 356 (89.0%) |
 
 Naive baseline = exact `order_id` + stated fee + exact UTR + net closes, with no
 requirement that the whole settlement close together.
 
-The ceiling is a range, not a flat number, because 0-2 of each run's `ambiguous` records
-(0-6 in `high-ambiguity`) are `CONTRADICTORY_LEDGER` — they close correctly against the
-closing equation (which never reads ledger data) even though the sealed key marks them
-unresolvable, so the honestly achievable ceiling depends on how many happen to close in a
-given run (`reference/master_specification.md` §8.2, `docs/challenges-log.md` C-008).
+The **resolvable** ceiling is a range, not a flat number, because 0-2 of each run's
+`ambiguous` records (0-6 in `high-ambiguity`) are `CONTRADICTORY_LEDGER` — they close
+correctly against the closing equation (which never reads ledger data) even though the
+sealed key marks them unresolvable, so the honestly achievable range depends on how many
+happen to close in a given run (`reference/master_specification.md` §8.2,
+`docs/challenges-log.md` C-008).
+
+**The achievable ceiling is the tighter, more honest number.** `resolvable: true` in the
+sealed key means "a human, given unlimited context, could correctly attribute this record
+to its settlement" — it does not mean the settlement has a bank transaction to close
+against at all, and the closing equation requires exactly one. On `heavy-refunds`, **66 of
+389 key-resolvable records belong to 13 settlements with zero bank transactions anywhere
+in the source data** — a bank credit simply never lands in the export window for them.
+**The cascade closes 100% of the achievable set on every dataset** — 384/384, 323/323,
+376/376, 356/356, verified independently outside `report/scoring.py` — so the gap between
+`matched` and `achievable` is entirely the already-documented `CONTRADICTORY_LEDGER` /
+`CROSS_PERIOD_UTR` scoring poison below, never a missed match (`docs/challenges-log.md`
+C-018).
+
+**heavy-refunds, reframed:** not "71.75% against a 97.25% ceiling" but **matched 100% of
+every record achievable from the data; the remaining 89% of its unresolved records have no
+bank transaction in the export window at all** — a designed data characteristic (heavy
+refund volume pushes many settlements' bank credit outside the window), not a capability
+gap.
 
 **Cascade throughput: ~9,800–10,900 records/sec**, single core, single thread
 (mean of 120 runs; `fee_reversal` is ~47% of it). Scaling analysis, including where this
@@ -124,8 +143,9 @@ screens for.
 ## The honest exception list
 
 Unresolved records per run: **10 / 74 / 18 / 31**. Every one carries a specific reason
-code — `NO_CANDIDATE` is 0 in every run. `AMBIGUOUS_DUPLICATE` records list **both**
-candidate orders and pick neither; naming the ambiguity precisely is the deliverable.
+code — `NO_CANDIDATE` is 0 in every run. `AMBIGUOUS_DUPLICATE` records list **all**
+candidate orders (usually two; occasionally three where the data is genuinely that
+ambiguous) and pick none; naming the ambiguity precisely is the deliverable.
 
 For example, `clean-august`'s `recon:rfnd_1crrLyt09fdr2N` (₹499.00): reason
 `AMBIGUOUS_DUPLICATE`, candidates `order:order_kFBitTyFWhKRFQ` and
@@ -172,16 +192,21 @@ Echoed into every `results.json` and shown in the dashboard, so no allowance is 
 
 ## A recurring lesson
 
-`docs/challenges-log.md` C-005 through C-011, and C-017 four days later, were all found
-the same way: running a pass against the real frozen datasets and checking its output
-against an independently-computed expectation, not trusting that green tests meant the
-pipeline worked. The sharpest instance is C-006 — 39 of 39 tests passing while the
-cascade's writes never actually committed to disk, because every test used a single
-open connection that could read its own uncommitted transaction. The bug was invisible
-to the test suite by construction; it was only caught by running the CLI as a real
-process, letting it exit, and opening `run.db` fresh from a second connection. The
-pattern repeats deliberately, not accidentally: this project treats "the tests are
-green" and "the product works" as two different claims that both have to be checked.
+`docs/challenges-log.md` C-005 through C-011, C-017 four days later, and C-018 in a
+post-submission adversarial audit, were all found the same way: running a pass against
+the real frozen datasets and checking its output against an independently-computed
+expectation, not trusting that green tests — or a prior "confirmed" note in this same
+log — meant the pipeline worked. The sharpest instance is C-006 — 39 of 39 tests passing
+while the cascade's writes never actually committed to disk, because every test used a
+single open connection that could read its own uncommitted transaction. The bug was
+invisible to the test suite by construction; it was only caught by running the CLI as a
+real process, letting it exit, and opening `run.db` fresh from a second connection. C-018
+is the same discipline turned on the project's own headline number: the published ceiling
+counted records a human could attribute but the architecture could never arithmetically
+close, and it was only caught by an audit explicitly instructed to re-derive every claim
+from source data rather than inherit it. The pattern repeats deliberately, not
+accidentally: this project treats "the tests are green," "the last audit said so," and
+"the product works" as three different claims, all of which have to be checked.
 
 ---
 
@@ -195,7 +220,7 @@ those reasons. Python was chosen deliberately: the domain literacy this task rew
 T+2 settlement cycles, unannounced fee-rate changes, GST-on-fee rounding — is expressed
 in the pass logic, not the runtime, and the arithmetic is **integer paise end to end**
 (`int`, never `float` or `Decimal`, enforced by `tests/test_money.py`), so `BigDecimal`
-buys nothing here. Six pinned dependencies a reviewer can audit in an afternoon reads as
+buys nothing here. Five pinned dependencies a reviewer can audit in an afternoon reads as
 deliberate; thirty reads as assembled. The role is AI Builder Intern — the stack itself
 is a signal.
 
@@ -282,14 +307,20 @@ behind a one-method interface so a swap is one environment variable
 
 ## Run it
 
+Requires **Python 3.11+** (tested on 3.12) and **Node 18+** (tested on Node 24) for the
+frontend. No other tooling assumed.
+
 ```bash
-pip install -r requirements.txt          # 6 packages, all pinned
+python -m venv .venv && .venv\Scripts\activate      # Windows; use `source .venv/bin/activate` on macOS/Linux
+pip install -r requirements.txt                      # 5 runtime dependencies, all pinned
 python -m recon run --dataset all --no-llm
 ```
 
 A fresh clone runs the full deterministic pipeline over the four committed datasets with
 **zero environment configuration** — no API key, no `.env`, no network. Every environment
-variable is optional.
+variable is optional. A virtual environment is optional too — the commands above work with
+a global interpreter — but recommended so `requirements.txt`'s pins don't collide with
+anything else on the machine.
 
 ```bash
 python -m recon run --dataset clean-august          # one dataset, with LLM if GROQ_API_KEY is set
@@ -297,13 +328,18 @@ python -m recon run --dataset all --no-llm          # all four, deterministic on
 python -m recon report --dataset clean-august --html # re-emit results.json + static HTML
 python -m recon inject --scenario llm-hallucination  # failure-injection scenarios
 python -m recon validate --dataset all               # dataset invariant checks
-pytest                                              # 93 tests
+pytest                                              # 95 tests
 ruff check .
 
-cd frontend && npm install && npm run dev            # the dashboard (reads results.json)
+cd frontend && npm install && npm run dev            # the dashboard, live-reloading (reads results.json)
+# or, to serve the production build instead of the dev server:
+npm run build && npm run preview                     # builds to dist/, then serves it locally
 ```
 
-`results.json` for all four datasets is committed under `data/<run>/`.
+`results.json` for all four datasets is committed under `data/<run>/`. **Running `recon
+run` regenerates the run's `results.json`** (only its wall-clock timing fields change,
+per `docs/challenges-log.md` C-015) — a clean working tree after a run showing exactly
+that one file modified is expected, not a bug; `git checkout -- data/` restores it.
 
 ---
 
@@ -315,7 +351,7 @@ cd frontend && npm install && npm run dev            # the dashboard (reads resu
 | `recon/generate/` | the synthetic data generator — imported by **nothing** |
 | `data/<run>/` | frozen sources + `answer_key.json` (sealed) + committed `results.json` |
 | `frontend/` | static Vite + React dashboard |
-| `tests/` | 93 tests; 8 protected tests that must never be skipped or weakened |
+| `tests/` | 95 tests; 8 protected tests that must never be skipped or weakened |
 | `reference/master_specification.md` | the single authoritative technical document |
 | `reference/design.md` | the frontend design system |
 | `docs/project-progress.md` | phase-by-phase build record |

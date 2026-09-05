@@ -254,12 +254,33 @@ def test_c011_widened_slab_still_passes_reproduces_all_stated() -> None:
     assert (fee, tax) == _bps_to_fee_tax(250000, 175)  # the pre-slab line derives at the real rate
 
 
+def test_gst_bps_is_derived_from_stated_lines_not_hardcoded() -> None:
+    """C-018/R-1: the pipeline must derive the GST rate from observed
+    (fee, tax) pairs, never assume 1800. Construct stated lines at a
+    DIFFERENT, deliberately unrealistic GST rate and confirm infer_slabs
+    still validates against it correctly."""
+    lines = []
+    for i in range(6):
+        amount = 100000 + i * 1000
+        fee = (amount * 175 + 5000) // 10000
+        tax = (fee * 1200 + 5000) // 10000  # 12% GST, not the real 18%
+        lines.append(_payment(f"pay_g{i:02d}", amount, fee, tax, "netbanking", 1_780_000_000 + i))
+
+    slabs = infer_slabs(lines)
+    nb = [s for s in slabs if s.method == "netbanking"]
+    assert len(nb) == 1
+    assert nb[0].gst_bps == 1200  # derived from this run's own data, not the real-world 18%
+    fee, tax = derive_fee(105000, nb[0])
+    assert tax == (fee * 1200 + 5000) // 10000
+
+
 def test_derive_fee_matches_the_synthetic_formula() -> None:
     slab = FeeSlab(
         method="card",
         period_start=datetime.date(2026, 6, 1),
         period_end=datetime.date(2026, 7, 16),
         inferred_bps=200,
+        gst_bps=1800,
         sample_size=10,
         reproduces_all_stated=True,
     )

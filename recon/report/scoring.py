@@ -161,6 +161,28 @@ def validate_key_and_ceiling(run_id: str) -> list[str]:
     return problems
 
 
+def _achievable_true_group_ids(key: dict[str, dict]) -> set[str]:
+    """Answer-key `true_group_id`s that include at least one `bank:` entry —
+    a settlement with an actual bank transaction to close against.
+
+    docs/challenges-log.md C-018: a resolvable recon record whose true
+    settlement has NO bank transaction anywhere in the export window can
+    never be matched under S13.1's closing equation (`= bank.credit`,
+    requiring exactly one bank txn) — regardless of matcher capability.
+    `resolvable: true` in the key means "a human, given unlimited context,
+    could attribute this record to its settlement" — it does not mean the
+    settlement is arithmetically closeable from the data actually exported.
+    Those are different claims, and only the second is what this pipeline's
+    ceiling should promise.
+    """
+    with_bank: set[str] = set()
+    for record_key, entry in key.items():
+        gid = entry.get("true_group_id")
+        if gid and record_key.startswith("bank:"):
+            with_bank.add(gid)
+    return with_bank
+
+
 def sealed_key_for(run_id: str) -> Path | None:
     """The sealed key path for `run_id`, or `None` if it is not present
     (§12.6: a missing key omits metrics, it does not fail the run).
@@ -194,6 +216,12 @@ class ScoreReport(BaseModel):
     excluded: int = 0  # NOT_A_SETTLEMENT bank debits (§9, rule 9)
     ceiling_resolvable: int = 0  # answer-key recon entries with resolvable: true
     ceiling_rate: float = 0.0
+    # C-018: of ceiling_resolvable, how many have a bank transaction to close
+    # against at all — the honest capability ceiling. resolvable: true means
+    # "a human could attribute this", not "the data can arithmetically close
+    # it" (S13.1 requires exactly one bank txn). Always <= ceiling_resolvable.
+    ceiling_achievable: int = 0
+    ceiling_achievable_rate: float = 0.0
     # Informational, for the Phase 5 error analysis — NOT surfaced in
     # results.json (that would be new schema surface, CLAUDE.md rule 12) and
     # NOT used to adjust any score above. §13.8 / C-008.
@@ -283,6 +311,12 @@ def score(db: sqlite3.Connection, answer_key: Path) -> ScoreReport:
     ceiling_resolvable = sum(
         1 for k, e in key.items() if _is_recon(k) and e["resolvable"]
     )
+    achievable_gids = _achievable_true_group_ids(key)
+    ceiling_achievable = sum(
+        1
+        for k, e in key.items()
+        if _is_recon(k) and e["resolvable"] and e.get("true_group_id") in achievable_gids
+    )
 
     return ScoreReport(
         records_processed=400,
@@ -294,5 +328,7 @@ def score(db: sqlite3.Connection, answer_key: Path) -> ScoreReport:
         excluded=excluded,
         ceiling_resolvable=ceiling_resolvable,
         ceiling_rate=round(ceiling_resolvable / 400, 4),
+        ceiling_achievable=ceiling_achievable,
+        ceiling_achievable_rate=round(ceiling_achievable / 400, 4),
         contradictory_ledger_false_matches=contradictory_ledger,
     )

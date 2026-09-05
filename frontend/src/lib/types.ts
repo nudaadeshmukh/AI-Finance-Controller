@@ -26,6 +26,8 @@ export interface Baseline {
 export interface Ceiling {
   resolvable: number | null;
   rate: number | null;
+  achievable: number | null;
+  achievable_rate: number | null;
 }
 
 export interface LlmContribution {
@@ -100,6 +102,7 @@ export interface FeeSlab {
   period_start: string;
   period_end: string;
   inferred_bps: number;
+  gst_bps: number;
   sample_size: number;
   reproduces_all_stated: boolean;
 }
