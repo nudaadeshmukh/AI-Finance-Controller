@@ -24,10 +24,10 @@ Log every error to `docs/challenges-log.md` **as it happens**, not at phase end.
 **Phases 2 onward begin with:** *"Modify the existing codebase. Do NOT regenerate the
 project structure. Only change the files necessary for this phase."*
 
-### Context budget
+### Reading budget
 
-Do not load the whole master specification every session. Each phase lists exactly which
-sections it needs. This is the main lever on keeping four days on schedule.
+Do not re-read the whole master specification every session. Each phase lists exactly
+which sections it needs. This is the main lever on keeping four days on schedule.
 
 ---
 

@@ -107,7 +107,7 @@ The system has **no runtime network dependency** except one optional LLM call.
 
 ```
 razorpay-recon/
-├── PROJECT_RULES.md                       # persistent rules
+├── PROJECT_RULES.md                # persistent rules
 ├── README.md                       # written Phase 8, with real numbers
 ├── LICENSE                         # MIT
 ├── pyproject.toml

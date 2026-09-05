@@ -1,6 +1,6 @@
 # Project Progress Log
 
-**Purpose:** this file is the running memory of the project across working sessions.
+**Purpose:** this file is the running state of the project across working sessions.
 Read it first at the start of any new session, before reading anything else, to know
 exactly what already exists. Update it last, at the end of every phase, after the phase's
 code is actually working.
@@ -154,8 +154,8 @@ example. | - | Closed |
   empty `src/{screens,components,lib}/` (`.gitkeep`d) — no screens, no
   components, no styling, per Phase 1 scope
 - Fixed a stale doc/comment inconsistency found while re-reading the updated
-  spec: `.env.example`'s `RECON_LLM_MODEL` comment still said `llama-3.3-70b-versatile`
-  after PROJECT_RULES.md/§22 were corrected to `llama-3.3-70b-versatile`
+  spec: `.env.example`'s `RECON_LLM_MODEL` comment still named the pre-Groq
+  model after PROJECT_RULES.md/§22 were corrected to `llama-3.3-70b-versatile`
 
 **Files modified:**
 ```
@@ -1309,7 +1309,7 @@ cut under time pressure.
   four-day budget and the cut order (frontend polish first to go), a Vitest
   setup was judged not worth it.
 
-**Visual verification (headless Chrome + live a live browser walkthrough):**
+**Visual verification (headless Chrome + a live browser walkthrough):**
 - All four screens + both drawer states screenshotted across all four datasets
   at 1440px and (headless) 900px. Live walkthrough confirmed: dataset dropdown
   switches all four runs, bridge-band click filters the Match Explorer

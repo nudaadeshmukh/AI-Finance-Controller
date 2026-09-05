@@ -1,9 +1,9 @@
-# PROJECT_RULES.md
+# Project rules
 
-This file is persistent project context. Read it before every task in this repo. It does
-not change between phases — `reference/implementation_guide.md` carries the phase-specific
-detail and `reference/master_specification.md` carries the technical contract; this file
-carries the rules that never change.
+The standing rules for this repository. They do not change between phases —
+`reference/implementation_guide.md` carries the phase-specific detail and
+`reference/master_specification.md` carries the technical contract; this file carries
+the rules that never change.
 
 ## Project
 
@@ -28,7 +28,7 @@ getting these right over feature breadth or visual polish.
 If you are ever unsure whether something should use an LLM, the answer is almost
 certainly no. This project wins on **restraint**, not on AI surface area.
 
-## Non-negotiable rules — never violate these, even if a phase prompt doesn't repeat them
+## Non-negotiable rules — never violate these, even where a phase's notes don't repeat them
 
 1. **All money is `int` paise. No floats, no `Decimal`, anywhere.** ₹1,000.00 is
    `100000`. Formatting to rupees happens in exactly two places: `report/` and
@@ -98,8 +98,9 @@ certainly no. This project wins on **restraint**, not on AI surface area.
 
 12. **Do not invent new modules, signatures, reason codes, or `results.json` fields that
     aren't in `reference/master_specification.md`.** If a phase seems to need one that isn't
-    documented, stop and ask rather than improvising. This project is graded partly on
-    architecture discipline, and undocumented surface breaks that.
+    documented, stop and settle it in the specification first rather than improvising.
+    This project is graded partly on architecture discipline, and undocumented surface
+    breaks that.
 
 13. **Two records per run will score as false matches, and that is expected.** The answer
     key marks 2 payments (6 in `high-ambiguity`) `CONTRADICTORY_LEDGER` on the basis of a
@@ -108,15 +109,12 @@ certainly no. This project wins on **restraint**, not on AI surface area.
     require inferring how the data was generated, which rule 2 forbids. Report it in the
     Phase 5 error analysis, `docs/challenges-log.md`, and the README. See §13.8.
 
-14. **Never use force operations without explicit permission** — no `git push --force`
-    or `--force-with-lease`, no `git reset --hard` on commits not made this session, no
-    `rm -rf`, no overwriting a file the user didn't ask to overwrite, no destructive
-    database operation outside the schema this spec defines. If a task seems to need one,
-    stop and ask, and say exactly what the force operation would do and to what. This
-    matters more than usual here because the repository and its commit history are
-    graded artifacts — a force-push that rewrites history is itself a problem, not just a
-    risk to working code.
-    
+14. **No force operations on the repository** — no `git push --force` or
+    `--force-with-lease`, no `git reset --hard`, no `rm -rf`, no destructive database
+    operation outside the schema this spec defines. This matters more than usual here
+    because the repository and its commit history are graded artifacts — a force-push
+    that rewrites history is itself a problem, not just a risk to working code.
+
 ## Scope exclusions (locked)
 
 **Do not build:** web server, authentication, RBAC, file upload, user accounts, dashboard
@@ -177,16 +175,16 @@ assembled.
 
 ## Reliability rules
 
-- Never guess the contents of a file — read it first.
-- Never overwrite working code unless explicitly requested.
-- Make the smallest possible change to accomplish each task.
+- Never guess at a file's contents — open it first.
+- Never overwrite working code as a side effect of an unrelated change.
+- Make the smallest change that accomplishes the task.
 - If a command fails, diagnose and fix the root cause before continuing. Do not patch
   around it.
 - Before ending a phase, verify `pytest` is green and `ruff` is clean.
-- If a required dependency or tool is missing, tell the user exactly what to install
-  instead of assuming it exists.
-- If an instruction is wrong or will hurt the submission, say so plainly. Do not agree
-  just because something was asked for.
+- If a required dependency or tool is missing, name it and its exact install command in
+  the notes rather than assuming the next environment has it.
+- If a plan is wrong or will hurt the submission, write that down and change the plan.
+  Do not carry it forward just because it was already decided.
 
 ## Commands
 
@@ -203,12 +201,12 @@ assembled.
 
 - **`reference/master_specification.md`** — the single authoritative technical document.
   Architecture, schemas, algorithms, APIs, metrics, deliverables. There is no second
-  architecture file. If code contradicts it, the code is wrong; if it is wrong, say so and
-  ask rather than resolving the conflict by writing different code.
+  architecture file. If code contradicts it, the code is wrong; if the spec itself is
+  wrong, correct the spec rather than resolving the conflict by writing different code.
 - **`reference/implementation_guide.md`** — the phase-by-phase blueprint. Build exactly
   what the current phase specifies, not ahead of it and not behind it. If a phase needs
-  something an earlier phase was supposed to deliver and didn't, flag it — don't silently
-  build around the gap.
+  something an earlier phase was supposed to deliver and didn't, record it — don't
+  silently build around the gap.
 - **`reference/design.md`** — the frontend design system: visual language, layout,
   typography, colour, component styling. Authoritative for **how** the frontend looks.
   It is **not** authoritative for what the screens contain — `master_specification.md`
@@ -216,7 +214,7 @@ assembled.
   about *what* a screen shows, §23 wins; `design.md` only governs *how* it looks.
   **Read it before writing any frontend code, not just before Phase 7** — this includes
   the `frontend/` skeleton in Phase 1 and any screenshot or styling work in Phase 8.
-- **`docs/project-progress.md`** — running memory across sessions.
+- **`docs/project-progress.md`** — the running state of the build, phase by phase.
 - **`docs/challenges-log.md`** — every error and challenge, logged as it happens.
 
 ## How to work within a phase
@@ -226,18 +224,18 @@ assembled.
   something built in an earlier phase, stop and explain why before doing it.
 - Do not build ahead. Do not add features from a later phase.
 - Do not refactor working code from an earlier phase unless the current phase requires it.
-- If the user's prompt for a phase conflicts with `reference/implementation_guide.md`, the
-  user's explicit instruction wins for that phase — but note the deviation in your
-  response so it's visible, don't silently absorb it.
-- **Each phase lists exactly which sections of the master specification to read.** Do not
-  load the whole document every session — the context budget has to last four days.
-- **At the start of every session**, read `docs/project-progress.md` first, before reading
-  anything else, to pick up where the last phase left off. Don't ask the user to
-  re-explain what's already built.
+- If a phase's actual scope diverges from `reference/implementation_guide.md`, the
+  divergence wins for that phase — but write it down so it stays visible, don't silently
+  absorb it.
+- **Each phase lists exactly which sections of the master specification to read.** The
+  spec is long; working from the sections a phase actually needs is what keeps four days
+  on schedule.
+- **Start each working session** from `docs/project-progress.md`, which records exactly
+  where the previous phase stopped.
 - **At the end of every phase**, update `docs/project-progress.md` with: Completed
   features, Files modified, Remaining work, Known issues/TODOs — appended as a new entry,
   never overwriting earlier phases. Do this as the last step, after the code works.
-  Then **stop and report.** Do not roll into the next phase unprompted.
+  Then **stop.** Phases do not roll into each other.
 
 ## Challenges log — update this in the moment, not at phase end
 
