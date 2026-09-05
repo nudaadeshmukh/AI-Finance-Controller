@@ -107,7 +107,7 @@ The system has **no runtime network dependency** except one optional LLM call.
 
 ```
 razorpay-recon/
-├── PROJECT_RULES.md                       # persistent rules
+├── PROJECT_RULES.md                # persistent rules
 ├── README.md                       # written Phase 8, with real numbers
 ├── LICENSE                         # MIT
 ├── pyproject.toml
@@ -117,7 +117,8 @@ razorpay-recon/
 │
 ├── reference/
 │   ├── master_specification.md     # THIS FILE — the only technical spec
-│   └── implementation_guide.md     # phase-by-phase build order
+│   ├── implementation_guide.md     # phase-by-phase build order
+│   └── design.md                   # frontend visual system — see §23
 │
 ├── docs/
 │   ├── project-progress.md         # running memory across sessions
@@ -155,6 +156,7 @@ razorpay-recon/
 │   ├── match/
 │   │   ├── __init__.py             # run_cascade(), PASSES
 │   │   ├── base.py                 # Pass protocol
+│   │   ├── classify.py             # residual → specific reason codes (§13.7)
 │   │   ├── constants.py            # tolerances, each with justifying comment
 │   │   ├── money.py                # round_half_up — matcher's OWN copy
 │   │   ├── utr.py                  # pass 1
@@ -165,7 +167,7 @@ razorpay-recon/
 │   │   └── tolerance.py            # pass 6
 │   │
 │   ├── hypothesize/
-│   │   ├── client.py               # Anthropic wrapper, timeout, retry
+│   │   ├── client.py               # Groq wrapper, timeout, retry
 │   │   ├── prompt.py               # system block + untrusted fence
 │   │   ├── parse.py                # strict JSON → Hypothesis
 │   │   └── cluster.py              # cluster_residual()
@@ -207,6 +209,7 @@ razorpay-recon/
 ├── tests/
 │   ├── conftest.py
 │   ├── test_firewall.py            # no generator imports
+│   ├── test_answer_key_seal.py     # answer key opened only by report/
 │   ├── test_money.py               # no floats
 │   ├── test_determinism.py
 │   ├── test_idempotency.py
@@ -229,10 +232,10 @@ razorpay-recon/
 │   ├── index.html
 │   └── src/
 │       ├── App.tsx                 # run dropdown + routing
-│       ├── types.ts                # asserts schema_version === 1
+│       ├── lib/types.ts            # asserts schema_version === 1
 │       ├── lib/format.ts           # ONLY place paise become rupees
 │       ├── screens/{RunOverview,Bridge,MatchExplorer,ExceptionList}.tsx
-│       └── components/{RecordDrawer,ProofTable,MetricStrip}.tsx
+│       └── components/{RecordDrawer,ProofTable,Bits}.tsx
 │
 └── .github/workflows/ci.yml        # ruff + pytest + recon validate
 ```
@@ -258,14 +261,14 @@ No upward imports. No cycles.
 | Money | Integer paise, no floats |
 | Data manipulation | Plain Python — **no pandas** |
 | CLI | Typer + Rich |
-| LLM | Anthropic SDK, `llama-3.3-70b-versatile` |
+| LLM | Groq SDK, `openai/gpt-oss-20b` (§15.1, C-013 — original pin retired by Groq mid-build) |
 | Templating | Jinja2 |
 | HTTP | httpx |
 | Tests | pytest; lint: ruff |
 | Frontend | Vite + React, static build |
 
-**Four runtime dependencies plus httpx. Do not add more without asking.** Every
-dependency is something a reviewer must trust without reading.
+**Five runtime dependencies: pydantic, typer+rich, groq, jinja2, httpx. Do not add more
+without asking.** Every dependency is something a reviewer must trust without reading.
 
 ---
 
@@ -581,10 +584,25 @@ CREATE TABLE audit_log (
 
 ### 7.2 Transaction boundaries
 
-One transaction per source file at ingest. One per pass in the cascade — a half-applied
-pass would corrupt the residual for the next. One per cluster in the LLM stage.
-`audit_log` writes participate in the enclosing transaction; audit and effect are never
-separable.
+**Ingest is one transaction for the whole call, covering all four sources —
+not one transaction per source file.** §12.1 requires that a `SourceUnavailable`
+raised partway through acquisition leave no partial write: not just from the
+source that failed, but from any source already read successfully earlier in
+the same call. A per-source transaction scheme cannot give that guarantee —
+by the time source 3 of 4 fails, sources 1–2 are already durably committed,
+which is a partial write in every sense that matters, even though each
+individual source's own transaction is internally clean. A single outer
+transaction gives the guarantee atomically: nothing commits until every
+source in the call succeeds. Implemented in `recon/ingest/__init__.py` and
+covered by
+`tests/test_ingest.py::test_source_unavailable_partway_through_leaves_no_partial_write`,
+which asserts zero rows in all four source tables (and `audit_log`) after a
+simulated failure on the third of four sources.
+
+One transaction per pass in the cascade — a half-applied pass would corrupt
+the residual for the next. One per cluster in the LLM stage. `audit_log`
+writes participate in the enclosing transaction in all three stages; audit
+and effect are never separable.
 
 ---
 
@@ -618,23 +636,92 @@ sources, including bank closure.
 | `fee_derived` | 41 | 39 | 40 | 38 |
 | `tolerance` | 19 | 7 | 20 | 7 |
 | **`ambiguous`** | **11** | **11** | **11** | **32** |
-| **Resolvable ceiling** | **389 (97.2%)** | **389 (97.2%)** | **389 (97.2%)** | **368 (92.0%)** |
+| **Resolvable ceiling** | **389-391 (97.25-97.75%)** | **389-391 (97.25-97.75%)** | **389-391 (97.25-97.75%)** | **368-374 (92.0-93.5%)** |
+| **Achievable ceiling** | **384 (96.0%)** | **323 (80.75%)** | **376 (94.0%)** | **356 (89.0%)** |
+
+The ceiling is a range, not a flat number, for a reason already implicit in §13.8's accepted
+math rather than something new: 2 of each run's `ambiguous` records (6 in `high-ambiguity`)
+are `CONTRADICTORY_LEDGER` — an order, stated fee, settlement and bank transaction that
+**close correctly**, since the closing equation never reads ledger data. §13.8 already
+states these will be matched and counted as false matches; the ceiling table originally
+implied 0 of the 11/32 `ambiguous` records could ever match, which understates the honestly
+achievable range by exactly how many `CONTRADICTORY_LEDGER` records happen to close in a
+given run — 0 to 2 (0 to 6 in `high-ambiguity`). Verified per-dataset, from source data only
+(never the sealed key): each run's `ledger_entries` table has exactly 2 `account='suspense'`
+rows (6 in `high-ambiguity`) with a `source_ref` that resolves to no real order receipt —
+the §6.4/§9.4 `CONTRADICTORY_LEDGER` signature — matching the designed count exactly in all
+four runs, confirming the range applies uniformly rather than being specific to one dataset's
+observed outcome. A run scoring above the base ceiling (389 or 368) is therefore not
+automatically a bug — it needs the same trace this session gave clean-august's 390/400
+(`docs/challenges-log.md` C-008), not an assumption either way.
+
+**A second, more consequential ceiling correction (`docs/challenges-log.md` C-018):**
+`resolvable: true` in the key means "a human, given unlimited context, could attribute this
+record to its true settlement." It does not mean the settlement has a bank transaction in
+the export window at all — §13.1's closing equation requires exactly one. On `heavy-refunds`
+specifically, **66 of 389 key-resolvable recon records belong to 13 settlements with zero
+bank transactions anywhere in the source data** (5/389 on `clean-august`, 13/389 on
+`holiday-skew`, 12/368 on `high-ambiguity`) — verified directly from `bank_statement.json`:
+no digit-run in any description matches their `settlement_utr`, exact or truncated. These
+records are correctly classified `CROSS_PERIOD_UTR` by `classify_residual` (the matcher
+already gets this right) and correctly counted false by nothing, since they're unresolved —
+but the *ceiling* arithmetic previously counted them as achievable headroom, which they can
+never be. The **achievable ceiling** row above is `ceiling_resolvable` minus exactly these —
+computed in `report/scoring.py`'s `_achievable_true_group_ids()` from which `true_group_id`s
+have a `bank:` member in the key, never inferred from generator internals. Confirmed by
+independent re-derivation (outside `report/scoring.py` entirely): on all four datasets, the
+cascade produces a closing arithmetic proof for **100% of the achievable set** — 384/384,
+323/323, 376/376, 356/356 — the gap between `matched` (§17.1's strict-scored figure) and
+`achievable` is entirely the already-documented C-009 poisoning, not a missed match.
 
 ### 8.3 Baseline headroom
 
 Naive matcher = exact `order_id` join **and** stated fee **and** exact UTR **and**
 settlement net closes with no derivation.
 
+Headroom below is measured against the **base** ceiling (389 / 368 — genuine,
+non-`CONTRADICTORY_LEDGER` resolvability), not the §8.2 range's upper bound. Headroom is a
+statement about matching capability; the extra 0-2 (0-6) `CONTRADICTORY_LEDGER` matches an
+honest matcher may pick up are a documented false-match artifact (§13.8), not a capability
+this metric should credit.
+
+**C-018 note:** the base ceiling used below is `ceiling_resolvable`, not the tighter
+`ceiling_achievable` (§8.2) — deliberately unchanged from the original headroom figures
+rather than silently revised alongside the ceiling fix. `ceiling_resolvable` is still the
+right denominator for a *baseline-vs-cascade capability* comparison: both the naive matcher
+and the cascade are equally incapable of closing an unbackable settlement, so it doesn't
+distort the gap *between them*. `ceiling_achievable` is the number to use when the question
+is "how much of the data can any matcher possibly close" (§8.2, §17.2) — a different
+question from "how much better is this matcher than the naive one."
+
 | Run | Naive baseline | Ceiling | Headroom |
 |---|---|---|---|
 | `clean-august` | 126/400 (31.5%) | 97.2% | **65.8 pp** |
-| `heavy-refunds` | 79/400 (19.8%) | 97.2% | **77.5 pp** |
-| `holiday-skew` | 120/400 (30.0%) | 97.2% | **67.2 pp** |
-| `high-ambiguity` | 147/400 (36.8%) | 92.0% | **55.2 pp** |
+| `heavy-refunds` | 80/400 (20.0%) | 97.2% | **77.2 pp** |
+| `holiday-skew` | 121/400 (30.25%) | 97.2% | **67.0 pp** |
+| `high-ambiguity` | 152/400 (38.0%) | 92.0% | **54.0 pp** |
+
+**Baseline reconciled to committed code in Phase 5.** The original figures
+(126 / 79 / 120 / 147) were produced by a one-off Phase 0 script that was not
+kept in the repo. `report/baseline.py` implements the §8.3 definition
+precisely and reproducibly — exact `order_id` join, stated fee (no
+derivation), a single unambiguous digit-run UTR in the bank description, and
+settlement net closing at `delta == 0` — and measures 126 / 80 / 121 / 152.
+The 0-5 record differences are within the ambiguity of "exact UTR" and
+"stated fee" the prose left open; the table now reflects the number a
+reviewer can regenerate with `python -m recon run`. The headroom story is
+unchanged.
 
 **`high-ambiguity` is designed to score worse.** Four flattering runs would invite
 exactly the suspicion the track bar warns about. A visible degradation on harder data is
 stronger evidence than a uniformly good number.
+
+### 8.3.1 `manifest.json`
+
+Generator metadata only. **The pipeline reads nothing from it except `run_id`, `label`
+and `seed`.** `seed` is read only to fill `results.json`'s §18 provenance block (it
+appears nowhere else in the data); no matching or scoring logic may depend on it. Other
+fields are generation statistics; do not build logic on them.
 
 ### 8.4 Deliberate data-quality defects
 
@@ -642,7 +729,7 @@ stronger evidence than a uniformly good number.
 |---|---|---|
 | Blank order receipt | 14–16 | `orders.receipt = ""` |
 | Fee/tax dropped from export | 41 | `recon_lines.fee = null` |
-| Ledger entry with no source ref | 78–92 | `ledger_entries.source_ref = null` |
+| Ledger entry with no source ref | 77–96 | `ledger_entries.source_ref = null` |
 | Ledger ref pointing at wrong order | ~7 | transposition error |
 | Suspense entries | 2 (6 in high-amb) | contradictory amount + ref |
 | Truncated UTR in bank description | 2 | last 2 digits missing |
@@ -707,7 +794,9 @@ of the boundary. This is the single best demonstration of domain literacy in the
 | `CROSS_PERIOD_UTR` | 4 (11) | Settlement falls outside the export window; the bank record genuinely does not exist in the data. |
 | `CONTRADICTORY_LEDGER` | 2 (6) | Suspense entry whose amount and reference contradict the transaction. |
 
-`AMBIGUOUS_DUPLICATE` exceptions **must list both candidates.** Naming the ambiguity
+`AMBIGUOUS_DUPLICATE` exceptions **must list all candidates** (usually two; occasionally
+three where the data genuinely produces that many indistinguishable orders — see
+`high-ambiguity`, `docs/challenges-log.md` audit findings). Naming the ambiguity
 precisely is the deliverable; picking one is the failure.
 
 ### 9.5 `tolerance`
@@ -769,7 +858,11 @@ Ingested ──validation fails──> Malformed ──> Exception
 `Excluded` is distinct from `Exception`, and the distinction matters. The 5 unrelated
 bank debits per run are *correctly* not matched. Counting them as exceptions understates
 performance; matching them is a false match. They get
-`reason_code = "NOT_A_SETTLEMENT"` and leave **both numerator and denominator**.
+`reason_code = "NOT_A_SETTLEMENT"`.
+
+**To be precise:** the denominator is the 400 recon lines. Bank transactions are not recon
+lines, so these 5 were never in the scored population. The reason code records that they
+were seen and deliberately excluded — it does not place them in any match-rate figure.
 
 ---
 
@@ -899,7 +992,8 @@ compute closure with **stated** fee/tax only. **Skip any settlement containing
 `fee IS NULL`** — that is pass 4.
 
 **`aggregate`:** same equation, for settlements where refunds and adjustments net against
-payments. Adjustments carry `order_id = NULL` by construction and contribute to the net
+payments. **The fee-null skip applies here too** — any settlement containing a payment with
+`fee IS NULL` is deferred to pass 4, in both `exact` and `aggregate`. Adjustments carry `order_id = NULL` by construction and contribute to the net
 with no order member.
 
 **Do not attempt to attribute an adjustment to an order.** For the 5 ambiguous
@@ -907,13 +1001,22 @@ duplicates this is precisely the trap.
 
 ### 13.4 Pass 4 — `fee_reversal` (the payments-literacy pass)
 
-**Step 1 — observe.** For every payment with a stated fee:
-`bps = round_half_up(fee * 10000, amount)`. Bucket by `method`. Discard buckets with
-fewer than 3 observations.
+**Step 1 — observe.** Filter to `type == "payment" AND fee IS NOT NULL` — **319 lines in
+`clean-august`, not 400.** Refunds and adjustments carry `fee = 0` with `amount > 0`;
+including them injects 40 spurious 0-bps observations and destroys the change-point scan.
+
+For each: `bps = round_half_up(fee * 10000, amount)`. Bucket by `method`. Discard buckets
+with fewer than 3 observations — **no slab is derived for a discarded bucket and no rate
+is guessed.** Its fee-null lines fall through to `timing` and `tolerance` like any other
+residual, then to `NO_CANDIDATE`. Log the abandoned inference to `audit_log`.
 
 **Step 2 — detect a change point.** If one bps value accounts for ≥95%, single slab.
 Otherwise sort by `created_at` and scan candidate splits, maximising mode purity on both
 sides. Accept only if both sides reach ≥95% purity **and** have ≥5 observations.
+
+**A candidate split is an index where `bps` differs between consecutive observations** —
+not every index boundary, not day boundaries. That keeps the search proportional to the
+number of distinct transitions.
 
 **Step 3 — validate before use.** A slab is accepted only if it reproduces
 `credit == amount − fee − tax` **exactly** on 100% of stated-fee lines in its period,
@@ -934,10 +1037,14 @@ change was **discovered, not configured**.
 3. Validate: `add_business_days(capture_date, 2) == settled_date`, where `capture_date`
    rolls forward one day if captured at or after 18:00 IST. Iterate; drop candidates
    causing widespread mismatch
-4. Use the calendar to attach ledger entries with `source_ref = NULL` (78–92 per run)
+4. Use the calendar to attach ledger entries with `source_ref = NULL` (77–96 per run)
 
 Accept only if the calendar explains ≥95% of payments with both timestamps. Below that,
 record low confidence and let affected records fall through to tolerance.
+
+**Never match on `bank_txns.value_date`.** The recon↔bank join is by UTR only. Zero lag
+between `settled_at` and `value_date` happens to hold in this data, but a matcher that
+depends on it would break on real data.
 
 ### 13.6 Pass 6 — `tolerance`
 
@@ -946,11 +1053,99 @@ justifying it**, echoed into `results.json`.
 
 | Allowance | Value | Justification |
 |---|---|---|
-| Amount delta | ≤ 2 paise | Independent half-up rounding on fee and tax each contribute ≤1 |
+| Amount delta | ≤ 2 paise **per derived-fee line**, 0 otherwise | See below |
 | UTR suffix truncation | ≤ 2 digits | Observed bank formatting defect; **requires unique prefix match** |
 | Ledger posting lag | ≤ 1 day | Accountants book same-day or next-day |
 
+**The amount allowance is derived, not flat.** A settlement whose member payments all
+carry a *stated* fee must close with `delta == 0` exactly — a stated fee cannot drift.
+Only a fee recovered in `fee_reversal` can be off, by at most 1 paise on the fee and 1 on
+the tax, since both round half-up independently.
+
+```
+allowed_delta = 2 * (number of member payments whose fee was DERIVED)
+```
+
+For a settlement with no derived fees this is 0. Settlements average 6.6 lines and reach
+32, so a flat settlement-level constant of 2 would be simultaneously too tight for a
+multi-line derived settlement and far too loose for a single stated one. Scaling by
+derived lines only is both tighter and more honest.
+
+Emitted as `tolerance_constants.amount_delta_paise_per_derived_line: 2`.
+
 A truncated UTR matching two settlements is **ambiguity, not a match.**
+
+### 13.7 `classify_residual` — assigning specific reason codes
+
+Runs at the end of `run_cascade()`, after pass 6 and **before** the LLM stage. It does not
+match anything. It converts blanket `NO_CANDIDATE` into specific, honest reason codes.
+
+```python
+# match/classify.py
+def classify_residual(db: Connection, state: CascadeState) -> list[Exception_]
+```
+
+| Detection | Emits |
+|---|---|
+| Unmatched adjustment with `order_id IS NULL`, where ≥2 orders share the same `customer_id`, `amount` and calendar date | `AMBIGUOUS_DUPLICATE`, `candidates` = those order record_keys |
+| Unmatched recon line whose `settlement_utr` matches no bank transaction, after both `utr` and `tolerance` have run | `CROSS_PERIOD_UTR` |
+| Everything else still unresolved | `NO_CANDIDATE` |
+
+**Never pick one candidate.** Listing all of them is the deliverable.
+
+`CONTRADICTORY_LEDGER` is **not** detected here — see §13.8.
+
+Note the distinction: §14.1's `arithmetic_scope` mechanism (C-008) recovers records that
+were only *collaterally* deferred by an unrelated ambiguous neighbour in the same
+settlement — the ambiguity itself still surfaces honestly as `AMBIGUOUS_DUPLICATE`. §13.8's
+`CONTRADICTORY_LEDGER` records are a different, unfixed case: they close correctly and
+*will* be matched, which is a known answer-key limitation, not something this mechanism (or
+any other) should paper over.
+
+### 13.8 Known answer-key limitation — report, do not fix
+
+The answer key marks 2 recon payments per run (6 in `high-ambiguity`) as
+`CONTRADICTORY_LEDGER`. Those payments have an order, a stated fee, a settlement and a
+bank transaction. **They close correctly under the closing equation, which does not
+include ledger entries at all.**
+
+The matcher will therefore match them, and scoring will count them as **false matches**.
+This is a defect in the answer key, not in the matcher.
+
+**Do not special-case the scorer. Do not attempt to detect them.** Detecting them would
+require inferring how the data was generated, which §4.2 forbids.
+
+Expect ~2 false matches per run traceable to this. State it explicitly in the Phase 5
+error analysis, in `docs/challenges-log.md`, and in the README. Reporting a known
+limitation honestly is a stronger signal than a clean number obtained by special-casing.
+
+**Phase 5 addendum — a second instance of the same pattern, `CROSS_PERIOD_UTR`
+(`docs/challenges-log.md` C-009).** Each run has exactly **one** settlement in
+which the answer key marks a subset of the payment lines `CROSS_PERIOD_UTR`
+("settlement falls outside the export window; no corresponding bank record") —
+while the bank record demonstrably **is** in the statement and the whole
+settlement closes against it at `delta == 0`. The matcher closes it (correctly —
+nothing in the source data distinguishes those lines). Poisoned-line counts per
+run: clean-august 4, heavy-refunds 1, holiday-skew 4, high-ambiguity 7.
+heavy-refunds' other 3 `CROSS_PERIOD_UTR` records, and every `CROSS_PERIOD_UTR`
+line not in that one settlement, are genuinely unresolvable (bank record truly
+absent) and correctly go to exceptions. Same rule as above: **do not detect, do
+not special-case** — the scorer treats every `resolvable: false` reason code
+identically.
+
+**Scoring rule (Phase 5, `report/scoring.py`) — strict whole-group equality.**
+A committed group is correct iff its recon-key set is **identical** to the
+answer key's true cluster (true cluster built by grouping the key on
+`true_group_id`). A group containing any `resolvable: false` record can never
+equal a true cluster, so the **entire group** — the poisoned record and its
+genuinely-resolvable settlement-mates — scores as a false match. Per run this
+poisons 3 / 3 / 3 / 7 settlements: **23 / 39 / 36 / 62 false matches** (the
+6/3/6/13 poisoned `CONTRADICTORY_LEDGER` + `CROSS_PERIOD_UTR` records dragging
+17/36/30/49 resolvable settlement-mates with them). A softer "score only the
+resolvable members, count the poisoned record standalone" reading was tried and
+**rejected** — it lifted precision to ~96-99% and was attractive only *after*
+the strict number was known, precisely the failure mode PROJECT_RULES.md rule 7 guards
+against. The harder number is the headline.
 
 ---
 
@@ -984,10 +1179,81 @@ class ArithmeticProof(BaseModel):
     delta: int                     # expected − observed; must be 0
     closes: bool
     tolerance_applied: int = 0     # nonzero is SURFACED in the UI
+    scope_only_keys: list[RecordKey] = []   # see §14.1 — always [] unless
+                                              # proposal.arithmetic_scope was set
 ```
 
 Splitting `verify()` from `commit()` is what makes "the verifier is the sole writer" a
 testable assertion rather than a promise.
+
+### 14.1 `arithmetic_scope` — resolution to C-008
+
+**`MatchProposal` gains one field: `arithmetic_scope: list[RecordKey] | None = None`.**
+`verify()`'s signature is unchanged — `def verify(proposal, db, facts) -> ArithmeticProof`
+still takes exactly the same three arguments. The new field lives on the proposal, not the
+function.
+
+**Old behaviour:** `verify()` re-read and summed exactly `proposal.member_keys` — the set
+of records the equation was computed over and the set `commit()` would write to
+`group_members` were always identical.
+
+**New behaviour:** when `arithmetic_scope` is `None` (true of every cascade pass except the
+one below, and of every proposal built before this amendment), behaviour is unchanged —
+`verify()` sums `member_keys` exactly as before. When `arithmetic_scope` is set, it **must
+be a superset of `member_keys`**; `verify()` re-reads and sums over `arithmetic_scope` to
+compute the closing equation, but `commit()` still writes `group_members` from
+`member_keys` only. The keys present in `arithmetic_scope` but absent from `member_keys` —
+the *scope-only keys* — are counted toward the proof but never marked matched.
+
+**Reason:** §13.7's `AMBIGUOUS_DUPLICATE` guard (`has_ambiguous_adjustment`, added in
+Phase 3 for C-005) defers an entire settlement — sometimes 20+ records — whenever it
+contains one adjustment line with no order attribution matching ≥2 duplicate orders. The
+settlement's closing equation balances regardless of which candidate order the adjustment
+"really" belongs to (the equation needs the adjustment's debit value, not its attribution),
+so every *other* record in that settlement has a legitimate, closing proof and was only
+being held back by one ambiguous neighbour. `arithmetic_scope` lets the proposer include
+the ambiguous line in the sum (so the equation still closes) while excluding it from
+`member_keys` (so it is never marked matched) — it falls through to `classify_residual` and
+is correctly named `AMBIGUOUS_DUPLICATE`, with every candidate listed, instead of silently
+blocking every other record in the settlement. This is the resolution to
+`docs/challenges-log.md` C-008.
+
+**The audit-transparency requirement.** A proof computed from a wider scope than its
+committed membership must never be reconstructable by guesswork only. Three things make it
+reconstructable purely from committed data:
+
+1. **`ArithmeticProof` gains one field: `scope_only_keys: list[RecordKey] = []`** — the
+   scope-only keys for this proof, always `[]` when `arithmetic_scope` was `None`. Because
+   `commit()` already persists `proof.model_dump()` verbatim into `match_groups.proof_json`,
+   this field requires no schema change to `match_groups` — it is simply present in the
+   JSON blob already stored there. Anyone reading a group's `proof_json` sees exactly which
+   keys its arithmetic counted that its membership doesn't.
+2. **`commit()` records one additional `audit_log` entry per scope-only key**, action
+   `"counted_not_committed"`, detail `{group_id, proof}` — in addition to (never instead
+   of) the normal per-member `"matched"` entries for `member_keys`. `audit.trail(key)` on a
+   scope-only key therefore shows, in its own history, that it was counted toward group X's
+   closing proof without becoming a member of it.
+3. **Invariant, enforced at runtime, not just by tests:** every key appearing in any
+   `match_groups.proof_json.scope_only_keys` must, by the end of the run, appear in
+   `exceptions` with a reason code. `report/scoring.py` checks this — after matching
+   completes, in the same place and same spirit as rule 6's answer-key gate — before it
+   computes a score or calls `emit_results()`. If any scope-only key lacks a corresponding
+   `exceptions` row, `score()` raises `ScoringError` and the run **refuses to emit
+   `results.json`** rather than silently reporting on a record that arithmetic touched but
+   nothing accounted for. This is PROJECT_RULES.md rule 4 ("no third state") enforced at the
+   pipeline's exit gate, not only in CI.
+
+   Covered by **`tests/test_scope_only_accounted.py`** — the eighth protected test (§25),
+   verifying both directions: (a) a scope-only key that legitimately gets an `exceptions`
+   row does not block scoring, and (b) a scope-only key deliberately left unaccounted
+   (simulating a future bug) causes `score()` to raise `ScoringError`, not silently
+   proceed.
+
+A person reading `match_groups` and `group_members` for a given group can now tell, without
+opening any code: which records the group's arithmetic counted
+(`proof_json.scope_only_keys`), that none of them are members (absent from
+`group_members`), and why each one isn't (`exceptions.reason_code` for that key,
+cross-referenced by `audit_log`).
 
 ---
 
@@ -995,7 +1261,7 @@ testable assertion rather than a promise.
 
 ```python
 def propose(residual: list[RecordKey], db: Connection, facts: DerivedFacts,
-            client: Anthropic | None, *, model: str = "llama-3.3-70b-versatile",
+            client: Groq | None, *, model: str = "openai/gpt-oss-20b",
             timeout_s: int = 20) -> list[MatchProposal]
 ```
 
@@ -1006,8 +1272,25 @@ None, the residual is empty, or the API is unavailable. **Never raises.**
 
 The task is narrow and structured — read a small residual set, propose a candidate
 grouping as JSON. Deep reasoning is unnecessary **because the verifier, not the model,
-establishes truth.** We chose the smallest model that cleared the bar. Escalation to
-`openai/gpt-oss-120b` is a one-line change, decided by measurement, not assumption.
+establishes truth.** Groq's inference speed keeps the hypothesis stage from dominating
+runtime, and the OpenAI-compatible client means the provider is swappable in one place.
+We chose the smallest capable model; escalation is a config change, decided by
+measurement, not assumption.
+
+**Model:** `openai/gpt-oss-20b` (served by Groq). The original pin was
+`llama-3.3-70b-versatile`; Groq retired it from their catalogue somewhere
+between Phase 0 (spec freeze) and Phase 6, and a live call now returns
+`404 model_not_found` (`docs/challenges-log.md` C-013). That is itself a small,
+honest data point worth stating in the README and video: **pinning a specific
+hosted-model version is a dependency on a third-party catalogue that churns on
+its own schedule, not ours.** The mitigation is architectural, not a better
+guess at which model lasts — the LLM sits behind a one-method `ChatModel`
+protocol, `RECON_LLM_MODEL` overrides the default with no code change, and the
+deterministic pipeline neither imports nor needs it. When the pinned model
+disappears, `--no-llm`-equivalent behaviour is automatic
+(`HYPOTHESIS_LAYER_UNAVAILABLE`, the run still completes) and swapping to a
+live model is one environment variable. The lesson generalises: depend on the
+*interface* a hosted model presents, never on the identity of one snapshot.
 
 ### 15.2 Prompt contract
 
@@ -1035,6 +1318,9 @@ frontend as evidence the architecture works.
 One call per residual cluster, not per record. Clusters are single-digit, so cost and
 latency are bounded by ambiguity rather than record count.
 
+**Clustering key:** residual records sharing a `settlement_utr` form one cluster. Records
+with no usable UTR cluster by `(customer_id, calendar date)`.
+
 ### 15.4 Failure matrix
 
 | Condition | Action | Reason code |
@@ -1045,6 +1331,20 @@ latency are bounded by ambiguity rather than record count.
 | API unavailable / 429 | **Pipeline completes** | `HYPOTHESIS_LAYER_UNAVAILABLE` |
 | References unknown key | Reject | `PROOF_DOES_NOT_CLOSE` |
 | Proof does not close | Reject | `PROOF_DOES_NOT_CLOSE` |
+
+**Clarification (C-017): "API unavailable / 429" means the client itself, not
+one call.** §15.3 clusters independently ("one call per residual cluster");
+this row's "pipeline completes" outcome must not be read as licence to abort
+every remaining cluster on a single call's failure. A dead connection or bad
+credentials means every subsequent call is certain to fail identically —
+abort the stage. A rate limit or a single generation the API itself rejects
+(Groq's `json_validate_failed`, for instance) says nothing about the next
+cluster's call — skip only that cluster and continue. `client.py` raises
+`LLMUnavailable` for the former, `LLMCallFailed` for the latter;
+`propose()` breaks on the first, continues past the second. Neither
+introduces a new reason code — both still surface as
+`HYPOTHESIS_LAYER_UNAVAILABLE` (if the stage as a whole never got a
+resolution) or simply fewer clusters proposing, never a third state.
 
 ### 15.5 Publish the contribution honestly
 
@@ -1090,14 +1390,21 @@ rate.** A number without a trail is a claim; a number with one is evidence.
 | **Unresolved rate** | records sent to exceptions ÷ 400 |
 | **Throughput** | records/sec, **separately** for cascade and LLM |
 
-Excluded records (`NOT_A_SETTLEMENT`) leave both numerator and denominator.
+The denominator is always the 400 recon lines. Bank transactions marked
+`NOT_A_SETTLEMENT` are not recon lines and appear in neither numerator nor denominator.
 
 ### 17.2 Required comparisons in every run
 
 1. **Naive baseline** — exact `order_id` + stated fee + exact UTR + net closes
 2. **Cascade without LLM** (`--no-llm`)
 3. **Cascade with LLM**
-4. **Resolvable ceiling** — 97.2% on three runs, 92.0% on `high-ambiguity`
+4. **Resolvable ceiling** — 97.2% base on three runs, 92.0% on `high-ambiguity`; an actual
+   run may land up to 2 records (6 on `high-ambiguity`) above this if a `CONTRADICTORY_LEDGER`
+   record closes, per §8.2's range and §13.8 — expected, not a bug. **Also report the
+   achievable ceiling** (§8.2, C-018) — `ceiling_resolvable` minus records whose true
+   settlement has no bank transaction in the export window at all (96.0% / 80.75% / 94.0% /
+   89.0%). The gap between the two is a data-availability fact, not a matcher weakness: the
+   cascade closes 100% of the achievable set on every dataset.
 
 ### 17.3 Error analysis
 
@@ -1132,7 +1439,14 @@ The pipeline's only output to the frontend. Static, self-contained, committed.
   },
 
   "baseline": { "name": "exact_id_and_amount", "matched": 0, "match_rate": 0.0 },
-  "ceiling":  { "resolvable": 389, "rate": 0.9725 },
+  "ceiling":  { "resolvable": 389, "rate": 0.9725,      // base ceiling (§8.2); an actual run's
+                "achievable": 384, "achievable_rate": 0.96 },
+                                                       // "matched" may exceed "resolvable" by up
+                                                       // to 2 if a CONTRADICTORY_LEDGER record
+                                                       // closes. "achievable" (C-018) is
+                                                       // "resolvable" minus records whose true
+                                                       // settlement has no bank txn at all —
+                                                       // the honest capability ceiling.
 
   "llm_contribution": {
     "enabled": true,
@@ -1156,8 +1470,8 @@ The pipeline's only output to the frontend. Static, self-contained, committed.
   ],
 
   "passes": [
-    { "name": "exact",        "matched": 0, "runtime_ms": 0 },
     { "name": "utr",          "matched": 0, "runtime_ms": 0 },
+    { "name": "exact",        "matched": 0, "runtime_ms": 0 },
     { "name": "aggregate",    "matched": 0, "runtime_ms": 0 },
     { "name": "fee_reversal", "matched": 0, "runtime_ms": 0 },
     { "name": "timing",       "matched": 0, "runtime_ms": 0 },
@@ -1197,7 +1511,7 @@ The pipeline's only output to the frontend. Static, self-contained, committed.
   ],
 
   "tolerance_constants": {
-    "amount_delta_paise": 2,
+    "amount_delta_paise_per_derived_line": 2,
     "utr_truncation_digits": 2,
     "ledger_lag_days": 1
   }
@@ -1291,6 +1605,9 @@ class MatchProposal(BaseModel):
     pass_name: str
     origin: Literal["cascade", "llm"]
     proof: ArithmeticProof | None = None    # filled by verify/, never by proposer
+    arithmetic_scope: list[RecordKey] | None = None   # §14.1 / C-008. None => same as
+                                                        # member_keys. When set, MUST be
+                                                        # a superset of member_keys.
 
 class Exception_(BaseModel):
     record_key: RecordKey
@@ -1358,6 +1675,7 @@ def ingest(adapter: SourceAdapter, db: Connection) -> IngestReport
 
 # match/
 def run_cascade(db: Connection, run_id: RunId, *, passes=PASSES) -> CascadeResult
+def classify_residual(db: Connection, state: CascadeState) -> list[Exception_]
 def extract_utr(description: str) -> str | None
 def infer_slabs(lines: list[ReconLine]) -> list[FeeSlab]
 def derive_fee(amount: Paise, slab: FeeSlab) -> tuple[Paise, Paise]
@@ -1372,11 +1690,23 @@ def commit(proposal, proof, db) -> None
 # hypothesize/
 def propose(residual, db, facts, client, *, model, timeout_s) -> list[MatchProposal]
 def cluster_residual(residual: list[RecordKey], db: Connection) -> list[list[RecordKey]]
+def run_hypothesis_stage(db, state, client, *, model, timeout_s) -> LLMStageResult  # Phase 6:
+    # glue - runs propose() then routes every proposal through the SAME
+    # verify()/commit() the cascade uses (rule 3), updates state, and returns
+    # the honest §15.5 contribution counts for results.json. `client` is a Groq
+    # instance or any object with `.complete(system, user, timeout_s) -> str`
+    # (the ChatModel protocol) - the latter is how §24's injection scenarios
+    # swap in a scripted model without touching propose().
 
 # report/
 def score(db: Connection, answer_key: Path) -> ScoreReport
+def sealed_key_for(run_id: RunId) -> Path | None      # Phase 5: the one module allowed to
+                                                       # name the sealed key resolves its path
 def compute_baseline(db: Connection) -> BaselineResult
-def emit_results(report: ScoreReport, path: Path) -> None
+def assemble_results(db, score, baseline, cascade, facts, *,   # Phase 5: the sketch below
+                     run_id, label, seed) -> ResultsDocument   # became this — see note
+def emit_results(db, score, baseline, cascade, facts, path, *,
+                 run_id, label, seed) -> None
 def emit_html(results: Path, out: Path) -> None
 
 # audit/
@@ -1386,6 +1716,28 @@ def trail(db, record_key) -> list[AuditEvent]
 
 Adapters return **raw dicts**, not models — validation belongs to `ingest/` so there is
 exactly one place where a malformed row is handled.
+
+**Phase 5 `report/` signature note.** The `emit_results` sketch above was
+`emit_results(report: ScoreReport, path)`. That is not enough to build the §18
+document: it needs the naive baseline, the per-pass table and timings, the
+learned fee slabs, and every source table. Resolved by keeping `score()` narrow
+(it is the one function with sealed-key access; its job is the metric numbers,
+not document assembly) and moving assembly into `assemble_results()`, with
+`emit_results()` a thin serializer over it. `run_id`/`label`/`seed` are
+keyword-only because §18 requires them and they are in neither the DB nor any
+other argument. `emit_html()` is unchanged — it reads the emitted
+`results.json`, so the HTML can never drift from it. `ResultsDocument` (in
+`report/results.py`) is the assembled §18 document; `sealed_key_for(run_id)`
+lets non-`report/scoring` callers ask "is there a key, and where?" without
+naming the sealed file (`tests/test_answer_key_seal.py`).
+
+**Phase 6 note.** `assemble_results` / `emit_results` gained a trailing
+keyword-only `llm: LLMStageResult | None = None`. `None` (a `--no-llm` run, or
+no `GROQ_API_KEY`) leaves `llm_contribution.enabled = false` and the
+`llm_verified` pass at `matched: 0, runtime_ms: 0`; a real stage result fills
+in the §18 `llm_contribution` block and `summary.runtime_ms_llm`. `recon
+report` re-emits with `llm=None` (it has no LLM state to replay) — the
+committed `results.json` files are the `--no-llm` artifacts.
 
 ---
 
@@ -1418,7 +1770,7 @@ exceptions — they are `Exception_` *records* written to the database.
 | Variable | Required | Purpose |
 |---|---|---|
 | `GROQ_API_KEY` | No | Absent → LLM stage skipped, run completes |
-| `RECON_LLM_MODEL` | No | Default `llama-3.3-70b-versatile` |
+| `RECON_LLM_MODEL` | No | Default `openai/gpt-oss-20b` (§15.1, C-013) |
 | `RECON_LLM_TIMEOUT_S` | No | Default 20 |
 | `RAZORPAY_KEY_ID` | No | Only for `--source razorpay` |
 | `RAZORPAY_KEY_SECRET` | No | Only for `--source razorpay` |
@@ -1459,7 +1811,7 @@ All 400 records, filterable by resolving pass, colour-coded. The visual point la
 without narration: **deterministic passes dominate, the LLM is a sliver.**
 
 ### 23.4 Screen 4 — Exception List
-Every unresolved record with a **specific** reason and both candidates listed. Badge:
+Every unresolved record with a **specific** reason and every candidate listed. Badge:
 `Requires human review`. Footer: *"These N were not resolved. No guess was recorded."*
 
 Most submissions hide their failures. This one has a screen dedicated to them.
@@ -1468,7 +1820,19 @@ Most submissions hide their failures. This one has a screen dedicated to them.
 Click any row → all four source records side by side, plus the full audit trail. This is
 where the hallucination-rejection moment is visible.
 
+**Accepted as final for this submission: the drawer shows source records at the
+`record_key` level (grouped by source prefix), not per-field (amount/date/narration
+columns).** `results.json` carries a matched record's `member_keys`, `proof`, and
+`audit` trail, not each source row's own field values — showing those would mean new
+`results.json` fields, which PROJECT_RULES.md rule 12 reserves for a documented decision, not
+a frontend-side improvisation. This is a time-budget scope decision, not a forgotten
+gap (`docs/project-progress.md` Phase 7, `docs/challenges-log.md`); the proof and audit
+trail already carry the "why this is a match" story this screen exists for.
+
 ### 23.6 Rules
+- **All visual decisions — layout, typography, colour, spacing, component styling — come
+  from `reference/design.md`. Read it before writing any frontend code.** This section
+  specifies content only and deliberately contains no visual specification
 - `src/lib/format.ts` is the **only** place paise become rupees
 - `types.ts` asserts `schema_version === 1`
 - Display `tolerance_constants`
@@ -1502,9 +1866,11 @@ Every phase ships with its tests passing. `pytest` green before a phase is compl
 | Test | Protects |
 |---|---|
 | `test_firewall.py` | §4.2 — no generator imports in `match/`, `hypothesize/`, `verify/` |
+| `test_answer_key_seal.py` | §4.6 — no module outside `report/` reads `answer_key.json` |
 | `test_money.py` | §4.1 — no float in any model or `results.json` |
 | `test_determinism.py` | Same seed, byte-identical dataset |
 | `test_idempotency.py` | Two runs, identical results, no duplicate rows |
+| `test_persistence_regression.py` | Cascade writes survive a real connection close + reopen — not just an in-memory, single-connection assertion (C-006) |
 | `test_ingest.py` | Malformed rows recorded, not raised |
 | `test_utr/exact/aggregate/timing/tolerance.py` | Per-pass, one fixture per class |
 | `test_fee_reversal.py` | Both slabs recovered; an approximate slab is **rejected** |
@@ -1512,13 +1878,24 @@ Every phase ships with its tests passing. `pytest` green before a phase is compl
 | `test_ambiguous.py` | All ambiguous records unresolved, none matched |
 | `test_injection.py` | The planted record never appears in a match group |
 | `test_no_llm.py` | `--no-llm` produces a complete run |
+| `test_scope_only_accounted.py` | Every `arithmetic_scope`-only key has an `exceptions` row by end-of-run; `score()` raises `ScoringError` and refuses to emit `results.json` if one doesn't (§14.1, C-008) |
 
-**Never skip, weaken, or xfail:** `test_firewall`, `test_money`, `test_ambiguous`,
-`test_injection`, `test_verify`.
+**Never skip, weaken, or xfail:** `test_firewall`, `test_money`, `test_answer_key_seal`,
+`test_ambiguous`, `test_injection`, `test_verify`, `test_persistence_regression`,
+`test_scope_only_accounted`.
 
 `test_firewall.py` is the one that erodes under pressure. On day 3, when fee inference
 will not converge, importing one constant from the generator will fix it and silently
 void the entire result. **The test exists because discipline will not hold at 2am.**
+
+`test_persistence_regression.py` exists because the other seven protect against a
+mistake someone would *notice* — a wrong number, an imported constant, a widened
+tolerance. This one protects against a mistake that produces **no wrong number at
+all**: 39/39 tests green, a plausible-looking CLI table, and an empty database the
+moment the process exits, because every existing test asserted against the same
+long-lived open connection that wrote the data. It must run against a real file on
+disk and must close the writing connection before reopening — an in-memory,
+single-connection test cannot catch this class of bug by construction (§7.2, C-006).
 
 ---
 
@@ -1596,6 +1973,42 @@ Must contain:
 Naming your own bottleneck precisely is the senior move. Claiming you do not have one is
 the junior move.
 
+### 29.1 Scaling analysis (measured)
+
+Measured on the four frozen 400-record datasets, in-memory SQLite, `--no-llm`,
+mean of 120 cascade runs (`time.perf_counter`; Windows `monotonic` is
+15 ms-granular and was replaced for this measurement):
+
+| Pass | mean ms / 400 rec | share of cascade | what it does |
+|---|---|---|---|
+| `utr` | 0.05 | <1% | one regex + dict insert per bank row |
+| `exact` | 5.4 | ~14% | per-settlement join + stated-fee equation |
+| `aggregate` | 4.3 | ~11% | same, for settlements with refunds/adjustments |
+| `fee_reversal` | 18.5 | **~47%** | change-point scan over every stated fee, then re-derive |
+| `timing` | 5.9 | ~15% | business-day / holiday inference from settled_at gaps |
+| `tolerance` | 0.6 | ~2% | truncated-UTR prefix match |
+
+Full cascade: **~38–41 ms / 400 records ≈ 9,800–10,900 records/sec**, single
+core, single thread.
+
+**Partitioning.** `exact`, `aggregate` and `tolerance` are embarrassingly
+parallel by settlement cycle — each settlement's closing equation is
+independent. `fee_reversal` and `timing` need the whole population once to
+learn the fee slabs and the holiday calendar, then partition the same way.
+
+**Where it breaks first.** Not the arithmetic — the candidate search. Every
+pass here keys on `settlement_utr` first, so matching a settlement is *linear*
+in its line count (mean 6.7, max 32 — one T+2 daily window). Remove the UTR
+join and the same problem becomes subset-sum: "which of these N recon lines
+sum to this bank credit", combinatorial in settlement size, and worse when
+many orders share an amount (73 of 350 in `high-ambiguity`). At a monthly
+window (~1,300 lines/settlement) that is intractable.
+
+**The fix.** Block on the UTR index before doing anything else — it is what
+keeps the whole cascade linear — then shard settlements across workers. The
+`utr` pass exists to be that barrier, not because UTR extraction is expensive
+(it is 0.05 ms).
+
 ---
 
 ## 30. README & Submission Checklist
@@ -1633,7 +2046,7 @@ Must contain:
 
 Frontend polish → LLM layer → extra datasets.
 
-**Never cut:** the verifier, the exception list, honest metrics, or the five protected
+**Never cut:** the verifier, the exception list, honest metrics, or the eight protected
 tests in §25.
 
 A deterministic pipeline with honest numbers and no LLM beats a flashy one with
